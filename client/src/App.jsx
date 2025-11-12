@@ -17,6 +17,10 @@ import Layout from './pages/layouts/Layout'
 import AddStudentPage from './pages/student/AddStudentPage'
 import AllStudentPage from './pages/student/AllStudentPage'
 import EditStudentPage from './pages/student/EditStudentPage'
+import AddProfessorPage from './pages/Professor/Add-professorPage'
+import AllProfessorPage from './pages/Professor/All-professorPage'
+import EditProfessorPage from './pages/Professor/Edit-professorPage'
+import AddCoursesPage from './pages/courses/Add-coursesPage'
 function App() {
 
   return (
@@ -33,16 +37,16 @@ function App() {
         <Route path="/analytics" element={<ProtectedRoute><Layout><div>Analytics</div></Layout></ProtectedRoute>} />
         <Route path="/widgets" element={<ProtectedRoute><Layout><div>Widgets</div></Layout></ProtectedRoute>} />
         <Route path="/events" element={<ProtectedRoute><Layout><div>Events</div></Layout></ProtectedRoute>} />
-        <Route path="/all-professors" element={<ProtectedRoute><Layout><div>All Professors</div></Layout></ProtectedRoute>} />
-        <Route path="/add-professor" element={<ProtectedRoute><Layout><div>Add Professor</div></Layout></ProtectedRoute>} />
-        <Route path="/edit-professor" element={<ProtectedRoute><Layout><div>Edit Professor</div></Layout></ProtectedRoute>} />
+        <Route path="/all-professors" element={<ProtectedRoute><AllProfessorPage /></ProtectedRoute>} />
+        <Route path="/add-professor" element={<ProtectedRoute><AddProfessorPage /></ProtectedRoute>} />
+        <Route path="/edit-professor/:id" element={<ProtectedRoute><EditProfessorPage /></ProtectedRoute>} />
         <Route path="/professor-profile" element={<ProtectedRoute><Layout><div>Professor Profile</div></Layout></ProtectedRoute>} />
         <Route path="/all-students" element={<ProtectedRoute><AllStudentPage /></ProtectedRoute>} />
         <Route path="/add-student" element={<ProtectedRoute><AddStudentPage /></ProtectedRoute>} />
         <Route path="/edit-student/:id" element={<ProtectedRoute><EditStudentPage /></ProtectedRoute>} />
         <Route path="/student-profile" element={<ProtectedRoute><Layout><div>Student Profile</div></Layout></ProtectedRoute>} />
         <Route path="/all-courses" element={<ProtectedRoute><Layout><div>All Courses</div></Layout></ProtectedRoute>} />
-        <Route path="/add-course" element={<ProtectedRoute><Layout><div>Add Course</div></Layout></ProtectedRoute>} />
+        <Route path="/add-course" element={<ProtectedRoute><AddCoursesPage /></ProtectedRoute>} />
         <Route path="/edit-course" element={<ProtectedRoute><Layout><div>Edit Course</div></Layout></ProtectedRoute>} />
         <Route path="/course-info" element={<ProtectedRoute><Layout><div>Course Info</div></Layout></ProtectedRoute>} />
         <Route path="/course-payment" element={<ProtectedRoute><Layout><div>Course Payment</div></Layout></ProtectedRoute>} />

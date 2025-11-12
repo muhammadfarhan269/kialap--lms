@@ -24,6 +24,8 @@ pool.query('SELECT NOW()', (err, res) => {
 // Routes
 app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/students', require('./routes/studentRoutes'));
+app.use('/api/professors', require('./routes/professorRoutes'));
+app.use('/api/courses', require('./routes/courseRoutes'));
 
 // Start server
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

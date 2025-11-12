@@ -14,7 +14,7 @@ const Layout = ({ children }) => {
   return (
     <div className="app">
       <Sidebar isOpen={sidebarOpen} />
-      <div className="main-content">
+      <div className="main-wrapper">
         <Header toggleSidebar={toggleSidebar} />
         <main className="content">
           {children}

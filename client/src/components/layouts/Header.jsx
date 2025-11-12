@@ -31,7 +31,7 @@ const Header = ({ toggleSidebar }) => {
   const breadcrumb = generateBreadcrumb();
 
   return (
-    <nav className="navbar top-navbar">
+    <nav className="top-navbar">
       <div className="container-fluid d-flex align-items-center h-100">
         {/* Hamburger Menu */}
         <button className="hamburger-menu d-lg-none" id="sidebarToggle" onClick={toggleSidebar}>
@@ -67,7 +67,7 @@ const Header = ({ toggleSidebar }) => {
               <i className="bi bi-search"></i>
             </button>
 
-            <form className={`search-form ${searchOpen ? 'open' : ''}`} id="searchForm">
+            <form className={`search-form ${searchOpen ? 'active' : ''}`} id="searchForm">
               <i className="bi bi-search search-icon"></i>
               <input
                 type="text"
@@ -90,6 +90,8 @@ const Header = ({ toggleSidebar }) => {
                 <li><a className="dropdown-item" href="#">Advanced Search</a></li>
               </ul>
             </form>
+
+            <div className={`search-backdrop ${searchOpen ? 'active' : ''}`}></div>
           </div>
 
           {/* Notifications */}

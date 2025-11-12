@@ -1,0 +1,31 @@
+const express = require('express');
+const router = express.Router();
+const {
+  createCourse,
+  getCourses,
+  getCourse,
+  updateCourse,
+  deleteCourse,
+  getCoursesByProfessor,
+  getCoursesByDepartment,
+  upload
+} = require('../controller/courseController');
+
+const verifyJWT = require('../middleware/verifyJWT');
+const verifyAdmin = require('../middleware/verifyAdmin');
+
+// All routes require authentication
+router.use(verifyJWT);
+
+// Admin only routes
+router.post('/', upload, verifyAdmin, createCourse);
+router.put('/:id', verifyAdmin, updateCourse);
+router.delete('/:id', verifyAdmin, deleteCourse);
+
+// // Public routes (authenticated users)
+// router.get('/', getCourses);
+// router.get('/:id', getCourse);
+// router.get('/professor/:professorId', getCoursesByProfessor);
+// router.get('/department/:department', getCoursesByDepartment);
+
+module.exports = router;

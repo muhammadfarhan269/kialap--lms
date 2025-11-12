@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 
-const Sidebar = ({ isOpen }) => {
+const Sidebar = ({ isOpen, collapsed = false }) => {
   const location = useLocation();
 
   const isActive = (path) => location.pathname === path;
@@ -9,18 +9,19 @@ const Sidebar = ({ isOpen }) => {
   const isSubmenuActive = (submenuPaths) => submenuPaths.some(path => location.pathname === path);
 
   return (
-    <aside className={`sidebar ${isOpen ? 'show' : ''}`} id="sidebar">
-      <div className="sidebar-header">
-        <div className="sidebar-brand">
-          <h5>
-            <i className="bi bi-mortarboard-fill"></i>
-            Kiaalap
-          </h5>
-          <button className="sidebar-close" id="sidebarClose">
-            <i className="bi bi-x-lg"></i>
-          </button>
+    <>
+      <aside className={`sidebar ${isOpen ? 'active' : ''} ${collapsed ? 'collapsed' : ''}`} id="sidebar">
+        <div className="sidebar-header">
+          <div className="sidebar-brand">
+            <h5>
+              <i className="bi bi-mortarboard-fill"></i>
+              <span>Kiaalap</span>
+            </h5>
+            <button className="sidebar-close" id="sidebarClose">
+              <i className="bi bi-x-lg"></i>
+            </button>
+          </div>
         </div>
-      </div>
 
       <nav className="sidebar-nav">
         <div className="menu-section">
@@ -257,7 +258,9 @@ const Sidebar = ({ isOpen }) => {
         </div>
       </nav>
     </aside>
-  );
+    <div className={`sidebar-overlay ${isOpen ? 'active' : ''}`}></div>
+  </>
+);
 };
 
 export default Sidebar;
