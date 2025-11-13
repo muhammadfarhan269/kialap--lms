@@ -1,5 +1,6 @@
-require('dotenv').config(); 
+require('dotenv').config();
 const express = require('express');
+const path = require('path');
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const pool = require('./config/dbConnection');
@@ -13,7 +14,11 @@ app.use(cors({
   credentials: true
 }));
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
+
+// Serve static files from public directory
+app.use('/images', express.static(path.join(__dirname, '../public/images')));
 
 // Test DB connection
 pool.query('SELECT NOW()', (err, res) => {
@@ -26,6 +31,8 @@ app.use('/api/auth', require('./routes/authRoutes'));
 app.use('/api/students', require('./routes/studentRoutes'));
 app.use('/api/professors', require('./routes/professorRoutes'));
 app.use('/api/courses', require('./routes/courseRoutes'));
+app.use('/api/assets', require('./routes/assetsRoutes'));
+app.use('/api/departments', require('./routes/departmentRoutes'));
 
 // Start server
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

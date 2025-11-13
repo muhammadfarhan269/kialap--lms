@@ -48,7 +48,7 @@ const AddCourse = () => {
 
   useEffect(() => {
     if (success) {
-      navigate('/courses');
+      navigate('/all-courses');
     }
   }, [success, navigate]);
 
@@ -158,7 +158,7 @@ const AddCourse = () => {
             <button
               type="button"
               className="btn btn-light"
-              onClick={() => navigate('/courses')}
+              onClick={() => navigate('/all-courses')}
             >
               <i className="bi bi-arrow-left me-2"></i>Back to Courses
             </button>
@@ -665,7 +665,7 @@ const AddCourse = () => {
                 <i className="bi bi-check-lg me-2"></i>
                 {loading ? 'Creating Course...' : 'Create Course'}
               </button>
-              <button type="button" className="btn btn-outline-secondary" onClick={() => navigate('/courses')}>
+              <button type="button" className="btn btn-outline-secondary" onClick={() => navigate('/all-courses')}>
                 <i className="bi bi-x-lg me-2"></i>Cancel
               </button>
               <button type="button" className="btn btn-outline-warning" onClick={handleReset}>

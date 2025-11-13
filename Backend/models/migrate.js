@@ -30,6 +30,17 @@ async function runMigration() {
     await pool.query(coursesSql);
     console.log('Courses table created successfully!');
 
+    const assetsSqlFilePath = path.join(__dirname, 'createAssetsTable.sql');
+    const assetsSql = fs.readFileSync(assetsSqlFilePath, 'utf8');
+    await pool.query(assetsSql);
+    console.log('Assets table created successfully!');
+
+    // Read and execute departments table SQL
+    const departmentsSqlFilePath = path.join(__dirname, 'createDepartmentTable.sql');
+    const departmentsSql = fs.readFileSync(departmentsSqlFilePath, 'utf8');
+    await pool.query(departmentsSql);
+    console.log('Departments table created successfully!');
+
     console.log('Migration completed successfully!');
   } catch (err) {
     console.error('Migration failed:', err);

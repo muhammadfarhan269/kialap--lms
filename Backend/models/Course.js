@@ -62,17 +62,48 @@ const createCourse = async (courseData) => {
 const findCourseById = async (id) => {
   const query = `
     SELECT
-      c.*,
-      CONCAT(p.title, ' ', p.first_name, ' ', p.last_name) as professor_name,
-      p.email as professor_email,
-      p.department as professor_department
+      c.id,
+      c.course_code as "courseCode",
+      c.course_name as "courseName",
+      c.department,
+      c.course_description as "courseDescription",
+      c.credits,
+      c.duration,
+      c.max_students as "maxStudents",
+      c.prerequisites,
+      c.semester,
+      c.course_type as "courseType",
+      c.class_days as "classDays",
+      c.start_time as "startTime",
+      c.end_time as "endTime",
+      c.classroom,
+      c.course_image as "courseImage",
+      c.course_status as "courseStatus",
+      c.enrollment_type as "enrollmentType",
+      c.online_available as "onlineAvailable",
+      c.certificate_offered as "certificateOffered",
+      c.recorded_lectures as "recordedLectures",
+      c.course_fee as "courseFee",
+      c.lab_fee as "labFee",
+      c.material_fee as "materialFee",
+      c.total_fee as "totalFee",
+      c.created_at as "createdAt",
+      c.updated_at as "updatedAt",
+      CONCAT(COALESCE(p.title, ''), ' ', COALESCE(p.first_name, ''), ' ', COALESCE(p.last_name, '')) as "professorName",
+      p.email as "professorEmail",
+      p.department as "professorDepartment"
     FROM courses c
     LEFT JOIN professors p ON c.professor_id = p.id
     WHERE c.id = $1
   `;
   const result = await pool.query(query, [id]);
   if (result.rows[0]) {
-    result.rows[0].classDays = JSON.parse(result.rows[0].class_days || '[]');
+    // Parse the classDays JSON string into an array
+    try {
+      result.rows[0].classDays = JSON.parse(result.rows[0].classDays || '[]');
+    } catch (e) {
+      result.rows[0].classDays = [];
+    }
   }
   return result.rows[0];
 };
@@ -80,17 +111,48 @@ const findCourseById = async (id) => {
 const findCourseByCode = async (courseCode) => {
   const query = `
     SELECT
-      c.*,
-      CONCAT(p.title, ' ', p.first_name, ' ', p.last_name) as professor_name,
-      p.email as professor_email,
-      p.department as professor_department
+      c.id,
+      c.course_code as "courseCode",
+      c.course_name as "courseName",
+      c.department,
+      c.course_description as "courseDescription",
+      c.credits,
+      c.duration,
+      c.max_students as "maxStudents",
+      c.prerequisites,
+      c.semester,
+      c.course_type as "courseType",
+      c.class_days as "classDays",
+      c.start_time as "startTime",
+      c.end_time as "endTime",
+      c.classroom,
+      c.course_image as "courseImage",
+      c.course_status as "courseStatus",
+      c.enrollment_type as "enrollmentType",
+      c.online_available as "onlineAvailable",
+      c.certificate_offered as "certificateOffered",
+      c.recorded_lectures as "recordedLectures",
+      c.course_fee as "courseFee",
+      c.lab_fee as "labFee",
+      c.material_fee as "materialFee",
+      c.total_fee as "totalFee",
+      c.created_at as "createdAt",
+      c.updated_at as "updatedAt",
+      CONCAT(COALESCE(p.title, ''), ' ', COALESCE(p.first_name, ''), ' ', COALESCE(p.last_name, '')) as "professorName",
+      p.email as "professorEmail",
+      p.department as "professorDepartment"
     FROM courses c
     LEFT JOIN professors p ON c.professor_id = p.id
     WHERE c.course_code = $1
   `;
   const result = await pool.query(query, [courseCode]);
   if (result.rows[0]) {
-    result.rows[0].classDays = JSON.parse(result.rows[0].class_days || '[]');
+    // Parse the classDays JSON string into an array
+    try {
+      result.rows[0].classDays = JSON.parse(result.rows[0].classDays || '[]');
+    } catch (e) {
+      result.rows[0].classDays = [];
+    }
   }
   return result.rows[0];
 };
@@ -125,7 +187,9 @@ const getAllCourses = async (limit = 10, offset = 0, filters = {}) => {
   }
 
   values.push(limit, offset);
-
+  console.log('getAllCourses - params:', { limit, offset, filterCount: Object.keys(filters).length, valueCount: values.length }); // DEBUG
+  
+  // Prepare LIMIT/OFFSET values after filter values
   const query = `
     SELECT
       c.id,
@@ -149,7 +213,7 @@ const getAllCourses = async (limit = 10, offset = 0, filters = {}) => {
       c.recorded_lectures as "recordedLectures",
       c.total_fee as "totalFee",
       c.created_at as "createdAt",
-      CONCAT(p.title, ' ', p.first_name, ' ', p.last_name) as "professorName",
+      CONCAT(COALESCE(p.title, ''), ' ', COALESCE(p.first_name, ''), ' ', COALESCE(p.last_name, '')) as "professorName",
       p.email as "professorEmail"
     FROM courses c
     LEFT JOIN professors p ON c.professor_id = p.id
@@ -158,14 +222,22 @@ const getAllCourses = async (limit = 10, offset = 0, filters = {}) => {
     LIMIT $${paramIndex} OFFSET $${paramIndex + 1}
   `;
 
+  // Run count query to get total number of matching courses (without limit)
+  const countValues = values.slice(0, values.length - 2); // exclude limit & offset
+  const countQuery = `SELECT COUNT(*)::int AS total FROM courses c WHERE 1=1 ${whereClause}`;
+  const countResult = await pool.query(countQuery, countValues);
+  const total = countResult.rows[0]?.total ?? 0;
+
+  console.log('getAllCourses - executing query with', values.length, 'parameters'); // DEBUG
   const result = await pool.query(query, values);
+  console.log('getAllCourses - query returned', result.rows.length, 'rows'); // DEBUG
 
   // Parse class_days JSON for each course
   result.rows.forEach(course => {
     course.classDays = JSON.parse(course.classDays || '[]');
   });
 
-  return result.rows;
+  return { rows: result.rows, total };
 };
 
 const updateCourse = async (id, updateData) => {
@@ -198,9 +270,39 @@ const updateCourse = async (id, updateData) => {
 
   const result = await pool.query(query, values);
   if (result.rows[0]) {
-    result.rows[0].classDays = JSON.parse(result.rows[0].class_days || '[]');
+    // Convert snake_case to camelCase
+    const row = result.rows[0];
+    return {
+      id: row.id,
+      courseCode: row.course_code,
+      courseName: row.course_name,
+      department: row.department,
+      courseDescription: row.course_description,
+      credits: row.credits,
+      duration: row.duration,
+      maxStudents: row.max_students,
+      prerequisites: row.prerequisites,
+      semester: row.semester,
+      courseType: row.course_type,
+      classDays: JSON.parse(row.class_days || '[]'),
+      startTime: row.start_time,
+      endTime: row.end_time,
+      classroom: row.classroom,
+      courseImage: row.course_image,
+      courseStatus: row.course_status,
+      enrollmentType: row.enrollment_type,
+      onlineAvailable: row.online_available,
+      certificateOffered: row.certificate_offered,
+      recordedLectures: row.recorded_lectures,
+      courseFee: row.course_fee,
+      labFee: row.lab_fee,
+      materialFee: row.material_fee,
+      totalFee: row.total_fee,
+      createdAt: row.created_at,
+      updatedAt: row.updated_at
+    };
   }
-  return result.rows[0];
+  return null;
 };
 
 const deleteCourse = async (id) => {

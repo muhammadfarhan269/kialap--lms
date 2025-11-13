@@ -149,15 +149,19 @@ const getCourses = asyncHandler(async (req, res) => {
   if (req.query.courseType) filters.courseType = req.query.courseType;
   if (req.query.status) filters.status = req.query.status;
 
-  const courses = await Course.getAllCourses(limit, offset, filters);
+  console.log('getCourses params:', { page, limit, offset, filters }); // DEBUG
+  
+  const { rows, total } = await Course.getAllCourses(limit, offset, filters);
+
+  console.log('getAllCourses result:', { rowsCount: rows.length, total }); // DEBUG
 
   res.status(200).json({
     success: true,
-    data: courses,
+    data: rows,
     pagination: {
       page,
       limit,
-      total: courses.length // In a real app, you'd get total count separately
+      total: total
     }
   });
 });
@@ -191,7 +195,7 @@ const updateCourse = asyncHandler(async (req, res) => {
   }
 
   // Check if course code is being changed and if it already exists
-  if (req.body.courseCode && req.body.courseCode !== course.course_code) {
+  if (req.body.courseCode && req.body.courseCode !== course.courseCode) {
     const existingCourse = await Course.findCourseByCode(req.body.courseCode);
     if (existingCourse) {
       res.status(400);

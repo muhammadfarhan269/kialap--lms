@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchProfessors } from '../../redux/slices/professorSlice';
+import { fetchProfessors, deleteProfessor } from '../../redux/slices/professorSlice';
 import { Link } from 'react-router-dom';
 import '../../css/dashboard.css';
 
@@ -15,6 +15,12 @@ const AllProfessor = () => {
   useEffect(() => {
     dispatch(fetchProfessors({ limit, offset: (currentPage - 1) * limit }));
   }, [dispatch, currentPage]);
+
+  const handleDelete = (id) => {
+    if (window.confirm('Are you sure you want to delete this professor?')) {
+      dispatch(deleteProfessor(id));
+    }
+  };
 
   if (loading) return <div className="text-center">Loading...</div>;
   if (error) return <div className="alert alert-danger">{error}</div>;
@@ -223,7 +229,7 @@ const AllProfessor = () => {
                               <li><Link className="dropdown-item" to={`/edit-professor/${prof.id}`}><i className="bi bi-pencil me-2"></i>Edit</Link></li>
                               <li><a className="dropdown-item" href="#"><i className="bi bi-envelope me-2"></i>Send Message</a></li>
                               <li><hr className="dropdown-divider" /></li>
-                              <li><a className="dropdown-item text-danger" href="#"><i className="bi bi-trash me-2"></i>Remove</a></li>
+                              <li><a className="dropdown-item text-danger" href="#" onClick={() => handleDelete(prof.id)}><i className="bi bi-trash me-2"></i>Remove</a></li>
                             </ul>
                           </div>
                         </td>

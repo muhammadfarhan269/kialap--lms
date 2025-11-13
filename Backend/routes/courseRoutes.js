@@ -22,10 +22,11 @@ router.post('/', upload, verifyAdmin, createCourse);
 router.put('/:id', verifyAdmin, updateCourse);
 router.delete('/:id', verifyAdmin, deleteCourse);
 
-// // Public routes (authenticated users)
-// router.get('/', getCourses);
-// router.get('/:id', getCourse);
-// router.get('/professor/:professorId', getCoursesByProfessor);
-// router.get('/department/:department', getCoursesByDepartment);
+// All authenticated users can GET courses
+router.get('/',verifyAdmin, getCourses);
+// Specific routes before dynamic id route
+router.get('/professor/:professorId', getCoursesByProfessor);
+router.get('/department/:department', getCoursesByDepartment);
+router.get('/:id', getCourse);
 
 module.exports = router;

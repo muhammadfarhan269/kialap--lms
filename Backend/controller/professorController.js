@@ -59,6 +59,11 @@ const addProfessor = async (req, res) => {
       password
     } = req.body;
 
+    // Validate phone number (must be at least 10 digits)
+    if (!phone || phone.replace(/\D/g, '').length < 10) {
+      return res.status(400).json({ message: 'Invalid phone number' });
+    }
+
     // Check if professor already exists
     const existingEmail = await findProfessorByEmail(email);
     if (existingEmail) {
@@ -156,6 +161,11 @@ const updateProfessor = async (req, res) => {
   try {
     const { id } = req.params;
     const updateData = req.body;
+
+    // Validate phone number if provided (must be at least 10 digits)
+    if (updateData.phone && updateData.phone.replace(/\D/g, '').length < 10) {
+      return res.status(400).json({ message: 'Invalid phone number' });
+    }
 
     // Handle file upload for profile image update
     if (req.files && req.files.profilePhoto && req.files.profilePhoto[0]) {

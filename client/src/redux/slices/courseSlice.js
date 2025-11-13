@@ -136,6 +136,7 @@ const courseSlice = createSlice({
     loading: false,
     error: null,
     success: false,
+    pagination: { page: 1, limit: 10, total: 0 },
   },
   reducers: {
     clearError: (state) => {
@@ -159,7 +160,9 @@ const courseSlice = createSlice({
       .addCase(addCourse.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
-        state.courses.push(action.payload.course);
+        // backend may return { success: true, data: course } or { course: ... }
+        const newCourse = action.payload?.data ?? action.payload?.course ?? action.payload;
+        if (newCourse) state.courses.push(newCourse);
       })
       .addCase(addCourse.rejected, (state, action) => {
         state.loading = false;
@@ -172,7 +175,10 @@ const courseSlice = createSlice({
       })
       .addCase(fetchCourses.fulfilled, (state, action) => {
         state.loading = false;
-        state.courses = action.payload;
+        // backend returns { success: true, data: [...], pagination: {...} }
+        const data = action.payload?.data ?? action.payload ?? [];
+        state.courses = data;
+        state.pagination = action.payload?.pagination ?? state.pagination;
       })
       .addCase(fetchCourses.rejected, (state, action) => {
         state.loading = false;
@@ -185,7 +191,7 @@ const courseSlice = createSlice({
       })
       .addCase(fetchCourseById.fulfilled, (state, action) => {
         state.loading = false;
-        state.currentCourse = action.payload;
+        state.currentCourse = action.payload?.data ?? action.payload ?? null;
       })
       .addCase(fetchCourseById.rejected, (state, action) => {
         state.loading = false;
@@ -200,12 +206,16 @@ const courseSlice = createSlice({
       .addCase(updateCourse.fulfilled, (state, action) => {
         state.loading = false;
         state.success = true;
-        const index = state.courses.findIndex(c => c.id === action.payload.course.id);
-        if (index !== -1) {
-          state.courses[index] = action.payload.course;
-        }
-        if (state.currentCourse?.id === action.payload.course.id) {
-          state.currentCourse = action.payload.course;
+        const updated = action.payload?.data ?? action.payload?.course ?? action.payload;
+        if (updated) {
+          const id = updated.id ?? updated._id ?? null;
+          const index = state.courses.findIndex(c => c.id === id);
+          if (index !== -1) {
+            state.courses[index] = updated;
+          }
+          if (state.currentCourse?.id === id) {
+            state.currentCourse = updated;
+          }
         }
       })
       .addCase(updateCourse.rejected, (state, action) => {

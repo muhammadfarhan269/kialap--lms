@@ -21,11 +21,21 @@ import AddProfessorPage from './pages/Professor/Add-professorPage'
 import AllProfessorPage from './pages/Professor/All-professorPage'
 import EditProfessorPage from './pages/Professor/Edit-professorPage'
 import AddCoursesPage from './pages/courses/Add-coursesPage'
+import AllCoursePage from './pages/courses/All-coursePage'
+import EditCoursePage from './pages/courses/Edit-CoursePage'
+import AddLibraryAssetsPage from './pages/assets/Add-libraryAssetsPage'
+import LibraryAssetsPage from './pages/assets/Library-AssetsPage'
+import EditLibraryAssetPage from './pages/assets/Edit-LibraryAssetPage'
+import AddDepartmentsPage from './pages/departments/Add-DepartmentsPage'
+import AllDepartmentsPage from './pages/departments/All-DepartmentsPage'
+import EditDepartmentPage from './pages/departments/Edit-DepartmentPage'
+
 function App() {
 
   return (
-      <Router>
-        <Routes>
+      <Provider store={store}>
+        <Router>
+          <Routes>
         <Route path="/" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
         <Route path="/password-recovery" element={<ForgotPasswordPage />} />
@@ -45,17 +55,17 @@ function App() {
         <Route path="/add-student" element={<ProtectedRoute><AddStudentPage /></ProtectedRoute>} />
         <Route path="/edit-student/:id" element={<ProtectedRoute><EditStudentPage /></ProtectedRoute>} />
         <Route path="/student-profile" element={<ProtectedRoute><Layout><div>Student Profile</div></Layout></ProtectedRoute>} />
-        <Route path="/all-courses" element={<ProtectedRoute><Layout><div>All Courses</div></Layout></ProtectedRoute>} />
+        <Route path="/all-courses" element={<ProtectedRoute><AllCoursePage /></ProtectedRoute>} />
         <Route path="/add-course" element={<ProtectedRoute><AddCoursesPage /></ProtectedRoute>} />
-        <Route path="/edit-course" element={<ProtectedRoute><Layout><div>Edit Course</div></Layout></ProtectedRoute>} />
+        <Route path="/edit-course/:id" element={<ProtectedRoute><EditCoursePage /></ProtectedRoute>} />
         <Route path="/course-info" element={<ProtectedRoute><Layout><div>Course Info</div></Layout></ProtectedRoute>} />
         <Route path="/course-payment" element={<ProtectedRoute><Layout><div>Course Payment</div></Layout></ProtectedRoute>} />
-        <Route path="/library-assets" element={<ProtectedRoute><Layout><div>Library Assets</div></Layout></ProtectedRoute>} />
-        <Route path="/add-library-assets" element={<ProtectedRoute><Layout><div>Add Library Asset</div></Layout></ProtectedRoute>} />
-        <Route path="/edit-library-assets" element={<ProtectedRoute><Layout><div>Edit Library Asset</div></Layout></ProtectedRoute>} />
-        <Route path="/departments" element={<ProtectedRoute><Layout><div>Departments List</div></Layout></ProtectedRoute>} />
-        <Route path="/add-department" element={<ProtectedRoute><Layout><div>Add Department</div></Layout></ProtectedRoute>} />
-        <Route path="/edit-department" element={<ProtectedRoute><Layout><div>Edit Department</div></Layout></ProtectedRoute>} />
+        <Route path="/library-assets" element={<ProtectedRoute><LibraryAssetsPage /></ProtectedRoute>} />
+        <Route path="/add-library-assets" element={<ProtectedRoute><AddLibraryAssetsPage /></ProtectedRoute>} />
+        <Route path="/edit-library-assets/:id" element={<ProtectedRoute><EditLibraryAssetPage /></ProtectedRoute>} />
+        <Route path="/departments" element={<ProtectedRoute><AllDepartmentsPage /></ProtectedRoute>} />
+        <Route path="/add-department" element={<ProtectedRoute><AddDepartmentsPage /></ProtectedRoute>} />
+        <Route path="/departments/edit/:id" element={<ProtectedRoute><EditDepartmentPage /></ProtectedRoute>} />
         <Route path="/mailbox" element={<ProtectedRoute><Layout><div>Inbox</div></Layout></ProtectedRoute>} />
         <Route path="/mailbox-compose" element={<ProtectedRoute><Layout><div>Compose</div></Layout></ProtectedRoute>} />
         <Route path="/mailbox-view" element={<ProtectedRoute><Layout><div>View Message</div></Layout></ProtectedRoute>} />
@@ -92,6 +102,7 @@ function App() {
         <Route path="/500" element={<Error500 />} />
         </Routes>
       </Router>
+    </Provider>
   )
 }
 
