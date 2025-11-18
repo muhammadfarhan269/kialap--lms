@@ -67,7 +67,7 @@ const EditProfessor = () => {
         joiningDate: currentProfessor.joining_date ? currentProfessor.joining_date.split('T')[0] : '',
         salary: currentProfessor.salary || '',
         accountStatus: currentProfessor.account_status || '',
-        officeHours: '', // Not in model, placeholder
+        officeHours: currentProfessor.office_hours || '',
         highestDegree: currentProfessor.highest_degree || '',
         specialization: currentProfessor.specialization || '',
         university: currentProfessor.university || '',

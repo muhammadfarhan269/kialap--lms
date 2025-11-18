@@ -23,6 +23,7 @@ const createProfessor = async (professorData) => {
     graduationYear,
     experience,
     office,
+    officeHours,
     subjects,
     bio,
     profileImage,
@@ -39,10 +40,10 @@ const createProfessor = async (professorData) => {
       title, first_name, last_name, email, phone, date_of_birth, gender, address,
       employee_id, department, position, employment_type, joining_date, salary,
       highest_degree, specialization, university, graduation_year, experience,
-      office, subjects, bio, profile_image, username, password, account_status, role
+      office, office_hours, subjects, bio, profile_image, username, password, account_status, role
     ) VALUES (
       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-      $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27
+      $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28
     )
     RETURNING id, title, first_name, last_name, email, phone, date_of_birth,
              gender, address, employee_id, department, position, employment_type,
@@ -55,7 +56,7 @@ const createProfessor = async (professorData) => {
     title, firstName, lastName, email, phone, dateOfBirth, gender, address,
     employeeId, department, position, employmentType, joiningDate, salary,
     highestDegree, specialization, university, graduationYear, experience,
-    office, subjects, bio, profileImage, username, hashedPassword, accountStatus, role
+    office, officeHours, subjects, bio, profileImage, username, hashedPassword, accountStatus, role
   ];
 
   const result = await pool.query(query, values);

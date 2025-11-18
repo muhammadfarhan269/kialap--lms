@@ -2,24 +2,35 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
 import { fetchAllStudents } from '../../redux/slices/studentSlice';
+import { fetchDepartments } from '../../redux/slices/departmentSlice';
 
 
 const AllStudents = () => {
   const dispatch = useDispatch();
   const { students, loading, error } = useSelector((state) => state.student);
+  const { departments } = useSelector((state) => state.department);
 
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDepartment, setSelectedDepartment] = useState('All Departments');
   const [selectedYear, setSelectedYear] = useState('All Years');
   const [currentPage, setCurrentPage] = useState(1);
   const [filteredStudents, setFilteredStudents] = useState([]);
-
+  const [availableDepartments, setAvailableDepartments] = useState([]);
 
   const studentsPerPage = 12; // Assuming 4 columns x 3 rows
 
   useEffect(() => {
     dispatch(fetchAllStudents({ limit: 100, offset: 0 })); // Fetch more students for client-side filtering
+    dispatch(fetchDepartments()); // Fetch departments for filtering
   }, [dispatch]);
+
+  // Create list of departments that have students
+  useEffect(() => {
+    if (students.length > 0) {
+      const uniqueDepartments = [...new Set(students.map(student => student.department))];
+      setAvailableDepartments(uniqueDepartments);
+    }
+  }, [students]);
 
   useEffect(() => {
     let filtered = students;
@@ -34,7 +45,7 @@ const AllStudents = () => {
 
     // Filter by department
     if (selectedDepartment !== 'All Departments') {
-      filtered = filtered.filter(student => student.department === selectedDepartment);
+      filtered = filtered.filter(student => student.department.toLowerCase() === selectedDepartment.toLowerCase());
     }
 
     // Filter by year (assuming year is derived from student_id or another field)
@@ -153,10 +164,14 @@ const AllStudents = () => {
                       onChange={(e) => setSelectedDepartment(e.target.value)}
                     >
                       <option>All Departments</option>
-                      <option>Computer Science</option>
-                      <option>Engineering</option>
-                      <option>Business</option>
-                      <option>Medicine</option>
+                      {availableDepartments.map(dept => {
+                        const departmentInfo = departments.find(d => d.departmentCode === dept);
+                        return (
+                          <option key={dept} value={dept}>
+                            {departmentInfo ? departmentInfo.departmentName : dept}
+                          </option>
+                        );
+                      })}
                     </select>
                   </div>
                   <div className="col-md-3">

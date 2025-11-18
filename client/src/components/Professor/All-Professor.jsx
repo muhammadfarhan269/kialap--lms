@@ -111,7 +111,7 @@ const AllProfessor = () => {
                 {featuredProfessors.map((prof) => (
                   <div key={prof.id} className="professor-card">
                     <div className="text-center mb-3">
-                      <img src={prof.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.name)}&background=0d6efd&color=fff`} alt={prof.name} className="rounded-circle" style={{ width: '80px', height: '80px' }} />
+                      <img src={prof.avatar ? `http://localhost:5000/images/${prof.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.name)}&background=0d6efd&color=fff`} alt={prof.name} className="rounded-circle" style={{ width: '80px', height: '80px' }} />
                     </div>
                     <div className="text-center">
                       <h6 className="mb-1">{prof.name}</h6>
@@ -197,7 +197,7 @@ const AllProfessor = () => {
                         </td>
                         <td>
                           <div className="d-flex align-items-center">
-                            <img src={prof.avatar || `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.name)}&background=0d6efd&color=fff`} alt={prof.name} className="rounded-circle me-3" style={{ width: '40px', height: '40px' }} />
+                            <img src={prof.avatar ? `http://localhost:5000/images/${prof.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.name)}&background=0d6efd&color=fff`} alt={prof.name} className="rounded-circle me-3" style={{ width: '40px', height: '40px' }} />
                             <div>
                               <div className="fw-medium">{prof.name}</div>
                               <small className="text-muted">{prof.email}</small>

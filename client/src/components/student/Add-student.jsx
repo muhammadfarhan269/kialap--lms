@@ -1,12 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { createStudent, clearError, resetSuccess } from '../../redux/slices/studentSlice';
+import { fetchDepartments } from '../../redux/slices/departmentSlice';
 import { useNavigate } from 'react-router-dom';
 
 const AddStudent = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error, success } = useSelector((state) => state.student);
+  const { departments } = useSelector((state) => state.department);
+  const { students } = useSelector((state) => state.student);
 
   const [activeTab, setActiveTab] = useState('basic');
   const [formData, setFormData] = useState({
@@ -43,6 +46,10 @@ const AddStudent = () => {
   });
 
   const [errors, setErrors] = useState({});
+
+  useEffect(() => {
+    dispatch(fetchDepartments()); // Fetch departments for the form
+  }, [dispatch]);
 
   useEffect(() => {
     if (success) {
@@ -263,11 +270,11 @@ const AddStudent = () => {
                           required
                         >
                           <option value="">Select Department</option>
-                          <option value="cs">Computer Science</option>
-                          <option value="eng">Engineering</option>
-                          <option value="bus">Business Administration</option>
-                          <option value="med">Medicine</option>
-                          <option value="psy">Psychology</option>
+                          {departments.map(dept => (
+                            <option key={dept.id} value={dept.departmentCode}>
+                              {dept.departmentName}
+                            </option>
+                          ))}
                         </select>
                         {errors.department && <div className="invalid-feedback">{errors.department}</div>}
                       </div>
@@ -642,12 +649,12 @@ const AddStudent = () => {
                           <i className="bi bi-check-circle me-2"></i>
                           {loading ? 'Creating...' : 'Complete Registration'}
                         </button>
-                        <button type="button" className="btn btn-success me-2">
+                        <button type="button" className="btn btn-success me-2" onClick={handleSubmit}>
                           <i className="bi bi-check-all me-2"></i>Save All Information
                         </button>
                       </>
                     ) : (
-                      <button type="button" className="btn btn-primary me-2" onClick={() => handleTabChange('account')}>
+                      <button type="button" className="btn btn-primary me-2" onClick={() => handleTabChange(activeTab === 'basic' ? 'account' : 'social')}>
                         <i className="bi bi-arrow-right me-2"></i>Next
                       </button>
                     )}

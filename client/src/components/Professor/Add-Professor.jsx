@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addProfessor, clearError, clearSuccess } from '../../redux/slices/professorSlice';
 import { useNavigate } from 'react-router-dom';
 import '../../css/dashboard.css';
+import '../../css/dashboard-layout.css'
 
 const AddProfessor = () => {
   const dispatch = useDispatch();
