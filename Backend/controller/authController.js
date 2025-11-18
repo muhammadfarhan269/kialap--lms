@@ -3,6 +3,7 @@ const jwt = require('jsonwebtoken');
 const crypto = require('crypto');
 const { sendPasswordResetEmail } = require('../services/mailService');
 const { createUser, findUserByEmail, updateRefreshToken, findUserByRefreshToken, clearRefreshToken, updateResetToken, findUserByResetToken, clearResetToken, updatePassword } = require('../models/User');
+const Student = require('../models/Student');
 
 const validateEmail = (email) => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -40,6 +41,38 @@ exports.registerUser = async (req, res) => {
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const user = await createUser(firstName, lastName, email, username, hashedPassword, role);
+
+    // If registering as a student, create a minimal student profile so student-related
+    // endpoints (enrollments, etc.) can find the corresponding record.
+    if (role === 'student') {
+      try {
+        const studentData = {
+          fullName: `${firstName} ${lastName}`,
+          studentId: username || null,
+          department: null,
+          course: null,
+          dateOfBirth: null,
+          gender: null,
+          phone: null,
+          parentPhone: null,
+          address: null,
+          city: null,
+          state: null,
+          postalCode: null,
+          profileImage: null,
+          email,
+          username,
+          password, // createStudent will hash the password internally
+          accountStatus: 'active',
+          role: 'student'
+        };
+
+        await Student.createStudent(studentData);
+      } catch (stuErr) {
+        console.error('Failed creating student profile for new user:', stuErr);
+        // Do not block user registration on student profile creation failure
+      }
+    }
 
     res.status(201).json({ message: 'User registered successfully', user });
   } catch (err) {

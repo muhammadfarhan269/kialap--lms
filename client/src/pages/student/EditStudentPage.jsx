@@ -1,6 +1,6 @@
- import React from 'react';
+import React from 'react';
 import Layout from '../layouts/Layout';
-import EditStudent from '../../components/student/Edit-student';
+import EditStudent from '../../components/admin/student/Edit-student';
 
 const EditStudentPage = () => {
   return (

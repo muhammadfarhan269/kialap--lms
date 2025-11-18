@@ -1,6 +1,6 @@
 import React from 'react';
 import Layout from '../layouts/Layout';
-import EditProfessor from '../../components/Professor/Edit-Professor';
+import EditProfessor from '../../components/admin/Professor/Edit-Professor';
 
 const EditProfessorPage = () => {
   return (

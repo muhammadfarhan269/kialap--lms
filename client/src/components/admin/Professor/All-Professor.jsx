@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchProfessors, deleteProfessor } from '../../redux/slices/professorSlice';
+import { fetchProfessors, deleteProfessor } from '../../../redux/slices/professorSlice';
 import { Link } from 'react-router-dom';
-import '../../css/dashboard.css';
+import '../../../css/dashboard.css';
 
 const AllProfessor = () => {
   const dispatch = useDispatch();

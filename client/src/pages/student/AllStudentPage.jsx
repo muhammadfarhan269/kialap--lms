@@ -1,6 +1,6 @@
 import React from 'react';
 import Layout from '../layouts/Layout';
-import AllStudents from '../../components/student/All-students';
+import AllStudents from '../../components/admin/student/All-students';
 
 const AllStudentPage = () => {
   return (

@@ -99,6 +99,12 @@ const createCourse = asyncHandler(async (req, res) => {
     courseImage = req.files.courseImage[0].filename;
   }
 
+  // Parse classDays from comma-separated string to array
+  let classDaysArray = [];
+  if (classDays) {
+    classDaysArray = classDays.split(',').map(day => day.trim()).filter(day => day);
+  }
+
   const courseData = {
     courseCode,
     courseName,
@@ -111,7 +117,7 @@ const createCourse = asyncHandler(async (req, res) => {
     prerequisites,
     semester,
     courseType,
-    classDays,
+    classDays: classDaysArray,
     startTime,
     endTime,
     classroom,
@@ -123,7 +129,8 @@ const createCourse = asyncHandler(async (req, res) => {
     recordedLectures: recordedLectures === 'true' || recordedLectures === true,
     courseFee: courseFee || 0.00,
     labFee: labFee || 0.00,
-    materialFee: materialFee || 0.00
+    materialFee: materialFee || 0.00,
+    createdBy: req.user.id // Track who created the course
   };
 
   const course = await Course.createCourse(courseData);
@@ -147,7 +154,13 @@ const getCourses = asyncHandler(async (req, res) => {
   if (req.query.department) filters.department = req.query.department;
   if (req.query.semester) filters.semester = req.query.semester;
   if (req.query.courseType) filters.courseType = req.query.courseType;
-  if (req.query.status) filters.status = req.query.status;
+
+  // For students, only show active courses available for enrollment
+  // For admins, show all courses regardless of status unless specifically filtered
+  if (req.user.role !== 'administrator') {
+    filters.status = 'active';
+  }
+  // Note: For admins, we don't set a default status filter so all statuses are shown
 
   console.log('getCourses params:', { page, limit, offset, filters }); // DEBUG
   

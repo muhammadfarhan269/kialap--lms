@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchCourses, deleteCourse } from '../../redux/slices/courseSlice';
-import '../../css/dashboard.css';
+import { fetchCourses, deleteCourse } from '../../../redux/slices/courseSlice';
+import '../../../css/dashboard.css';
 
 const AllCourse = () => {
 		const navigate = useNavigate();

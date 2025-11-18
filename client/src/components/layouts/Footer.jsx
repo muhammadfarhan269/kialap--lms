@@ -8,7 +8,7 @@ const Footer = () => {
       <div className="container-fluid">
         <div className="row">
           <div className="col-md-6">
-            <p className="mb-0">&copy; {currentYear} Kiaalap. All rights reserved.</p>
+            <p className="mb-0 text-start">&copy; {currentYear} Kiaalap. All rights reserved.</p>
           </div>
           <div className="col-md-6 text-md-end">
             <p className="mb-0">Built with <i className="bi bi-heart-fill text-danger"></i> for education</p>

@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { addCourse, clearError, clearSuccess } from '../../redux/slices/courseSlice';
-import { fetchProfessors } from '../../redux/slices/professorSlice';
+import { addCourse, clearError, clearSuccess } from '../../../redux/slices/courseSlice';
+import { fetchProfessors } from '../../../redux/slices/professorSlice';
 import { useNavigate } from 'react-router-dom';
-import '../../css/dashboard.css';
+import '../../../css/dashboard.css';
 
 const AddCourse = () => {
   const dispatch = useDispatch();

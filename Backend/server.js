@@ -33,6 +33,7 @@ app.use('/api/professors', require('./routes/professorRoutes'));
 app.use('/api/courses', require('./routes/courseRoutes'));
 app.use('/api/assets', require('./routes/assetsRoutes'));
 app.use('/api/departments', require('./routes/departmentRoutes'));
+app.use('/api/enrollments', require('./routes/enrollmentRoutes'));
 
 // Start server
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));

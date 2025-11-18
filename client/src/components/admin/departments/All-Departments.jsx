@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { fetchDepartments, fetchDepartmentStats, deleteDepartment, clearError, resetSuccess } from '../../redux/slices/departmentSlice';
+import { fetchDepartments, fetchDepartmentStats, deleteDepartment, clearError, resetSuccess } from '../../../redux/slices/departmentSlice';
 // import '../../css/dashboard-layout.css';
-import '../../css/dashboard.css';
+import '../../../css/dashboard.css';
 
 
 const AllDepartments = () => {

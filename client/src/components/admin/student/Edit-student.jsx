@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchStudentById, updateStudent, clearError, resetSuccess } from '../../redux/slices/studentSlice';
+import { fetchStudentById, updateStudent, clearError, resetSuccess } from '../../../redux/slices/studentSlice';
 import DeleteStudent from './Delete-Student';
 
 const EditStudent = () => {

@@ -1,6 +1,6 @@
 import React from 'react';
 import Layout from '../layouts/Layout';
-import EditLibraryAsset from '../../components/assets/Edit-LibraryAsset';
+import EditLibraryAsset from '../../components/admin/assets/Edit-LibraryAsset';
 
 const EditLibraryAssetPage = () => {
   return (

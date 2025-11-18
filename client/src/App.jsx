@@ -1,4 +1,4 @@
-import React from 'react'
+import React from 'react';
 import './App.css'
 import 'bootstrap/dist/css/bootstrap.min.css'
 import 'bootstrap/dist/js/bootstrap.bundle.min.js'
@@ -29,6 +29,10 @@ import EditLibraryAssetPage from './pages/assets/Edit-LibraryAssetPage'
 import AddDepartmentsPage from './pages/departments/Add-DepartmentsPage'
 import AllDepartmentsPage from './pages/departments/All-DepartmentsPage'
 import EditDepartmentPage from './pages/departments/Edit-DepartmentPage'
+import EnrollCoursePage from './pages/Students/Enroll-CoursePage'
+import AttendancePage from './pages/Students/AttendancePage'
+import AssignmentPage from './pages/Students/AssignmentPage'
+import GradesPage from './pages/Students/GradesPage'
 
 function App() {
 
@@ -47,25 +51,30 @@ function App() {
         <Route path="/analytics" element={<ProtectedRoute><Layout><div>Analytics</div></Layout></ProtectedRoute>} />
         <Route path="/widgets" element={<ProtectedRoute><Layout><div>Widgets</div></Layout></ProtectedRoute>} />
         <Route path="/events" element={<ProtectedRoute><Layout><div>Events</div></Layout></ProtectedRoute>} />
-        <Route path="/all-professors" element={<ProtectedRoute><AllProfessorPage /></ProtectedRoute>} />
-        <Route path="/add-professor" element={<ProtectedRoute><AddProfessorPage /></ProtectedRoute>} />
-        <Route path="/edit-professor/:id" element={<ProtectedRoute><EditProfessorPage /></ProtectedRoute>} />
+        <Route path="/all-professors" element={<ProtectedRoute allowedRoles={['administrator']}><AllProfessorPage /></ProtectedRoute>} />
+        <Route path="/add-professor" element={<ProtectedRoute allowedRoles={['administrator']}><AddProfessorPage /></ProtectedRoute>} />
+        <Route path="/edit-professor/:id" element={<ProtectedRoute allowedRoles={['administrator']}><EditProfessorPage /></ProtectedRoute>} />
         <Route path="/professor-profile" element={<ProtectedRoute><Layout><div>Professor Profile</div></Layout></ProtectedRoute>} />
-        <Route path="/all-students" element={<ProtectedRoute><AllStudentPage /></ProtectedRoute>} />
-        <Route path="/add-student" element={<ProtectedRoute><AddStudentPage /></ProtectedRoute>} />
-        <Route path="/edit-student/:id" element={<ProtectedRoute><EditStudentPage /></ProtectedRoute>} />
+        <Route path="/all-students" element={<ProtectedRoute allowedRoles={['administrator']}><AllStudentPage /></ProtectedRoute>} />
+        <Route path="/add-student" element={<ProtectedRoute allowedRoles={['administrator']}><AddStudentPage /></ProtectedRoute>} />
+        <Route path="/edit-student/:id" element={<ProtectedRoute allowedRoles={['administrator']}><EditStudentPage /></ProtectedRoute>} />
         <Route path="/student-profile" element={<ProtectedRoute><Layout><div>Student Profile</div></Layout></ProtectedRoute>} />
-        <Route path="/all-courses" element={<ProtectedRoute><AllCoursePage /></ProtectedRoute>} />
-        <Route path="/add-course" element={<ProtectedRoute><AddCoursesPage /></ProtectedRoute>} />
-        <Route path="/edit-course/:id" element={<ProtectedRoute><EditCoursePage /></ProtectedRoute>} />
+        <Route path="/enroll-course" element={<ProtectedRoute allowedRoles={['student']}><EnrollCoursePage /></ProtectedRoute>} />
+        <Route path="/attendance" element={<ProtectedRoute allowedRoles={['student']}><AttendancePage /></ProtectedRoute>} />
+        <Route path="/assignments" element={<ProtectedRoute allowedRoles={['student']}><AssignmentPage /></ProtectedRoute>} />
+        <Route path="/grades" element={<ProtectedRoute allowedRoles={['student']}><GradesPage /></ProtectedRoute>} />
+        <Route path="/courses" element={<ProtectedRoute allowedRoles={['administrator']}><AllCoursePage /></ProtectedRoute>} />
+        <Route path="/all-courses" element={<ProtectedRoute allowedRoles={['administrator']}><AllCoursePage /></ProtectedRoute>} />
+        <Route path="/add-course" element={<ProtectedRoute allowedRoles={['administrator']}><AddCoursesPage /></ProtectedRoute>} />
+        <Route path="/edit-course/:id" element={<ProtectedRoute allowedRoles={['administrator']}><EditCoursePage /></ProtectedRoute>} />
         <Route path="/course-info" element={<ProtectedRoute><Layout><div>Course Info</div></Layout></ProtectedRoute>} />
         <Route path="/course-payment" element={<ProtectedRoute><Layout><div>Course Payment</div></Layout></ProtectedRoute>} />
-        <Route path="/library-assets" element={<ProtectedRoute><LibraryAssetsPage /></ProtectedRoute>} />
-        <Route path="/add-library-assets" element={<ProtectedRoute><AddLibraryAssetsPage /></ProtectedRoute>} />
-        <Route path="/edit-library-assets/:id" element={<ProtectedRoute><EditLibraryAssetPage /></ProtectedRoute>} />
-        <Route path="/departments" element={<ProtectedRoute><AllDepartmentsPage /></ProtectedRoute>} />
-        <Route path="/add-department" element={<ProtectedRoute><AddDepartmentsPage /></ProtectedRoute>} />
-        <Route path="/departments/edit/:id" element={<ProtectedRoute><EditDepartmentPage /></ProtectedRoute>} />
+        <Route path="/library-assets" element={<ProtectedRoute allowedRoles={['administrator']}><LibraryAssetsPage /></ProtectedRoute>} />
+        <Route path="/add-library-assets" element={<ProtectedRoute allowedRoles={['administrator']}><AddLibraryAssetsPage /></ProtectedRoute>} />
+        <Route path="/edit-library-assets/:id" element={<ProtectedRoute allowedRoles={['administrator']}><EditLibraryAssetPage /></ProtectedRoute>} />
+        <Route path="/departments" element={<ProtectedRoute allowedRoles={['administrator']}><AllDepartmentsPage /></ProtectedRoute>} />
+        <Route path="/add-department" element={<ProtectedRoute allowedRoles={['administrator']}><AddDepartmentsPage /></ProtectedRoute>} />
+        <Route path="/departments/edit/:id" element={<ProtectedRoute allowedRoles={['administrator']}><EditDepartmentPage /></ProtectedRoute>} />
         <Route path="/mailbox" element={<ProtectedRoute><Layout><div>Inbox</div></Layout></ProtectedRoute>} />
         <Route path="/mailbox-compose" element={<ProtectedRoute><Layout><div>Compose</div></Layout></ProtectedRoute>} />
         <Route path="/mailbox-view" element={<ProtectedRoute><Layout><div>View Message</div></Layout></ProtectedRoute>} />

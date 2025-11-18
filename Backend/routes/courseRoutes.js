@@ -23,7 +23,7 @@ router.put('/:id', verifyAdmin, updateCourse);
 router.delete('/:id', verifyAdmin, deleteCourse);
 
 // All authenticated users can GET courses
-router.get('/',verifyAdmin, getCourses);
+router.get('/', getCourses);
 // Specific routes before dynamic id route
 router.get('/professor/:professorId', getCoursesByProfessor);
 router.get('/department/:department', getCoursesByDepartment);

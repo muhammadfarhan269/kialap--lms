@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { createAsset } from '../../redux/slices/assetsSlice';
-import '../../css/dashboard.css';
+import { createAsset } from '../../../redux/slices/assetsSlice';
+import '../../../css/dashboard.css';
 
 const AddLibraryAssets = () => {
   const navigate = useNavigate();

@@ -34,17 +34,17 @@ const createCourse = async (courseData) => {
       credits, duration, max_students, prerequisites, semester, course_type,
       class_days, start_time, end_time, classroom, course_image, course_status,
       enrollment_type, online_available, certificate_offered, recorded_lectures,
-      course_fee, lab_fee, material_fee
+      course_fee, lab_fee, material_fee, created_by
     ) VALUES (
       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-      $17, $18, $19, $20, $21, $22, $23, $24
+      $17, $18, $19, $20, $21, $22, $23, $24, $25
     )
     RETURNING id, course_code, course_name, department, professor_id,
              course_description, credits, duration, max_students, prerequisites,
              semester, course_type, class_days, start_time, end_time, classroom,
              course_image, course_status, enrollment_type, online_available,
              certificate_offered, recorded_lectures, course_fee, lab_fee,
-             material_fee, total_fee, created_at;
+             material_fee, total_fee, created_by, created_at;
   `;
 
   const values = [
@@ -52,7 +52,7 @@ const createCourse = async (courseData) => {
     credits, duration, maxStudents, prerequisites, semester, courseType,
     JSON.stringify(classDays), startTime, endTime, classroom, courseImage,
     courseStatus, enrollmentType, onlineAvailable, certificateOffered,
-    recordedLectures, courseFee, labFee, materialFee
+    recordedLectures, courseFee, labFee, materialFee, courseData.createdBy
   ];
 
   const result = await pool.query(query, values);
@@ -197,26 +197,17 @@ const getAllCourses = async (limit = 10, offset = 0, filters = {}) => {
       c.course_name as "courseName",
       c.department,
       c.credits,
-      c.duration,
-      c.max_students as "maxStudents",
-      c.semester,
-      c.course_type as "courseType",
-      c.class_days as "classDays",
-      c.start_time as "startTime",
-      c.end_time as "endTime",
-      c.classroom,
-      c.course_image as "courseImage",
-      c.course_status as "courseStatus",
-      c.enrollment_type as "enrollmentType",
-      c.online_available as "onlineAvailable",
-      c.certificate_offered as "certificateOffered",
-      c.recorded_lectures as "recordedLectures",
-      c.total_fee as "totalFee",
-      c.created_at as "createdAt",
+      COALESCE(c.course_status, 'active') as "courseStatus",
       CONCAT(COALESCE(p.title, ''), ' ', COALESCE(p.first_name, ''), ' ', COALESCE(p.last_name, '')) as "professorName",
-      p.email as "professorEmail"
+      COALESCE(e.enrolled_count, 0) as "enrolledStudents"
     FROM courses c
     LEFT JOIN professors p ON c.professor_id = p.id
+    LEFT JOIN (
+      SELECT course_id, COUNT(*) as enrolled_count
+      FROM enrollments
+      WHERE status = 'active'
+      GROUP BY course_id
+    ) e ON c.id = e.course_id
     WHERE 1=1 ${whereClause}
     ORDER BY c.created_at DESC
     LIMIT $${paramIndex} OFFSET $${paramIndex + 1}

@@ -58,6 +58,23 @@ const createStudent = async (studentData) => {
   return result.rows[0];
 };
 
+// Create a minimal student record (used when a user with role 'student' exists
+// in `users` table but no corresponding `students` row). This does not require
+// a password and will set sensible defaults.
+const createMinimalStudent = async ({ fullName = null, email, username = null, role = 'student' }) => {
+  const query = `
+    INSERT INTO students (full_name, email, username, account_status, role, created_at)
+    VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
+    RETURNING id, full_name, student_id, department, course, date_of_birth,
+             gender, phone, parent_phone, address, city, state, postal_code,
+             profile_image, email, username, account_status, role, created_at;
+  `;
+
+  const values = [fullName, email, username, 'active', role];
+  const result = await pool.query(query, values);
+  return result.rows[0];
+};
+
 const findStudentById = async (id) => {
   const query = 'SELECT * FROM students WHERE id = $1';
   const result = await pool.query(query, [id]);
@@ -120,6 +137,7 @@ const deleteStudent = async (id) => {
 
 module.exports = {
   createStudent,
+  createMinimalStudent,
   findStudentById,
   findStudentByEmail,
   findStudentByStudentId,

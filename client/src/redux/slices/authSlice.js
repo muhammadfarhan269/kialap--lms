@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { jwtDecode } from 'jwt-decode';
 
 // Async thunk for user registration
 export const registerUser = createAsyncThunk(
@@ -47,8 +48,9 @@ export const loginUser = createAsyncThunk(
 
       // Store the access token in localStorage
       localStorage.setItem('accessToken', data.accessToken);
-      // Store username (assuming 'Admin' for now; adjust based on backend response)
-      localStorage.setItem('username', 'Admin');
+      // Decode the token to get user info
+      const decoded = jwtDecode(data.accessToken);
+      localStorage.setItem('username', decoded.UserInfo.username || decoded.UserInfo.email || 'Admin');
 
       return data;
     } catch (error) {
@@ -131,7 +133,9 @@ const authSlice = createSlice({
       const token = localStorage.getItem('accessToken');
       if (token) {
         state.isAuthenticated = true;
-        // You might want to decode the token to get user info
+        // Decode the token to get user info
+        const decoded = jwtDecode(token);
+        state.user = { role: decoded.UserInfo.role, username: decoded.UserInfo.username || decoded.UserInfo.email };
       }
     },
   },
@@ -161,8 +165,9 @@ const authSlice = createSlice({
         state.loading = false;
         state.isAuthenticated = true;
         state.error = null;
-        // Note: We don't set user here as the backend doesn't return user data on login
-        // You might want to fetch user profile separately or decode from token
+        // Decode the token to get user info
+        const decoded = jwtDecode(action.payload.accessToken);
+        state.user = { role: decoded.UserInfo.role, username: decoded.UserInfo.username || decoded.UserInfo.email };
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;

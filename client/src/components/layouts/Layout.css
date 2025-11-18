@@ -4,6 +4,7 @@
 :root {
     --sidebar-width: 260px;
     --header-height: 60px;
+    --footer-height: 60px;
     --sidebar-bg: #1e293b;
     --body-bg: #f5f7fa;
     --border-color: #e5e7eb;
@@ -237,7 +238,8 @@ body {
 
 .main-wrapper {
     margin-left: var(--sidebar-width);
-    min-height: 100vh;
+    margin-top: var(--header-height);
+    min-height: calc(100vh - var(--header-height));
     transition: margin-left var(--transition-speed) ease;
     display: flex;
     flex-direction: column;
@@ -265,9 +267,12 @@ body {
     padding: 0 1rem;
     display: flex;
     align-items: center;
-    position: sticky;
+    position: fixed;
     top: 0;
-    z-index: 1030;
+    left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+    z-index: 1050;
+    transition: left var(--transition-speed) ease, width var(--transition-speed) ease;
 }
 
 .hamburger-menu {
@@ -468,6 +473,11 @@ body {
         margin-left: 0;
     }
 
+    .top-navbar {
+        left: 0;
+        width: 100%;
+    }
+
     .search-form.active {
         width: 200px;
     }
@@ -481,6 +491,13 @@ body {
     }
 }
 
+@media (max-width: 768px) {
+    .sidebar.active + .main-wrapper .top-navbar {
+        left: var(--sidebar-width);
+        width: calc(100% - var(--sidebar-width));
+    }
+}
+
 @media (min-width: 769px) {
     .sidebar-close {
         display: none;
@@ -491,9 +508,35 @@ body {
         width: 70px;
     }
 
+    .sidebar.collapsed + .main-wrapper .top-navbar {
+        left: 70px;
+        width: calc(100% - 70px);
+    }
+
     .main-wrapper.full-width {
         margin-left: 70px;
+        margin-top: var(--header-height);
     }
+}
+
+/* ========================================
+   FOOTER STYLES
+======================================== */
+
+.dashboard-footer {
+    background: white;
+    border-top: 1px solid var(--border-color);
+    box-shadow: var(--shadow-sm);
+    height: var(--footer-height);
+    padding: 0 1rem;
+    display: flex;
+    align-items: center;
+    position: fixed;
+    bottom: 0;
+    left: var(--sidebar-width);
+    width: calc(100% - var(--sidebar-width));
+    z-index: 1050;
+    transition: left var(--transition-speed) ease, width var(--transition-speed) ease;
 }
 
 /* ========================================

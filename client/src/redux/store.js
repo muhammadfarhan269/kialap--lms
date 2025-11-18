@@ -5,6 +5,7 @@ import professorReducer from './slices/professorSlice';
 import courseReducer from './slices/courseSlice';
 import assetsReducer from './slices/assetsSlice';
 import departmentReducer from './slices/departmentSlice';
+import enrollmentReducer from './slices/enrollmentSlice';
 
 const store = configureStore({
   reducer: {
@@ -14,6 +15,7 @@ const store = configureStore({
     course: courseReducer,
     assets: assetsReducer,
     department: departmentReducer,
+    enrollment: enrollmentReducer,
   },
 });
 

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
-import { fetchProfessorById, updateProfessor, clearError, clearSuccess } from '../../redux/slices/professorSlice';
-import '../../css/dashboard.css';
+import { fetchProfessorById, updateProfessor, clearError, clearSuccess } from '../../../redux/slices/professorSlice';
+import '../../../css/dashboard.css';
 
 const EditProfessor = () => {
   const { id } = useParams();

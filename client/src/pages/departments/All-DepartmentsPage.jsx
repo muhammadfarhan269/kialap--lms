@@ -1,6 +1,6 @@
 import React from 'react';
 import Layout from '../layouts/Layout';
-import AllDepartments from '../../components/departments/All-Departments';
+import AllDepartments from '../../components/admin/departments/All-Departments';
 
 const AllDepartmentsPage = () => {
   return (

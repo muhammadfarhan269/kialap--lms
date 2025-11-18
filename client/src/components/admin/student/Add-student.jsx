@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { createStudent, clearError, resetSuccess } from '../../redux/slices/studentSlice';
-import { fetchDepartments } from '../../redux/slices/departmentSlice';
+import { createStudent, clearError, resetSuccess } from '../../../redux/slices/studentSlice';
+import { fetchDepartments } from '../../../redux/slices/departmentSlice';
 import { useNavigate } from 'react-router-dom';
 
 const AddStudent = () => {

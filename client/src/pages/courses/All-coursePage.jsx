@@ -1,6 +1,6 @@
 import React from 'react';
 import Layout from '../layouts/Layout';
-import AllCourse from '../../components/courses/All-Course';
+import AllCourse from '../../components/admin/courses/All-Course';
 
 const AllCoursePage = () => {
 	return (

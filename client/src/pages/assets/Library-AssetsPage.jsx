@@ -1,6 +1,6 @@
 import React from 'react';
 import Layout from '../layouts/Layout';
-import LibraryAssets from '../../components/assets/Library-Assets';
+import LibraryAssets from '../../components/admin/assets/Library-Assets';
 
 const LibraryAssetsPage = () => {
   return (

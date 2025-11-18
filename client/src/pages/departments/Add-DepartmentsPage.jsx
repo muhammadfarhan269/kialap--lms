@@ -1,5 +1,5 @@
 import React from 'react';
-import AddDepartments from '../../components/departments/Add-Departments';
+import AddDepartments from '../../components/admin/departments/Add-Departments';
 import Layout from '../layouts/Layout';
 
 const AddDepartmentsPage = () => {

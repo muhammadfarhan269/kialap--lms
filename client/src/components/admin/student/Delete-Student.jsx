@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { deleteStudent, clearError, resetSuccess } from '../../redux/slices/studentSlice';
+import { deleteStudent, clearError, resetSuccess } from '../../../redux/slices/studentSlice';
 
 const DeleteStudent = ({ studentId, studentName, onClose, onSuccess }) => {
   const dispatch = useDispatch();
