@@ -1,6 +1,16 @@
-# TODO: Implement Role-Based Sidebar for Students
+# TODO: Remove Course and Username Fields from Student Management
 
-- [x] Install jwt-decode package
-- [x] Update authSlice.js to decode JWT token and store user role in state
-- [x] Update Sidebar.jsx to conditionally render menu based on user role (student vs admin)
-- [x] Test the implementation by logging in as student and verifying sidebar shows only student features
+## Frontend Changes
+- [ ] Remove course field from Add-student.jsx form
+- [ ] Remove username field from Add-student.jsx form
+- [ ] Remove course field from Edit-student.jsx form
+- [ ] Remove username field from Edit-student.jsx form
+
+## Backend Changes
+- [ ] Update studentController.js to exclude course and username from studentData, validation, and checks
+- [ ] Update Student.js model to remove course and username from INSERT and SELECT queries
+
+## Testing
+- [ ] Test adding a new student without course and username
+- [ ] Test editing an existing student
+- [ ] Verify backend API handles requests without these fields

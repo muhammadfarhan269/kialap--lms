@@ -163,26 +163,32 @@ const getAllCourses = async (limit = 10, offset = 0, filters = {}) => {
   let paramIndex = 1;
 
   if (filters.department) {
-    whereClause += ` AND c.department = $${paramIndex}`;
+    whereClause += ` AND LOWER(c.department) = LOWER($${paramIndex})`;
     values.push(filters.department);
     paramIndex++;
   }
 
   if (filters.semester) {
-    whereClause += ` AND c.semester = $${paramIndex}`;
+    whereClause += ` AND LOWER(c.semester) = LOWER($${paramIndex})`;
     values.push(filters.semester);
     paramIndex++;
   }
 
   if (filters.courseType) {
-    whereClause += ` AND c.course_type = $${paramIndex}`;
+    whereClause += ` AND LOWER(c.course_type) = LOWER($${paramIndex})`;
     values.push(filters.courseType);
     paramIndex++;
   }
 
   if (filters.status) {
-    whereClause += ` AND c.course_status = $${paramIndex}`;
+    whereClause += ` AND LOWER(c.course_status) = LOWER($${paramIndex})`;
     values.push(filters.status);
+    paramIndex++;
+  }
+
+  if (filters.search) {
+    whereClause += ` AND (c.course_code ILIKE $${paramIndex} OR c.course_name ILIKE $${paramIndex})`;
+    values.push(`%${filters.search}%`);
     paramIndex++;
   }
 
@@ -215,7 +221,7 @@ const getAllCourses = async (limit = 10, offset = 0, filters = {}) => {
 
   // Run count query to get total number of matching courses (without limit)
   const countValues = values.slice(0, values.length - 2); // exclude limit & offset
-  const countQuery = `SELECT COUNT(*)::int AS total FROM courses c WHERE 1=1 ${whereClause}`;
+  const countQuery = `SELECT COUNT(*)::int AS total FROM courses c LEFT JOIN professors p ON c.professor_id = p.id WHERE 1=1 ${whereClause}`;
   const countResult = await pool.query(countQuery, countValues);
   const total = countResult.rows[0]?.total ?? 0;
 

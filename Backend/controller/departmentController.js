@@ -18,13 +18,6 @@ const createDepartment = async (req, res) => {
             currentStudents: req.body.currentStudents || 0,
             maxCapacity: req.body.maxCapacity,
             facultyCount: req.body.facultyCount || 0,
-            annualBudget: req.body.annualBudget,
-            budgetYear: req.body.budgetYear || 2025,
-            allowOnlineApplication: req.body.allowOnlineApplication !== undefined ? req.body.allowOnlineApplication : true,
-            enableNotifications: req.body.enableNotifications !== undefined ? req.body.enableNotifications : true,
-            publiclyVisible: req.body.publiclyVisible !== undefined ? req.body.publiclyVisible : true,
-            departmentWebsite: req.body.departmentWebsite,
-            socialMedia: req.body.socialMedia
         };
 
         const departmentId = await Department.create(departmentData);
@@ -82,13 +75,6 @@ const getAllDepartments = async (req, res) => {
             currentStudents: dept.currentStudents,
             maxCapacity: dept.maxCapacity,
             facultyCount: dept.facultyCount,
-            annualBudget: dept.annualBudget,
-            budgetYear: dept.budgetYear,
-            allowOnlineApplication: dept.allowOnlineApplication,
-            enableNotifications: dept.enableNotifications,
-            publiclyVisible: dept.publiclyVisible,
-            departmentWebsite: dept.departmentWebsite,
-            socialMedia: dept.socialMedia,
             createdAt: dept.createdAt,
             updatedAt: dept.updatedAt
         }));

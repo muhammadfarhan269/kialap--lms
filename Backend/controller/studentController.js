@@ -6,7 +6,6 @@ const {
   findStudentById,
   findStudentByEmail,
   findStudentByStudentId,
-  findStudentByUsername,
   getAllStudents,
   updateStudent,
   deleteStudent
@@ -84,10 +83,6 @@ const validateStudentData = (data) => {
     errors.push('Valid email is required');
   }
 
-  if (!data.username || data.username.trim().length < 3) {
-    errors.push('Username must be at least 3 characters long');
-  }
-
   if (!data.password || data.password.length < 6) {
     errors.push('Password must be at least 6 characters long');
   }
@@ -121,7 +116,6 @@ exports.createStudent = async (req, res) => {
         fullName: req.body.fullName,
         studentId: req.body.studentId,
         department: req.body.department,
-        course: req.body.course,
         dateOfBirth: req.body.dateOfBirth,
         gender: req.body.gender,
         phone: req.body.phone,
@@ -132,21 +126,15 @@ exports.createStudent = async (req, res) => {
         postalCode: req.body.postalCode,
         profileImage: req.file ? req.file.filename : null,
         email: req.body.email,
-        username: req.body.username,
+        username: req.body.username || req.body.email,
         password: req.body.password,
         confirmPassword: req.body.confirmPassword,
         accountStatus: req.body.accountStatus || 'active',
-        role: req.body.role || 'student',
-        facebook: req.body.facebook,
-        twitter: req.body.twitter,
-        linkedin: req.body.linkedin,
-        instagram: req.body.instagram,
-        website: req.body.website,
-        github: req.body.github
+        role: req.body.role || 'student'
       };
 
       // Validate required fields
-      const missingField = validateRequired(['fullName', 'studentId', 'department', 'dateOfBirth', 'gender', 'phone', 'email', 'username', 'password', 'confirmPassword'], studentData);
+      const missingField = validateRequired(['fullName', 'studentId', 'department', 'dateOfBirth', 'gender', 'phone', 'email', 'password', 'confirmPassword'], studentData);
       if (missingField) {
         return res.status(400).json({ message: `${missingField} is required` });
       }
@@ -168,10 +156,7 @@ exports.createStudent = async (req, res) => {
         return res.status(400).json({ message: 'Student ID already exists' });
       }
 
-      const existingUsername = await findStudentByUsername(studentData.username);
-      if (existingUsername) {
-        return res.status(400).json({ message: 'Username already taken' });
-      }
+
 
       // Create student
       const student = await createStudent(studentData);
@@ -245,7 +230,6 @@ exports.updateStudent = async (req, res) => {
         fullName: req.body.fullName,
         studentId: req.body.studentId,
         department: req.body.department,
-        course: req.body.course,
         dateOfBirth: req.body.dateOfBirth,
         gender: req.body.gender,
         phone: req.body.phone,
@@ -255,15 +239,8 @@ exports.updateStudent = async (req, res) => {
         state: req.body.state,
         postalCode: req.body.postalCode,
         email: req.body.email,
-        username: req.body.username,
         accountStatus: req.body.accountStatus,
-        role: req.body.role,
-        facebook: req.body.facebook,
-        twitter: req.body.twitter,
-        linkedin: req.body.linkedin,
-        instagram: req.body.instagram,
-        website: req.body.website,
-        github: req.body.github
+        role: req.body.role
       };
 
       // Handle password update separately
@@ -302,12 +279,7 @@ exports.updateStudent = async (req, res) => {
         }
       }
 
-      if (updateData.username) {
-        const existingUsername = await findStudentByUsername(updateData.username);
-        if (existingUsername && existingUsername.id !== parseInt(id)) {
-          return res.status(400).json({ message: 'Username already taken' });
-        }
-      }
+
 
       // Update student
       const updatedStudent = await updateStudent(id, updateData);

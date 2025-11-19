@@ -30,7 +30,7 @@ class Department {
 
     // Create a new department
     static async create(departmentData) {
-        const sql = `INSERT INTO departments (departmentName, departmentCode, establishedYear, departmentStatus, description, headName, headTitle, headEmail, headPhone, officeLocation, appointmentDate, currentStudents, maxCapacity, facultyCount, annualBudget, budgetYear, allowOnlineApplication, enableNotifications, publiclyVisible, departmentWebsite, socialMedia, createdAt, updatedAt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16, $17, $18, $19, $20, $21, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id`;
+        const sql = `INSERT INTO departments (departmentName, departmentCode, establishedYear, departmentStatus, description, headName, headTitle, headEmail, headPhone, officeLocation, appointmentDate, currentStudents, maxCapacity, facultyCount, createdAt, updatedAt) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP) RETURNING id`;
         const values = [
             departmentData.departmentName,
             departmentData.departmentCode,
@@ -45,14 +45,7 @@ class Department {
             departmentData.appointmentDate,
             departmentData.currentStudents,
             departmentData.maxCapacity,
-            departmentData.facultyCount,
-            departmentData.annualBudget,
-            departmentData.budgetYear,
-            departmentData.allowOnlineApplication,
-            departmentData.enableNotifications,
-            departmentData.publiclyVisible,
-            departmentData.departmentWebsite,
-            departmentData.socialMedia
+            departmentData.facultyCount
         ];
         try {
             const result = await db.query(sql, values);
@@ -151,8 +144,7 @@ class Department {
             SELECT
                 COUNT(*) as totalDepartments,
                 SUM(currentStudents) as totalStudents,
-                SUM(facultyCount) as totalFaculty,
-                AVG(annualBudget) as avgBudget
+                SUM(facultyCount) as totalFaculty
             FROM departments
             WHERE departmentStatus = 'active'
         `;

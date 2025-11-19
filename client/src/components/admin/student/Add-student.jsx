@@ -17,7 +17,6 @@ const AddStudent = () => {
     fullName: '',
     studentId: '',
     department: '',
-    course: '',
     dateOfBirth: '',
     gender: '',
     phone: '',
@@ -30,19 +29,10 @@ const AddStudent = () => {
 
     // Account Information
     email: '',
-    username: '',
     password: '',
     confirmPassword: '',
     accountStatus: 'active',
     role: 'student',
-
-    // Social Information
-    facebook: '',
-    twitter: '',
-    linkedin: '',
-    instagram: '',
-    website: '',
-    github: '',
   });
 
   const [errors, setErrors] = useState({});
@@ -60,7 +50,6 @@ const AddStudent = () => {
         fullName: '',
         studentId: '',
         department: '',
-        course: '',
         dateOfBirth: '',
         gender: '',
         phone: '',
@@ -71,17 +60,10 @@ const AddStudent = () => {
         postalCode: '',
         profileImage: null,
         email: '',
-        username: '',
         password: '',
         confirmPassword: '',
         accountStatus: 'active',
         role: 'student',
-        facebook: '',
-        twitter: '',
-        linkedin: '',
-        instagram: '',
-        website: '',
-        github: '',
       });
       setActiveTab('basic');
       dispatch(resetSuccess());
@@ -113,7 +95,6 @@ const AddStudent = () => {
       if (!formData.phone.trim()) newErrors.phone = 'Phone number is required';
     } else if (tab === 'account') {
       if (!formData.email.trim()) newErrors.email = 'Email is required';
-      if (!formData.username.trim()) newErrors.username = 'Username is required';
       if (!formData.password) newErrors.password = 'Password is required';
       if (!formData.confirmPassword) newErrors.confirmPassword = 'Confirm password is required';
       if (formData.password !== formData.confirmPassword) {
@@ -137,7 +118,7 @@ const AddStudent = () => {
     // Validate all required fields
     const requiredFields = [
       'fullName', 'studentId', 'department', 'dateOfBirth', 'gender', 'phone',
-      'email', 'username', 'password', 'confirmPassword'
+      'email', 'password', 'confirmPassword'
     ];
 
     const newErrors = {};
@@ -209,16 +190,7 @@ const AddStudent = () => {
                     <i className="bi bi-shield-lock me-2"></i>Account Information
                   </button>
                 </li>
-                <li className="nav-item" role="presentation">
-                  <button
-                    className={`nav-link ${activeTab === 'social' ? 'active' : ''}`}
-                    onClick={() => handleTabChange('social')}
-                    type="button"
-                    role="tab"
-                  >
-                    <i className="bi bi-share me-2"></i>Social Information
-                  </button>
-                </li>
+
               </ul>
 
               {/* Tab Content */}
@@ -279,20 +251,7 @@ const AddStudent = () => {
                         {errors.department && <div className="invalid-feedback">{errors.department}</div>}
                       </div>
                     </div>
-                    <div className="col-md-6">
-                      <div className="mb-3">
-                        <label htmlFor="course" className="form-label">Course</label>
-                        <input
-                          type="text"
-                          className="form-control"
-                          id="course"
-                          name="course"
-                          placeholder="Enter course name"
-                          value={formData.course}
-                          onChange={handleInputChange}
-                        />
-                      </div>
-                    </div>
+
                     <div className="col-md-6">
                       <div className="mb-3">
                         <label htmlFor="dateOfBirth" className="form-label">Date of Birth <span className="text-danger">*</span></label>
@@ -449,22 +408,7 @@ const AddStudent = () => {
                         {errors.email && <div className="invalid-feedback">{errors.email}</div>}
                       </div>
                     </div>
-                    <div className="col-md-6">
-                      <div className="mb-3">
-                        <label htmlFor="username" className="form-label">Username <span className="text-danger">*</span></label>
-                        <input
-                          type="text"
-                          className={`form-control ${errors.username ? 'is-invalid' : ''}`}
-                          id="username"
-                          name="username"
-                          placeholder="Enter username"
-                          value={formData.username}
-                          onChange={handleInputChange}
-                          required
-                        />
-                        {errors.username && <div className="invalid-feedback">{errors.username}</div>}
-                      </div>
-                    </div>
+
                     <div className="col-md-6">
                       <div className="mb-3">
                         <label htmlFor="password" className="form-label">Password <span className="text-danger">*</span></label>
@@ -532,118 +476,12 @@ const AddStudent = () => {
                   </div>
                 )}
 
-                {/* Social Information Tab */}
-                {activeTab === 'social' && (
-                  <div className="row g-3">
-                    <div className="col-md-6">
-                      <div className="mb-3">
-                        <label htmlFor="facebook" className="form-label">Facebook Profile</label>
-                        <div className="input-group">
-                          <span className="input-group-text"><i className="bi bi-facebook"></i></span>
-                          <input
-                            type="url"
-                            className="form-control"
-                            id="facebook"
-                            name="facebook"
-                            placeholder="https://facebook.com/username"
-                            value={formData.facebook}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-md-6">
-                      <div className="mb-3">
-                        <label htmlFor="twitter" className="form-label">Twitter Profile</label>
-                        <div className="input-group">
-                          <span className="input-group-text"><i className="bi bi-twitter"></i></span>
-                          <input
-                            type="url"
-                            className="form-control"
-                            id="twitter"
-                            name="twitter"
-                            placeholder="https://twitter.com/username"
-                            value={formData.twitter}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-md-6">
-                      <div className="mb-3">
-                        <label htmlFor="linkedin" className="form-label">LinkedIn Profile</label>
-                        <div className="input-group">
-                          <span className="input-group-text"><i className="bi bi-linkedin"></i></span>
-                          <input
-                            type="url"
-                            className="form-control"
-                            id="linkedin"
-                            name="linkedin"
-                            placeholder="https://linkedin.com/in/username"
-                            value={formData.linkedin}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-md-6">
-                      <div className="mb-3">
-                        <label htmlFor="instagram" className="form-label">Instagram Profile</label>
-                        <div className="input-group">
-                          <span className="input-group-text"><i className="bi bi-instagram"></i></span>
-                          <input
-                            type="url"
-                            className="form-control"
-                            id="instagram"
-                            name="instagram"
-                            placeholder="https://instagram.com/username"
-                            value={formData.instagram}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-md-6">
-                      <div className="mb-3">
-                        <label htmlFor="website" className="form-label">Personal Website</label>
-                        <div className="input-group">
-                          <span className="input-group-text"><i className="bi bi-globe"></i></span>
-                          <input
-                            type="url"
-                            className="form-control"
-                            id="website"
-                            name="website"
-                            placeholder="https://example.com"
-                            value={formData.website}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                    <div className="col-md-6">
-                      <div className="mb-3">
-                        <label htmlFor="github" className="form-label">GitHub Profile</label>
-                        <div className="input-group">
-                          <span className="input-group-text"><i className="bi bi-github"></i></span>
-                          <input
-                            type="url"
-                            className="form-control"
-                            id="github"
-                            name="github"
-                            placeholder="https://github.com/username"
-                            value={formData.github}
-                            onChange={handleInputChange}
-                          />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                )}
+
 
                 {/* Action Buttons */}
                 <div className="row mt-4">
                   <div className="col-12">
-                    {activeTab === 'social' ? (
+                    {activeTab === 'account' ? (
                       <>
                         <button type="submit" className="btn btn-primary me-2" disabled={loading}>
                           <i className="bi bi-check-circle me-2"></i>
@@ -654,7 +492,7 @@ const AddStudent = () => {
                         </button>
                       </>
                     ) : (
-                      <button type="button" className="btn btn-primary me-2" onClick={() => handleTabChange(activeTab === 'basic' ? 'account' : 'social')}>
+                      <button type="button" className="btn btn-primary me-2" onClick={() => handleTabChange('account')}>
                         <i className="bi bi-arrow-right me-2"></i>Next
                       </button>
                     )}

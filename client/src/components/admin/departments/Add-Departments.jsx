@@ -25,13 +25,6 @@ const AddDepartments = () => {
     currentStudents: 0,
     maxCapacity: '',
     facultyCount: 0,
-    annualBudget: '',
-    budgetYear: '2025',
-    allowOnlineApplication: true,
-    enableNotifications: true,
-    publiclyVisible: true,
-    departmentWebsite: '',
-    socialMedia: '',
   });
 
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -58,11 +51,6 @@ const AddDepartments = () => {
         facultyCount: 0,
         annualBudget: '',
         budgetYear: '2025',
-        allowOnlineApplication: true,
-        enableNotifications: true,
-        publiclyVisible: true,
-        departmentWebsite: '',
-        socialMedia: '',
       });
       dispatch(resetSuccess());
     }
@@ -77,7 +65,7 @@ const AddDepartments = () => {
     } else {
       setFormData(prev => ({
         ...prev,
-        [name]: type === 'checkbox' ? checked : value
+        [name]: value
       }));
     }
   };
@@ -174,7 +162,7 @@ const AddDepartments = () => {
   };
 
   const progress = getProgress();
-  const progressStep = progress < 34 ? 'Step 1 of 3' : progress < 67 ? 'Step 2 of 3' : 'Step 3 of 3';
+  const progressStep = progress < 50 ? 'Step 1 of 2' : 'Step 2 of 2';
 
   return (
     <>
@@ -214,7 +202,7 @@ const AddDepartments = () => {
       </div>
 
       {/* Add Department Form */}
-      <form id="addDepartmentForm" className="needs-validation" novalidate onSubmit={handleSubmit}>
+      <form id="addDepartmentForm" className="needs-validation" noValidate onSubmit={handleSubmit}>
         {/* Department Information */}
         <div className="dashboard-row">
           <div className="dashboard-card">
@@ -448,101 +436,6 @@ const AddDepartments = () => {
                          placeholder="0"
                          value={formData.facultyCount}
                          onChange={handleInputChange} />
-                </div>
-                <div>
-                  <label htmlFor="annualBudget" className="form-label">Annual Budget (USD)</label>
-                  <div className="input-group">
-                    <span className="input-group-text">$</span>
-                    <input type="number"
-                           className="form-control"
-                           id="annualBudget"
-                           name="annualBudget"
-                           min="0"
-                           step="1000"
-                           placeholder="0"
-                           value={formData.annualBudget}
-                           onChange={handleInputChange} />
-                    <span className="input-group-text">.00</span>
-                  </div>
-                </div>
-                <div>
-                  <label htmlFor="budgetYear" className="form-label">Budget Year</label>
-                  <select className="form-select" id="budgetYear" name="budgetYear" value={formData.budgetYear} onChange={handleInputChange}>
-                    <option value="">Select year...</option>
-                    <option value="2024">2024</option>
-                    <option value="2025">2025</option>
-                    <option value="2026">2026</option>
-                  </select>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Additional Settings */}
-        <div className="dashboard-row">
-          <div className="dashboard-card">
-            <div className="dashboard-card-header">
-              <div className="d-flex align-items-center">
-                <div className="form-step-icon bg-warning bg-opacity-10 rounded-circle d-flex align-items-center justify-content-center me-3" style={{width: '40px', height: '40px'}}>
-                  <i className="bi bi-gear text-warning"></i>
-                </div>
-                <div>
-                  <h5 className="mb-0">Additional Settings</h5>
-                  <p className="text-muted small mb-0">Optional configuration and features</p>
-                </div>
-              </div>
-            </div>
-            <div className="dashboard-card-body">
-              <div className="dashboard-grid grid-cols-2 gap-3">
-                <div>
-                  <div className="form-check form-switch">
-                    <input className="form-check-input" type="checkbox" id="allowOnlineApplication" name="allowOnlineApplication" checked={formData.allowOnlineApplication} onChange={handleInputChange} />
-                    <label className="form-check-label" htmlFor="allowOnlineApplication">
-                      Allow Online Applications
-                    </label>
-                    <div className="form-text">Students can apply to this department through the online portal</div>
-                  </div>
-                </div>
-                <div>
-                  <div className="form-check form-switch">
-                    <input className="form-check-input" type="checkbox" id="enableNotifications" name="enableNotifications" checked={formData.enableNotifications} onChange={handleInputChange} />
-                    <label className="form-check-label" htmlFor="enableNotifications">
-                      Enable Email Notifications
-                    </label>
-                    <div className="form-text">Department head will receive email notifications for important updates</div>
-                  </div>
-                </div>
-                <div>
-                  <div className="form-check form-switch">
-                    <input className="form-check-input" type="checkbox" id="publiclyVisible" name="publiclyVisible" checked={formData.publiclyVisible} onChange={handleInputChange} />
-                    <label className="form-check-label" htmlFor="publiclyVisible">
-                      Publicly Visible
-                    </label>
-                    <div className="form-text">Department information will be visible on the public website</div>
-                  </div>
-                </div>
-                <div>
-                  <label htmlFor="departmentWebsite" className="form-label">Department Website</label>
-                  <input type="url"
-                         className="form-control"
-                         id="departmentWebsite"
-                         name="departmentWebsite"
-                         placeholder="https://cs.kiaalap.edu"
-                         value={formData.departmentWebsite}
-                         onChange={handleInputChange} />
-                  <div className="form-text">Optional: Department's dedicated website URL</div>
-                </div>
-                <div>
-                  <label htmlFor="socialMedia" className="form-label">Social Media</label>
-                  <input type="url"
-                         className="form-control"
-                         id="socialMedia"
-                         name="socialMedia"
-                         placeholder="https://linkedin.com/company/kiaalap-cs"
-                         value={formData.socialMedia}
-                         onChange={handleInputChange} />
-                  <div className="form-text">Optional: LinkedIn, Twitter, or Facebook page</div>
                 </div>
               </div>
             </div>

@@ -146,14 +146,16 @@ const createCourse = asyncHandler(async (req, res) => {
 // @route   GET /api/courses
 // @access  Private
 const getCourses = asyncHandler(async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 10;
-  const offset = (page - 1) * limit;
+  const offset = parseInt(req.query.offset) || 0;
+  const page = Math.floor(offset / limit) + 1;
 
   const filters = {};
   if (req.query.department) filters.department = req.query.department;
   if (req.query.semester) filters.semester = req.query.semester;
   if (req.query.courseType) filters.courseType = req.query.courseType;
+  if (req.query.status) filters.status = req.query.status;
+  if (req.query.search) filters.search = req.query.search;
 
   // For students, only show active courses available for enrollment
   // For admins, show all courses regardless of status unless specifically filtered
@@ -163,7 +165,7 @@ const getCourses = asyncHandler(async (req, res) => {
   // Note: For admins, we don't set a default status filter so all statuses are shown
 
   console.log('getCourses params:', { page, limit, offset, filters }); // DEBUG
-  
+
   const { rows, total } = await Course.getAllCourses(limit, offset, filters);
 
   console.log('getAllCourses result:', { rowsCount: rows.length, total }); // DEBUG

@@ -6,7 +6,6 @@ const createStudent = async (studentData) => {
     fullName,
     studentId,
     department,
-    course,
     dateOfBirth,
     gender,
     phone,
@@ -20,38 +19,29 @@ const createStudent = async (studentData) => {
     username,
     password,
     accountStatus = 'active',
-    role = 'student',
-    facebook,
-    twitter,
-    linkedin,
-    instagram,
-    website,
-    github
+    role = 'student'
   } = studentData;
 
   const hashedPassword = await bcrypt.hash(password, 10);
 
   const query = `
     INSERT INTO students (
-      full_name, student_id, department, course, date_of_birth, gender, phone,
+      full_name, student_id, department, date_of_birth, gender, phone,
       parent_phone, address, city, state, postal_code, profile_image, email,
-      username, password, account_status, role, facebook, twitter, linkedin,
-      instagram, website, github
+      username, password, account_status, role
     ) VALUES (
-      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-      $17, $18, $19, $20, $21, $22, $23, $24
+      $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14,
+      $15, $16, $17
     )
-    RETURNING id, full_name, student_id, department, course, date_of_birth,
+    RETURNING id, full_name, student_id, department, date_of_birth,
              gender, phone, parent_phone, address, city, state, postal_code,
-             profile_image, email, username, account_status, role, facebook,
-             twitter, linkedin, instagram, website, github, created_at;
+             profile_image, email, account_status, role, created_at;
   `;
 
   const values = [
-    fullName, studentId, department, course, dateOfBirth, gender, phone,
+    fullName, studentId, department, dateOfBirth, gender, phone,
     parentPhone, address, city, state, postalCode, profileImage, email,
-    username, hashedPassword, accountStatus, role, facebook, twitter, linkedin,
-    instagram, website, github
+    username, hashedPassword, accountStatus, role
   ];
 
   const result = await pool.query(query, values);
@@ -61,16 +51,16 @@ const createStudent = async (studentData) => {
 // Create a minimal student record (used when a user with role 'student' exists
 // in `users` table but no corresponding `students` row). This does not require
 // a password and will set sensible defaults.
-const createMinimalStudent = async ({ fullName = null, email, username = null, role = 'student' }) => {
+const createMinimalStudent = async ({ fullName = null, email, role = 'student' }) => {
   const query = `
-    INSERT INTO students (full_name, email, username, account_status, role, created_at)
-    VALUES ($1, $2, $3, $4, $5, CURRENT_TIMESTAMP)
+    INSERT INTO students (full_name, email, account_status, role, created_at)
+    VALUES ($1, $2, $3, $4, CURRENT_TIMESTAMP)
     RETURNING id, full_name, student_id, department, course, date_of_birth,
              gender, phone, parent_phone, address, city, state, postal_code,
-             profile_image, email, username, account_status, role, created_at;
+             profile_image, email, account_status, role, created_at;
   `;
 
-  const values = [fullName, email, username, 'active', role];
+  const values = [fullName, email, 'active', role];
   const result = await pool.query(query, values);
   return result.rows[0];
 };
@@ -93,14 +83,8 @@ const findStudentByStudentId = async (studentId) => {
   return result.rows[0];
 };
 
-const findStudentByUsername = async (username) => {
-  const query = 'SELECT * FROM students WHERE username = $1';
-  const result = await pool.query(query, [username]);
-  return result.rows[0];
-};
-
 const getAllStudents = async (limit = 10, offset = 0) => {
-  const query = 'SELECT id, full_name, student_id, department, course, date_of_birth, profile_image, email, username, account_status, role, created_at FROM students ORDER BY created_at DESC LIMIT $1 OFFSET $2';
+  const query = 'SELECT id, full_name, student_id, department, date_of_birth, profile_image, email, account_status, role, created_at FROM students ORDER BY created_at DESC LIMIT $1 OFFSET $2';
   const result = await pool.query(query, [limit, offset]);
   return result.rows;
 };
@@ -141,7 +125,6 @@ module.exports = {
   findStudentById,
   findStudentByEmail,
   findStudentByStudentId,
-  findStudentByUsername,
   getAllStudents,
   updateStudent,
   deleteStudent

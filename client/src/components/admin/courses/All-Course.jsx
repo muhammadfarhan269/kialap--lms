@@ -9,8 +9,9 @@ const AllCourse = () => {
 		const dispatch = useDispatch();
 		const { courses, loading, error, pagination } = useSelector(state => state.course);
 		const [currentPage, setCurrentPage] = useState(pagination?.page ?? 1);
-		const [limit, setLimit] = useState(pagination?.limit ?? 10);
-		const [searchTerm, setSearchTerm] = useState('');
+		const [limit, setLimit] = useState(pagination?.limit ?? 6);
+	const [searchTerm, setSearchTerm] = useState('');
+	const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 	const [filters, setFilters] = useState({
 		department: '',
 		semester: '',
@@ -18,6 +19,15 @@ const AllCourse = () => {
 	});
 	const [selectedCourse, setSelectedCourse] = useState(null);
 	const [showModal, setShowModal] = useState(false);
+
+	// Debounce search term
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			setDebouncedSearchTerm(searchTerm);
+		}, 500); // 500ms delay
+
+		return () => clearTimeout(timer);
+	}, [searchTerm]);
 
 		// fetch courses when page, limit, or filters change
 		useEffect(() => {
@@ -29,10 +39,10 @@ const AllCourse = () => {
 				...(filters.department && { department: filters.department }),
 				...(filters.semester && { semester: filters.semester }),
 				...(filters.status && { status: filters.status }),
-				...(searchTerm && { search: searchTerm }),
+				...(debouncedSearchTerm && { search: debouncedSearchTerm }),
 			};
 			dispatch(fetchCourses(params));
-		}, [dispatch, currentPage, limit, filters, searchTerm]);
+		}, [dispatch, currentPage, limit, filters, debouncedSearchTerm]);
 
 		// DOM effects for lazy loading images and checkbox behavior when courses change
 		useEffect(() => {

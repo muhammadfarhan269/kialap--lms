@@ -378,20 +378,11 @@ const AllDepartments = () => {
                     </div>
                     <div className="col-md-6">
                       <h6>Additional Details</h6>
-                      <p><strong>Annual Budget:</strong> ${selectedDept.annualBudget}</p>
-                      <p><strong>Budget Year:</strong> {selectedDept.budgetYear}</p>
                       <p><strong>Office Location:</strong> {selectedDept.officeLocation || 'N/A'}</p>
                       <p><strong>Website:</strong> {selectedDept.departmentWebsite ? <a href={selectedDept.departmentWebsite} target="_blank" rel="noopener noreferrer">{selectedDept.departmentWebsite}</a> : 'N/A'}</p>
                     </div>
                   </div>
-                  <div className="row mt-3">
-                    <div className="col-12">
-                      <h6>Settings</h6>
-                      <p><strong>Online Applications:</strong> {selectedDept.allowOnlineApplication ? 'Enabled' : 'Disabled'}</p>
-                      <p><strong>Notifications:</strong> {selectedDept.enableNotifications ? 'Enabled' : 'Disabled'}</p>
-                      <p><strong>Publicly Visible:</strong> {selectedDept.publiclyVisible ? 'Yes' : 'No'}</p>
-                    </div>
-                  </div>
+                  
                 </div>
                 <div className="modal-footer">
                   <button type="button" className="btn btn-secondary" onClick={() => { setShowModal(false); setSelectedDept(null); }}>Close</button>

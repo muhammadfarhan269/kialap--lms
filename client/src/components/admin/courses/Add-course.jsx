@@ -143,15 +143,16 @@ const AddCourse = () => {
   };
 
   return (
-    <div className="container-fluid">
-      {/* Page Header */}
-      <div className="mb-3">
+    <div className="dashboard-content">
+      <div className="container-fluid">
+        {/* Page Header */}
+        <div className="mb-3">
         <div className="d-flex justify-content-between align-items-center">
           <div>
             <h1 className="h3 fw-bold mb-2">Add New Course</h1>
             <p className="text-muted mb-0">Create a new course for the academic curriculum</p>
           </div>
-          <div className="d-none d-md-flex gap-2">
+          <div className="d-flex flex-wrap gap-2">
             <button type="button" className="btn btn-outline-secondary">
               <i className="bi bi-question-circle me-2"></i>Help
             </button>
@@ -191,17 +192,17 @@ const AddCourse = () => {
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="needs-validation" noValidate>
-        <div className="row" style={{ gap: '20px' }}>
-          <div className="col-lg-8">
+        <div className="dashboard-grid" style={{ gridTemplateColumns: '2fr 1fr', gap: '20px' }}>
+          <div>
             {/* Basic Information */}
-            <div className="card mb-3">
-              <div className="card-header">
-                <h5 className="card-title mb-0">Basic Information</h5>
+            <div className="dashboard-card mb-3">
+              <div className="dashboard-card-header">
+                <h5 className="dashboard-card-title">Basic Information</h5>
               </div>
-              <div className="card-body">
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <label htmlFor="courseCode" className="form-label">
+              <div className="dashboard-card-body">
+                <div className="dashboard-grid grid-cols-2 mb-3">
+                  <div>
+                    <label htmlFor="courseCode" className="form-label text-start">
                       Course Code <span className="text-danger">*</span>
                     </label>
                     <input
@@ -216,8 +217,8 @@ const AddCourse = () => {
                     />
                     <div className="invalid-feedback">Please provide a valid course code.</div>
                   </div>
-                  <div className="col-md-6">
-                    <label htmlFor="courseName" className="form-label">
+                  <div>
+                    <label htmlFor="courseName" className="form-label text-start">
                       Course Name <span className="text-danger">*</span>
                     </label>
                     <input
@@ -234,9 +235,9 @@ const AddCourse = () => {
                   </div>
                 </div>
 
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <label htmlFor="department" className="form-label">
+                <div className="dashboard-grid grid-cols-2 mb-3">
+                  <div>
+                    <label htmlFor="department" className="form-label text-start">
                       Department <span className="text-danger">*</span>
                     </label>
                     <select
@@ -259,8 +260,8 @@ const AddCourse = () => {
                     </select>
                     <div className="invalid-feedback">Please select a department.</div>
                   </div>
-                  <div className="col-md-6">
-                    <label htmlFor="professorId" className="form-label">
+                  <div>
+                    <label htmlFor="professorId" className="form-label text-start">
                       Professor <span className="text-danger">*</span>
                     </label>
                     <select
@@ -283,7 +284,7 @@ const AddCourse = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="description" className="form-label">Course Description</label>
+                  <label htmlFor="description" className="form-label text-start">Course Description</label>
                   <textarea
                     className="form-control"
                     id="description"
@@ -295,9 +296,9 @@ const AddCourse = () => {
                   ></textarea>
                 </div>
 
-                <div className="row mb-3">
-                  <div className="col-md-4">
-                    <label htmlFor="credits" className="form-label">
+                <div className="dashboard-grid grid-cols-3 mb-3">
+                  <div>
+                    <label htmlFor="credits" className="form-label text-start">
                       Credits <span className="text-danger">*</span>
                     </label>
                     <input
@@ -313,7 +314,7 @@ const AddCourse = () => {
                     />
                     <div className="invalid-feedback">Credits must be between 1 and 6.</div>
                   </div>
-                  <div className="col-md-4">
+                  <div>
                     <label htmlFor="duration" className="form-label">
                       Duration (weeks) <span className="text-danger">*</span>
                     </label>
@@ -330,8 +331,8 @@ const AddCourse = () => {
                     />
                     <div className="invalid-feedback">Duration must be between 1 and 52 weeks.</div>
                   </div>
-                  <div className="col-md-4">
-                    <label htmlFor="maxStudents" className="form-label">Max Students</label>
+                  <div>
+                    <label htmlFor="maxStudents" className="form-label text-start">Max Students</label>
                     <input
                       type="number"
                       className="form-control"
@@ -346,7 +347,7 @@ const AddCourse = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="prerequisites" className="form-label">Prerequisites</label>
+                  <label htmlFor="prerequisites" className="form-label text-start">Prerequisites</label>
                   <input
                     type="text"
                     className="form-control"
@@ -362,14 +363,14 @@ const AddCourse = () => {
             </div>
 
             {/* Schedule Information */}
-            <div className="card mb-3">
-              <div className="card-header">
-                <h5 className="card-title mb-0">Schedule Information</h5>
+            <div className="dashboard-card mb-3">
+              <div className="dashboard-card-header">
+                <h5 className="dashboard-card-title">Schedule Information</h5>
               </div>
-              <div className="card-body">
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <label htmlFor="semester" className="form-label">
+              <div className="dashboard-card-body">
+                <div className="dashboard-grid grid-cols-2 mb-3">
+                  <div>
+                    <label htmlFor="semester" className="form-label text-start">
                       Semester <span className="text-danger">*</span>
                     </label>
                     <select
@@ -387,8 +388,8 @@ const AddCourse = () => {
                     </select>
                     <div className="invalid-feedback">Please select a semester.</div>
                   </div>
-                  <div className="col-md-6">
-                    <label htmlFor="courseType" className="form-label">
+                  <div>
+                    <label htmlFor="courseType" className="form-label text-start">
                       Course Type <span className="text-danger">*</span>
                     </label>
                     <select
@@ -410,7 +411,7 @@ const AddCourse = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label">
+                  <label className="form-label text-start">
                     Class Days <span className="text-danger">*</span>
                   </label>
                   <div className="d-flex flex-wrap gap-3">
@@ -431,9 +432,9 @@ const AddCourse = () => {
                   </div>
                 </div>
 
-                <div className="row mb-3">
-                  <div className="col-md-6">
-                    <label htmlFor="startTime" className="form-label">
+                <div className="dashboard-grid grid-cols-2 mb-3">
+                  <div>
+                    <label htmlFor="startTime" className="form-label text-start">
                       Start Time <span className="text-danger">*</span>
                     </label>
                     <input
@@ -447,8 +448,8 @@ const AddCourse = () => {
                     />
                     <div className="invalid-feedback">Please select a start time.</div>
                   </div>
-                  <div className="col-md-6">
-                    <label htmlFor="endTime" className="form-label">
+                  <div>
+                    <label htmlFor="endTime" className="form-label text-start">
                       End Time <span className="text-danger">*</span>
                     </label>
                     <input
@@ -465,7 +466,7 @@ const AddCourse = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="classroom" className="form-label">Classroom/Location</label>
+                  <label htmlFor="classroom" className="form-label text-start">Classroom/Location</label>
                   <input
                     type="text"
                     className="form-control"
@@ -480,13 +481,13 @@ const AddCourse = () => {
             </div>
           </div>
 
-          <div className="col-lg-4">
+          <div>
             {/* Course Image */}
-            <div className="card mb-3">
-              <div className="card-header">
-                <h5 className="card-title mb-0">Course Image</h5>
+            <div className="dashboard-card mb-3">
+              <div className="dashboard-card-header">
+                <h5 className="dashboard-card-title">Course Image</h5>
               </div>
-              <div className="card-body text-center">
+              <div className="dashboard-card-body text-center">
                 <div className="position-relative d-inline-block mb-3">
                   <img
                     src={imagePreview}
@@ -499,7 +500,7 @@ const AddCourse = () => {
                   </div>
                 </div>
                 <div className="mb-3">
-                  <label htmlFor="courseImage" className="form-label">Upload Course Image</label>
+                  <label htmlFor="courseImage" className="form-label text-start">Upload Course Image</label>
                   <input
                     className="form-control"
                     type="file"
@@ -513,13 +514,13 @@ const AddCourse = () => {
             </div>
 
             {/* Course Settings */}
-            <div className="card mb-3">
-              <div className="card-header">
-                <h5 className="card-title mb-0">Course Settings</h5>
+            <div className="dashboard-card mb-3">
+              <div className="dashboard-card-header">
+                <h5 className="dashboard-card-title">Course Settings</h5>
               </div>
-              <div className="card-body">
+              <div className="dashboard-card-body">
                 <div className="mb-3">
-                  <label htmlFor="status" className="form-label">Status</label>
+                  <label htmlFor="status" className="form-label text-start">Status</label>
                   <select
                     className="form-select"
                     id="status"
@@ -534,7 +535,7 @@ const AddCourse = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label htmlFor="enrollmentType" className="form-label">Enrollment Type</label>
+                    <label htmlFor="enrollmentType" className="form-label text-start">Enrollment Type</label>
                   <select
                     className="form-select"
                     id="enrollmentType"
@@ -549,7 +550,7 @@ const AddCourse = () => {
                 </div>
 
                 <div className="mb-3">
-                  <label className="form-label">Course Options</label>
+                  <label className="form-label text-start">Course Options</label>
                   <div className="form-check mb-2">
                     <input
                       className="form-check-input"
@@ -594,14 +595,14 @@ const AddCourse = () => {
             </div>
 
             {/* Fee Structure */}
-            <div className="card">
-              <div className="card-header">
-                <h5 className="card-title mb-0">Fee Structure</h5>
+            <div className="dashboard-card">
+              <div className="dashboard-card-header">
+                <h5 className="dashboard-card-title">Fee Structure</h5>
               </div>
-              <div className="card-body">
-                <div className="row mb-3">
-                  <div className="col-12 mb-2">
-                    <label htmlFor="courseFee" className="form-label">Course Fee ($)</label>
+              <div className="dashboard-card-body">
+                <div className="dashboard-grid grid-cols-3 mb-3">
+                  <div>
+                    <label htmlFor="courseFee" className="form-label text-start">Course Fee ($)</label>
                     <input
                       type="number"
                       className="form-control"
@@ -614,8 +615,8 @@ const AddCourse = () => {
                       onChange={handleInputChange}
                     />
                   </div>
-                  <div className="col-12 mb-2">
-                    <label htmlFor="labFee" className="form-label">Lab Fee ($)</label>
+                  <div>
+                    <label htmlFor="labFee" className="form-label text-start">Lab Fee ($)</label>
                     <input
                       type="number"
                       className="form-control"
@@ -628,8 +629,8 @@ const AddCourse = () => {
                       onChange={handleInputChange}
                     />
                   </div>
-                  <div className="col-12 mb-2">
-                    <label htmlFor="materialFee" className="form-label">Material Fee ($)</label>
+                  <div>
+                    <label htmlFor="materialFee" className="form-label text-start">Material Fee ($)</label>
                     <input
                       type="number"
                       className="form-control"
@@ -657,10 +658,10 @@ const AddCourse = () => {
         </div>
 
         {/* Form Actions */}
-        <div className="row mt-4">
+        <div className="row">
           <div className="col-12">
             <hr className="my-4" />
-            <div className="d-flex gap-3 justify-content-center">
+            <div className="d-flex gap-3">
               <button type="submit" className="btn btn-primary" disabled={loading}>
                 <i className="bi bi-check-lg me-2"></i>
                 {loading ? 'Creating Course...' : 'Create Course'}
@@ -678,6 +679,7 @@ const AddCourse = () => {
           </div>
         </div>
       </form>
+      </div>
     </div>
   );
 };

@@ -17,7 +17,6 @@ const EditStudent = () => {
     fullName: '',
     studentId: '',
     department: '',
-    course: '',
     dateOfBirth: '',
     gender: '',
     phone: '',
@@ -30,19 +29,12 @@ const EditStudent = () => {
 
     // Account Information
     email: '',
-    username: '',
     password: '',
     confirmPassword: '',
     accountStatus: 'active',
     role: 'student',
 
-    // Social Information
-    facebook: '',
-    twitter: '',
-    linkedin: '',
-    instagram: '',
-    website: '',
-    github: ''
+
   });
 
   useEffect(() => {
@@ -67,15 +59,10 @@ const EditStudent = () => {
         state: currentStudent.state || '',
         postalCode: currentStudent.postal_code || '',
         email: currentStudent.email || '',
-        username: currentStudent.username || '',
+
         accountStatus: currentStudent.account_status || 'active',
         role: currentStudent.role || 'student',
-        facebook: currentStudent.facebook || '',
-        twitter: currentStudent.twitter || '',
-        linkedin: currentStudent.linkedin || '',
-        instagram: currentStudent.instagram || '',
-        website: currentStudent.website || '',
-        github: currentStudent.github || ''
+
       });
     }
   }, [currentStudent]);
@@ -239,16 +226,7 @@ const EditStudent = () => {
                       <i className="bi bi-shield-lock me-2"></i>Account Information
                     </button>
                   </li>
-                  <li className="nav-item" role="presentation">
-                    <button
-                      className={`nav-link ${activeTab === 'social' ? 'active' : ''}`}
-                      onClick={() => setActiveTab('social')}
-                      type="button"
-                      role="tab"
-                    >
-                      <i className="bi bi-share me-2"></i>Social Information
-                    </button>
-                  </li>
+
                 </ul>
 
                 {/* Tab Content */}
@@ -309,19 +287,7 @@ const EditStudent = () => {
                               <div className="invalid-feedback">Please select a department.</div>
                             </div>
                           </div>
-                          <div className="col-md-6 px-2">
-                            <div className="mb-4">
-                              <label htmlFor="course" className="form-label">Course</label>
-                              <input
-                                type="text"
-                                className="form-control"
-                                id="course"
-                                name="course"
-                                value={formData.course}
-                                onChange={handleInputChange}
-                              />
-                            </div>
-                          </div>
+
                           <div className="col-md-6 px-2">
                             <div className="mb-4">
                               <label htmlFor="dateOfBirth" className="form-label">Date of Birth <span className="text-danger">*</span></label>
@@ -486,21 +452,7 @@ const EditStudent = () => {
                               <div className="invalid-feedback">Please provide a valid email.</div>
                             </div>
                           </div>
-                          <div className="col-md-6 px-2">
-                            <div className="mb-4">
-                              <label htmlFor="username" className="form-label">Username <span className="text-danger">*</span></label>
-                              <input
-                                type="text"
-                                className="form-control"
-                                id="username"
-                                name="username"
-                                value={formData.username}
-                                onChange={handleInputChange}
-                                required
-                              />
-                              <div className="invalid-feedback">Please provide a username.</div>
-                            </div>
-                          </div>
+
                           <div className="col-md-6 px-2">
                             <div className="mb-4">
                               <label htmlFor="password" className="form-label">New Password</label>
@@ -585,124 +537,7 @@ const EditStudent = () => {
                     </div>
                   )}
 
-                  {/* Social Information Tab */}
-                  {activeTab === 'social' && (
-                    <div className="tab-pane fade show active" role="tabpanel">
-                      <form onSubmit={(e) => handleSubmit(e, 'social')}>
-                        <div className="row g-3">
-                          <div className="col-md-6 px-2">
-                            <div className="mb-4">
-                              <label htmlFor="facebook" className="form-label">Facebook Profile</label>
-                              <div className="input-group">
-                                <span className="input-group-text"><i className="bi bi-facebook"></i></span>
-                                <input
-                                  type="url"
-                                  className="form-control"
-                                  id="facebook"
-                                  name="facebook"
-                                  value={formData.facebook}
-                                  onChange={handleInputChange}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-6 px-2">
-                            <div className="mb-4">
-                              <label htmlFor="twitter" className="form-label">Twitter Profile</label>
-                              <div className="input-group">
-                                <span className="input-group-text"><i className="bi bi-twitter"></i></span>
-                                <input
-                                  type="url"
-                                  className="form-control"
-                                  id="twitter"
-                                  name="twitter"
-                                  value={formData.twitter}
-                                  onChange={handleInputChange}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-6 px-2">
-                            <div className="mb-4">
-                              <label htmlFor="linkedin" className="form-label">LinkedIn Profile</label>
-                              <div className="input-group">
-                                <span className="input-group-text"><i className="bi bi-linkedin"></i></span>
-                                <input
-                                  type="url"
-                                  className="form-control"
-                                  id="linkedin"
-                                  name="linkedin"
-                                  value={formData.linkedin}
-                                  onChange={handleInputChange}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-6 px-2">
-                            <div className="mb-4">
-                              <label htmlFor="instagram" className="form-label">Instagram Profile</label>
-                              <div className="input-group">
-                                <span className="input-group-text"><i className="bi bi-instagram"></i></span>
-                                <input
-                                  type="url"
-                                  className="form-control"
-                                  id="instagram"
-                                  name="instagram"
-                                  value={formData.instagram}
-                                  onChange={handleInputChange}
-                                  placeholder="https://instagram.com/username"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-6 px-2">
-                            <div className="mb-4">
-                              <label htmlFor="website" className="form-label">Personal Website</label>
-                              <div className="input-group">
-                                <span className="input-group-text"><i className="bi bi-globe"></i></span>
-                                <input
-                                  type="url"
-                                  className="form-control"
-                                  id="website"
-                                  name="website"
-                                  value={formData.website}
-                                  onChange={handleInputChange}
-                                  placeholder="https://example.com"
-                                />
-                              </div>
-                            </div>
-                          </div>
-                          <div className="col-md-6 px-2">
-                            <div className="mb-4">
-                              <label htmlFor="github" className="form-label">GitHub Profile</label>
-                              <div className="input-group">
-                                <span className="input-group-text"><i className="bi bi-github"></i></span>
-                                <input
-                                  type="url"
-                                  className="form-control"
-                                  id="github"
-                                  name="github"
-                                  value={formData.github}
-                                  onChange={handleInputChange}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        <div className="row mt-4">
-                          <div className="col-12 px-2">
-                            <button type="submit" className="btn btn-primary" disabled={loading}>
-                              <i className="bi bi-check-circle me-2"></i>
-                              {loading ? 'Updating...' : 'Update Social Information'}
-                            </button>
-                            <button type="button" className="btn btn-success ms-2" onClick={handleViewProfile}>
-                              <i className="bi bi-eye me-2"></i>View Profile
-                            </button>
-                          </div>
-                        </div>
-                      </form>
-                    </div>
-                  )}
+
                 </div>
               </div>
             </div>
