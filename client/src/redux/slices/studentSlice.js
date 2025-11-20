@@ -152,6 +152,12 @@ const studentSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.error = null;
+        // Add the new student to the list
+        state.students.push({
+          ...action.payload.student,
+          department: action.payload.student.department || action.payload.student.users?.department,
+          student_id: action.payload.student.student_id || action.payload.student.users?.student_id
+        });
       })
       .addCase(createStudent.rejected, (state, action) => {
         state.loading = false;

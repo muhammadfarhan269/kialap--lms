@@ -115,6 +115,7 @@ const authSlice = createSlice({
   name: 'auth',
   initialState: {
     user: null,
+    studentDetails: null,
     loading: false,
     error: null,
     isAuthenticated: false,
@@ -125,6 +126,7 @@ const authSlice = createSlice({
     },
     logout: (state) => {
       state.user = null;
+      state.studentDetails = null;
       state.isAuthenticated = false;
       localStorage.removeItem('accessToken');
       localStorage.removeItem('username');
@@ -135,7 +137,7 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         // Decode the token to get user info
         const decoded = jwtDecode(token);
-        state.user = { role: decoded.UserInfo.role, username: decoded.UserInfo.username || decoded.UserInfo.email };
+        state.user = { role: decoded.UserInfo.role, username: decoded.UserInfo.username || decoded.UserInfo.email, uuid: decoded.UserInfo.uuid };
       }
     },
   },
@@ -151,6 +153,10 @@ const authSlice = createSlice({
         state.user = action.payload.user;
         state.isAuthenticated = true;
         state.error = null;
+        // If student, set studentDetails
+        if (action.payload.user.role === 'student' && action.payload.studentDetails) {
+          state.studentDetails = action.payload.studentDetails;
+        }
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
@@ -167,7 +173,11 @@ const authSlice = createSlice({
         state.error = null;
         // Decode the token to get user info
         const decoded = jwtDecode(action.payload.accessToken);
-        state.user = { role: decoded.UserInfo.role, username: decoded.UserInfo.username || decoded.UserInfo.email };
+        state.user = { role: decoded.UserInfo.role, username: decoded.UserInfo.username || decoded.UserInfo.email, uuid: decoded.UserInfo.uuid };
+        // If student, set studentDetails
+        if (decoded.UserInfo.role === 'student' && action.payload.studentDetails) {
+          state.studentDetails = action.payload.studentDetails;
+        }
       })
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;

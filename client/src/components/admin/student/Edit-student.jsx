@@ -69,7 +69,7 @@ const EditStudent = () => {
 
   useEffect(() => {
     if (success) {
-      alert('Student updated successfully!');
+      toast.success('Student updated successfully!');
       dispatch(resetSuccess());
       navigate('/all-students');
     }
@@ -142,24 +142,7 @@ const EditStudent = () => {
     );
   }
 
-  if (error) {
-    return (
-      <div className="dashboard-content">
-        <div className="container-fluid">
-          <div className="alert alert-danger">
-            {error}
-            <button
-              type="button"
-              className="btn btn-sm btn-outline-danger ms-2"
-              onClick={() => dispatch(clearError())}
-            >
-              Dismiss
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }
+
 
   const profileImageUrl = currentStudent?.profile_image
     ? `http://localhost:5000/images/${currentStudent.profile_image}`
@@ -439,7 +422,7 @@ const EditStudent = () => {
                         <div className="row g-3">
                           <div className="col-md-6 px-2">
                             <div className="mb-4">
-                              <label htmlFor="email" className="form-label">Email Address <span className="text-danger">*</span></label>
+                              <label htmlFor="email" className="form-label">Email Address</label>
                               <input
                                 type="email"
                                 className="form-control"
@@ -447,7 +430,6 @@ const EditStudent = () => {
                                 name="email"
                                 value={formData.email}
                                 onChange={handleInputChange}
-                                required
                               />
                               <div className="invalid-feedback">Please provide a valid email.</div>
                             </div>

@@ -4,12 +4,13 @@ const path = require('path');
 const {
   createStudent,
   findStudentById,
-  findStudentByEmail,
-  findStudentByStudentId,
+  findStudentByUserUuid,
   getAllStudents,
   updateStudent,
   deleteStudent
 } = require('../models/Student');
+const { createUser, findUserByEmail } = require('../models/User');
+const pool = require('../config/dbConnection');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -94,85 +95,208 @@ const validateStudentData = (data) => {
   return errors;
 };
 
+const validateStudentCreationData = (data) => {
+  const errors = [];
+
+  if (!data.fullName || data.fullName.trim().length < 2) {
+    errors.push('Full name must be at least 2 characters long');
+  }
+
+  if (!data.studentId || data.studentId.trim().length < 1) {
+    errors.push('Student ID is required');
+  }
+
+  if (!data.department) {
+    errors.push('Department is required');
+  }
+
+  if (!data.dateOfBirth) {
+    errors.push('Date of birth is required');
+  }
+
+  if (!data.gender || !['male', 'female', 'other'].includes(data.gender)) {
+    errors.push('Valid gender is required');
+  }
+
+  if (!data.phone || data.phone.trim().length < 10) {
+    errors.push('Valid phone number is required');
+  }
+
+  if (!data.email || !validateEmail(data.email)) {
+    errors.push('Valid email is required');
+  }
+
+  if (!data.password || data.password.length < 6) {
+    errors.push('Password must be at least 6 characters long');
+  }
+
+  if (data.password !== data.confirmPassword) {
+    errors.push('Passwords do not match');
+  }
+
+  return errors;
+};
+
+const validateUserData = (data) => {
+  const errors = [];
+
+  if (!data.firstName || data.firstName.trim().length < 1) {
+    errors.push('First name is required');
+  }
+
+  if (!data.lastName || data.lastName.trim().length < 1) {
+    errors.push('Last name is required');
+  }
+
+  if (!data.email || !validateEmail(data.email)) {
+    errors.push('Valid email is required');
+  }
+
+  if (!data.password || data.password.length < 6) {
+    errors.push('Password must be at least 6 characters long');
+  }
+
+  if (data.password !== data.confirmPassword) {
+    errors.push('Passwords do not match');
+  }
+
+  if (!data.studentId || data.studentId.trim().length < 1) {
+    errors.push('Student ID is required');
+  }
+
+  if (!data.department) {
+    errors.push('Department is required');
+  }
+
+  return errors;
+};
+
 exports.createStudent = async (req, res) => {
-  try {
-    // Check if user is administrator
-    if (req.user.role !== 'administrator') {
-      return res.status(403).json({ message: 'Access denied. Only administrators can add students.' });
+  // Check if user is administrator
+  if (req.user.role !== 'administrator') {
+    return res.status(403).json({ message: 'Access denied. Only administrators can add students.' });
+  }
+
+  // Handle file upload
+  upload(req, res, async (err) => {
+    if (err) {
+      if (err instanceof multer.MulterError) {
+        if (err.code === 'LIMIT_FILE_SIZE') {
+          return res.status(400).json({ message: 'File too large. Maximum size is 2MB.' });
+        }
+      }
+      return res.status(400).json({ message: err.message });
     }
 
-    // Handle file upload
-    upload(req, res, async (err) => {
-      if (err) {
-        if (err instanceof multer.MulterError) {
-          if (err.code === 'LIMIT_FILE_SIZE') {
-            return res.status(400).json({ message: 'File too large. Maximum size is 2MB.' });
-          }
-        }
-        return res.status(400).json({ message: err.message });
-      }
+    const studentData = {
+      fullName: req.body.fullName,
+      studentId: req.body.studentId,
+      department: req.body.department,
+      dateOfBirth: req.body.dateOfBirth,
+      gender: req.body.gender,
+      phone: req.body.phone,
+      parentPhone: req.body.parentPhone,
+      address: req.body.address,
+      city: req.body.city,
+      state: req.body.state,
+      postalCode: req.body.postalCode,
+      profileImage: req.file ? req.file.filename : null,
+      email: req.body.email,
+      email:req.body.email,
+      password: req.body.password,
+      confirmPassword: req.body.confirmPassword,
+      accountStatus: req.body.accountStatus || 'active',
+      role: req.body.role || 'student'
+    };
 
-      const studentData = {
-        fullName: req.body.fullName,
-        studentId: req.body.studentId,
-        department: req.body.department,
-        dateOfBirth: req.body.dateOfBirth,
-        gender: req.body.gender,
-        phone: req.body.phone,
-        parentPhone: req.body.parentPhone,
-        address: req.body.address,
-        city: req.body.city,
-        state: req.body.state,
-        postalCode: req.body.postalCode,
-        profileImage: req.file ? req.file.filename : null,
-        email: req.body.email,
-        username: req.body.username || req.body.email,
-        password: req.body.password,
-        confirmPassword: req.body.confirmPassword,
-        accountStatus: req.body.accountStatus || 'active',
-        role: req.body.role || 'student'
-      };
+    // Check for required fields that might be missing due to FormData not appending empty values
+    if (studentData.department === undefined || studentData.department === null || (typeof studentData.department === 'string' && studentData.department.trim() === '')) {
+      return res.status(400).json({ message: 'Department is required' });
+    }
 
-      // Validate required fields
-      const missingField = validateRequired(['fullName', 'studentId', 'department', 'dateOfBirth', 'gender', 'phone', 'email', 'password', 'confirmPassword'], studentData);
-      if (missingField) {
-        return res.status(400).json({ message: `${missingField} is required` });
-      }
+    // Validate required fields
+    const missingField = validateRequired(['fullName', 'studentId', 'department', 'dateOfBirth', 'gender', 'phone', 'email', 'password', 'confirmPassword'], studentData);
+    if (missingField) {
+      return res.status(400).json({ message: `${missingField} is required` });
+    }
 
-      // Additional validation
-      const validationErrors = validateStudentData(studentData);
-      if (validationErrors.length > 0) {
-        return res.status(400).json({ message: 'Validation failed', errors: validationErrors });
-      }
+    // Additional validation
+    const validationErrors = validateStudentData(studentData);
+    if (validationErrors.length > 0) {
+      return res.status(400).json({ message: 'Validation failed', errors: validationErrors });
+    }
 
-      // Check for existing student
-      const existingEmail = await findStudentByEmail(studentData.email);
-      if (existingEmail) {
-        return res.status(400).json({ message: 'Email already registered' });
-      }
+    // Ensure password is provided and valid
+    if (!studentData.password || typeof studentData.password !== 'string' || studentData.password.trim() === '') {
+      return res.status(400).json({ message: 'Password is required' });
+    }
 
-      const existingStudentId = await findStudentByStudentId(studentData.studentId);
-      if (existingStudentId) {
-        return res.status(400).json({ message: 'Student ID already exists' });
-      }
+    // Check for existing user
+    const existingEmail = await findUserByEmail(studentData.email);
+    if (existingEmail) {
+      return res.status(400).json({ message: 'Email already registered' });
+    }
 
+    // Check for existing student ID in users table
+    const existingStudentIdQuery = 'SELECT * FROM users WHERE student_id = $1';
+    const existingStudentIdResult = await pool.query(existingStudentIdQuery, [studentData.studentId]);
+    if (existingStudentIdResult.rows.length > 0) {
+      return res.status(400).json({ message: 'Student ID already exists' });
+    }
 
+    // Start transaction
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
 
-      // Create student
-      const student = await createStudent(studentData);
+      // Create user first
+      const nameParts = studentData.fullName.split(' ');
+      const firstName = nameParts[0];
+      const lastName = nameParts.slice(1).join(' ') || '';
+
+      const hashedPassword = await bcrypt.hash(studentData.password, 10);
+      const user = await createUser(firstName, lastName, studentData.email, null, hashedPassword, 'student', studentData.department, studentData.studentId, client);
+
+      // Create student record
+      const studentRecord = await createStudent({
+        userUuid: user.uuid,
+        fullName: studentData.fullName,
+        email: studentData.email,
+        studentId: studentData.studentId,
+        department: studentData.department,
+        dateOfBirth: studentData.dateOfBirth,
+        gender: studentData.gender,
+        phone: studentData.phone,
+        parentPhone: studentData.parentPhone,
+        address: studentData.address,
+        city: studentData.city,
+        state: studentData.state,
+        postalCode: studentData.postalCode,
+        profileImage: studentData.profileImage,
+        accountStatus: studentData.accountStatus
+      }, client);
+
+      await client.query('COMMIT');
+
+      // Fetch the full student data with user details joined
+      const fullStudent = await findStudentById(studentRecord.id);
 
       // Remove password from response
-      const { password, ...studentResponse } = student;
+      const { password, ...userResponse } = user;
 
       res.status(201).json({
         message: 'Student created successfully',
-        student: studentResponse
+        user: userResponse,
+        student: fullStudent
       });
-    });
-  } catch (err) {
-    console.error('Error creating student:', err);
-    res.status(500).json({ message: err.message });
-  }
+    } catch (error) {
+      await client.query('ROLLBACK');
+      console.error('Error creating student:', error);
+      res.status(500).json({ message: error.message });
+    } finally {
+      client.release();
+    }
+  });
 };
 
 exports.getAllStudents = async (req, res) => {
@@ -226,6 +350,12 @@ exports.updateStudent = async (req, res) => {
         return res.status(400).json({ message: err.message });
       }
 
+      // First, get the student to obtain user_uuid
+      const student = await findStudentById(id);
+      if (!student) {
+        return res.status(404).json({ message: 'Student not found' });
+      }
+
       const updateData = {
         fullName: req.body.fullName,
         studentId: req.body.studentId,
@@ -244,6 +374,7 @@ exports.updateStudent = async (req, res) => {
       };
 
       // Handle password update separately
+      let hashedPassword = null;
       if (req.body.password) {
         if (req.body.password.length < 6) {
           return res.status(400).json({ message: 'Password must be at least 6 characters long' });
@@ -251,7 +382,7 @@ exports.updateStudent = async (req, res) => {
         if (req.body.password !== req.body.confirmPassword) {
           return res.status(400).json({ message: 'Passwords do not match' });
         }
-        updateData.password = await bcrypt.hash(req.body.password, 10);
+        hashedPassword = await bcrypt.hash(req.body.password, 10);
       }
 
       // Handle profile image
@@ -259,42 +390,98 @@ exports.updateStudent = async (req, res) => {
         updateData.profileImage = req.file.filename;
       }
 
-      // Remove undefined values
+      // Separate updates for students and users tables
+      const studentUpdate = {};
+      const userUpdate = {};
+
       Object.keys(updateData).forEach(key => {
-        if (updateData[key] === undefined || updateData[key] === '') {
-          delete updateData[key];
+        if (updateData[key] !== undefined && updateData[key] !== '') {
+          if (key === 'email' || key === 'role') {
+            userUpdate[key] = updateData[key];
+          } else {
+            studentUpdate[key] = updateData[key];
+          }
         }
       });
 
       // Validate email if provided
-      if (updateData.email && !validateEmail(updateData.email)) {
+      if (userUpdate.email && !validateEmail(userUpdate.email)) {
         return res.status(400).json({ message: 'Invalid email format' });
       }
 
-      // Check for existing email/username if changed
-      if (updateData.email) {
-        const existingEmail = await findStudentByEmail(updateData.email);
-        if (existingEmail && existingEmail.id !== parseInt(id)) {
+      // Check for existing email if changed
+      if (userUpdate.email) {
+        const existingEmail = await findUserByEmail(userUpdate.email);
+        if (existingEmail && existingEmail.uuid !== student.user_uuid) {
           return res.status(400).json({ message: 'Email already registered' });
         }
       }
 
+      // Start transaction
+      const client = await pool.connect();
+      try {
+        await client.query('BEGIN');
 
+        // Update student table
+        if (Object.keys(studentUpdate).length > 0) {
+          const studentFields = [];
+          const studentValues = [];
+          let paramIndex = 1;
 
-      // Update student
-      const updatedStudent = await updateStudent(id, updateData);
+          Object.keys(studentUpdate).forEach(key => {
+            const dbKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+            studentFields.push(`${dbKey} = $${paramIndex}`);
+            studentValues.push(studentUpdate[key]);
+            paramIndex++;
+          });
 
-      if (!updatedStudent) {
-        return res.status(404).json({ message: 'Student not found' });
+          studentValues.push(id);
+          const studentQuery = `UPDATE students SET ${studentFields.join(', ')}, updated_at = CURRENT_TIMESTAMP WHERE id = $${paramIndex}`;
+          await client.query(studentQuery, studentValues);
+        }
+
+        // Update user table
+        if (Object.keys(userUpdate).length > 0 || hashedPassword) {
+          const userFields = [];
+          const userValues = [];
+          let paramIndex = 1;
+
+          Object.keys(userUpdate).forEach(key => {
+            const dbKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+            userFields.push(`${dbKey} = $${paramIndex}`);
+            userValues.push(userUpdate[key]);
+            paramIndex++;
+          });
+
+          if (hashedPassword) {
+            userFields.push(`password = $${paramIndex}`);
+            userValues.push(hashedPassword);
+            paramIndex++;
+          }
+
+          userValues.push(student.user_uuid);
+          const userQuery = `UPDATE users SET ${userFields.join(', ')} WHERE uuid = $${paramIndex}`;
+          await client.query(userQuery, userValues);
+        }
+
+        await client.query('COMMIT');
+
+        // Fetch updated student
+        const updatedStudent = await findStudentById(id);
+
+        // Remove password from response
+        const { password, ...studentResponse } = updatedStudent;
+
+        res.json({
+          message: 'Student updated successfully',
+          student: studentResponse
+        });
+      } catch (error) {
+        await client.query('ROLLBACK');
+        throw error;
+      } finally {
+        client.release();
       }
-
-      // Remove password from response
-      const { password, ...studentResponse } = updatedStudent;
-
-      res.json({
-        message: 'Student updated successfully',
-        student: studentResponse
-      });
     });
   } catch (err) {
     console.error('Error updating student:', err);

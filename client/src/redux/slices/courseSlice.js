@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { toast } from 'react-toastify';
 
 // Helper function to make API calls with fetch
 const apiCall = async (url, options = {}) => {
@@ -54,9 +55,14 @@ export const addCourse = createAsyncThunk(
 // Async thunk for fetching all courses
 export const fetchCourses = createAsyncThunk(
   'course/fetchCourses',
-  async ({ limit = 10, offset = 0 } = {}, { rejectWithValue }) => {
+  async ({ limit = 10, offset = 0, ...filters } = {}, { rejectWithValue }) => {
     try {
       const params = new URLSearchParams({ limit: limit.toString(), offset: offset.toString() });
+      Object.keys(filters).forEach(key => {
+        if (filters[key] !== undefined && filters[key] !== null) {
+          params.append(key, filters[key]);
+        }
+      });
       return await apiCall(`http://localhost:5000/api/courses?${params}`);
     } catch (error) {
       return rejectWithValue(error.message);
@@ -163,10 +169,12 @@ const courseSlice = createSlice({
         // backend may return { success: true, data: course } or { course: ... }
         const newCourse = action.payload?.data ?? action.payload?.course ?? action.payload;
         if (newCourse) state.courses.push(newCourse);
+        toast.success('Course added successfully!');
       })
       .addCase(addCourse.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(`Failed to add course: ${action.payload}`);
       })
       // Fetch Courses
       .addCase(fetchCourses.pending, (state) => {
@@ -217,6 +225,7 @@ const courseSlice = createSlice({
             state.currentCourse = updated;
           }
         }
+        toast.success('Course updated successfully!');
       })
       .addCase(updateCourse.rejected, (state, action) => {
         state.loading = false;
@@ -233,10 +242,12 @@ const courseSlice = createSlice({
         if (state.currentCourse?.id === action.payload) {
           state.currentCourse = null;
         }
+        toast.success('Course deleted successfully!');
       })
       .addCase(deleteCourse.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(`Failed to delete course: ${action.payload}`);
       })
       // Fetch Courses by Professor
       .addCase(fetchCoursesByProfessor.pending, (state) => {

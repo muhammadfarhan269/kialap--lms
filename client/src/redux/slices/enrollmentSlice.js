@@ -112,10 +112,12 @@ const enrollmentSlice = createSlice({
           state.enrollments.push(enrollment);
           state.enrollmentStatus[enrollment.course_id] = { enrolled: true, status: 'active' };
         }
+        toast.success('Enrolled in course successfully!');
       })
       .addCase(enrollInCourse.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(`Failed to enroll in course: ${action.payload}`);
       })
       // Unenroll from Course
       .addCase(unenrollFromCourse.pending, (state) => {
@@ -134,10 +136,12 @@ const enrollmentSlice = createSlice({
           state.enrollments = state.enrollments.filter(e => e.id !== enrollmentId);
           state.enrollmentStatus[courseId] = { enrolled: false, status: null };
         }
+        toast.success('Unenrolled from course successfully!');
       })
       .addCase(unenrollFromCourse.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(`Failed to unenroll from course: ${action.payload}`);
       })
       // Fetch Student Enrollments
       .addCase(fetchStudentEnrollments.pending, (state) => {

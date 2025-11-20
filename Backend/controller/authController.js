@@ -97,7 +97,7 @@ exports.loginUser = async (req, res) => {
     if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
     const accessToken = jwt.sign(
-      { UserInfo: { id: user.id, email: user.email, role: user.role } },
+      { UserInfo: { id: user.id, uuid: user.uuid, email: user.email, role: user.role } },
       process.env.JWT_SECRET,
       { expiresIn: '7d' }
     );
@@ -110,8 +110,31 @@ exports.loginUser = async (req, res) => {
 
     await updateRefreshToken(user.id, refreshToken);
 
+    // If user is a student, fetch additional details
+    let studentDetails = null;
+    if (user.role === 'student') {
+      const Student = require('../models/Student');
+      const student = await Student.findStudentByUserUuid(user.uuid);
+      if (student) {
+        // Fetch enrollments and courses
+        const pool = require('../config/dbConnection');
+        const enrollmentsQuery = `
+          SELECT e.id, e.enrollment_date, e.status, e.grade,
+                 c.id as course_id, c.course_name, c.course_code, c.course_description
+          FROM enrollments e
+          JOIN courses c ON e.course_id = c.id
+          WHERE e.student_id = $1
+        `;
+        const enrollmentsResult = await pool.query(enrollmentsQuery, [student.id]);
+        studentDetails = {
+          ...student,
+          enrollments: enrollmentsResult.rows
+        };
+      }
+    }
+
     res.cookie('jwt', refreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 30 * 24 * 60 * 60 * 1000 });
-    res.json({ accessToken });
+    res.json({ accessToken, user: { id: user.id, uuid: user.uuid, email: user.email, role: user.role, firstName: user.first_name, lastName: user.last_name, department: user.department, studentId: user.student_id }, studentDetails });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: err.message });

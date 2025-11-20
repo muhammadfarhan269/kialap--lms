@@ -86,6 +86,24 @@ const createCourse = asyncHandler(async (req, res) => {
     materialFee
   } = req.body;
 
+  // Validate required fields
+  if (!courseCode || courseCode.trim() === '') {
+    res.status(400);
+    throw new Error('Course code is required');
+  }
+  if (!courseName || courseName.trim() === '') {
+    res.status(400);
+    throw new Error('Course name is required');
+  }
+  if (!department || department.trim() === '') {
+    res.status(400);
+    throw new Error('Department is required');
+  }
+  if (!professorId || professorId === '') {
+    res.status(400);
+    throw new Error('Professor is required');
+  }
+
   // Check if course code already exists
   const existingCourse = await Course.findCourseByCode(courseCode);
   if (existingCourse) {
@@ -105,15 +123,29 @@ const createCourse = asyncHandler(async (req, res) => {
     classDaysArray = classDays.split(',').map(day => day.trim()).filter(day => day);
   }
 
+  // Helper function to parse numeric values safely
+  const parseNumeric = (value, defaultValue) => {
+    if (value === '' || value === null || value === undefined) return defaultValue;
+    const parsed = parseFloat(value);
+    return isNaN(parsed) ? defaultValue : parsed;
+  };
+
+  // Helper function to parse integer values safely
+  const parseIntSafe = (value, defaultValue) => {
+    if (value === '' || value === null || value === undefined) return defaultValue;
+    const parsed = parseInt(value, 10);
+    return isNaN(parsed) ? defaultValue : parsed;
+  };
+
   const courseData = {
     courseCode,
     courseName,
     department,
-    professorId,
+    professorId: professorId && professorId !== '' ? parseIntSafe(professorId, null) : null,
     courseDescription: description,
-    credits: credits || 3,
-    duration: duration || 16,
-    maxStudents: maxStudents || 30,
+    credits: parseIntSafe(credits, 3),
+    duration: parseIntSafe(duration, 16),
+    maxStudents: parseIntSafe(maxStudents, 30),
     prerequisites,
     semester,
     courseType,
@@ -127,9 +159,9 @@ const createCourse = asyncHandler(async (req, res) => {
     onlineAvailable: onlineAvailable === 'true' || onlineAvailable === true,
     certificateOffered: certificateOffered === 'true' || certificateOffered === true,
     recordedLectures: recordedLectures === 'true' || recordedLectures === true,
-    courseFee: courseFee || 0.00,
-    labFee: labFee || 0.00,
-    materialFee: materialFee || 0.00,
+    courseFee: parseNumeric(courseFee, 0.00),
+    labFee: parseNumeric(labFee, 0.00),
+    materialFee: parseNumeric(materialFee, 0.00),
     createdBy: req.user.id // Track who created the course
   };
 
@@ -161,6 +193,7 @@ const getCourses = asyncHandler(async (req, res) => {
   // For admins, show all courses regardless of status unless specifically filtered
   if (req.user.role !== 'administrator') {
     filters.status = 'active';
+    filters.createdBy = 'administrator';
   }
   // Note: For admins, we don't set a default status filter so all statuses are shown
 

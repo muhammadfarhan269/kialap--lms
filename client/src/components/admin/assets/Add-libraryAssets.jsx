@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { createAsset } from '../../../redux/slices/assetsSlice';
+import { toast } from 'react-toastify';
 import '../../../css/dashboard.css';
 
 const AddLibraryAssets = () => {
@@ -50,7 +51,7 @@ const AddLibraryAssets = () => {
   const handleFileSelect = (file) => {
     if (file && file.type.startsWith('image/')) {
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB');
+        toast.error('File size must be less than 5MB');
         return;
       }
       setCoverImage(file);
@@ -193,14 +194,13 @@ const AddLibraryAssets = () => {
 
       // Dispatch Redux action
       const result = await dispatch(createAsset(formDataToSend)).unwrap();
-      
+
       if (result.success) {
-        alert('Asset added successfully!');
+        toast.success('Asset added successfully!');
         navigate('/library-assets');
       }
     } catch (err) {
-      console.error('Error creating asset:', err);
-      alert(`Error: ${err.message || 'Failed to create asset'}`);
+      toast.error(err.message || 'Error creating asset');
     } finally {
       setSubmitLoading(false);
     }
@@ -236,11 +236,10 @@ const AddLibraryAssets = () => {
         // Reset form for new entry
         handleClearForm();
         setValidated(false);
-        alert('Asset saved! Ready to add another.');
+        toast.success('Asset saved! Ready to add another.');
       }
     } catch (err) {
-      console.error('Error creating asset:', err);
-      alert(`Error: ${err.message || 'Failed to create asset'}`);
+      toast.error(err.message || 'Error creating asset');
     } finally {
       setSubmitLoading(false);
     }
@@ -249,14 +248,7 @@ const AddLibraryAssets = () => {
   return (
     <div className="dashboard-content">
       <div className="container-fluid">
-        {/* Error Alert */}
-        {error && (
-          <div className="alert alert-danger alert-dismissible fade show mb-3" role="alert">
-            <i className="bi bi-exclamation-triangle me-2" />
-            <strong>Error:</strong> {error}
-            <button type="button" className="btn-close" onClick={() => {}} aria-label="Close"></button>
-          </div>
-        )}
+
 
         {/* Page Header */}
         <div className="dashboard-card mb-3">

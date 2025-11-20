@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { createStudent, clearError, resetSuccess } from '../../../redux/slices/studentSlice';
 import { fetchDepartments } from '../../../redux/slices/departmentSlice';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 const AddStudent = () => {
   const dispatch = useDispatch();
@@ -29,13 +30,14 @@ const AddStudent = () => {
 
     // Account Information
     email: '',
-    password: '',
-    confirmPassword: '',
+    password: 'password123',
+    confirmPassword: 'password123',
     accountStatus: 'active',
     role: 'student',
   });
 
   const [errors, setErrors] = useState({});
+  const [showNotAllowedIcon, setShowNotAllowedIcon] = useState(false);
 
   useEffect(() => {
     dispatch(fetchDepartments()); // Fetch departments for the form
@@ -43,8 +45,6 @@ const AddStudent = () => {
 
   useEffect(() => {
     if (success) {
-      // Show success message
-      alert('Student created successfully! You can add another student.');
       // Reset form
       setFormData({
         fullName: '',
@@ -60,8 +60,8 @@ const AddStudent = () => {
         postalCode: '',
         profileImage: null,
         email: '',
-        password: '',
-        confirmPassword: '',
+        password: 'password123',
+        confirmPassword: 'password123',
         accountStatus: 'active',
         role: 'student',
       });
@@ -80,6 +80,10 @@ const AddStudent = () => {
     // Clear error for this field
     if (errors[name]) {
       setErrors(prev => ({ ...prev, [name]: '' }));
+    }
+    // Auto-fill confirmPassword when password changes
+    if (name === 'password') {
+      setFormData(prev => ({ ...prev, confirmPassword: value }));
     }
   };
 
@@ -134,19 +138,25 @@ const AddStudent = () => {
 
     if (Object.keys(newErrors).length > 0) {
       setErrors(newErrors);
-      alert('Please fill in all required fields correctly');
+      toast.error('Please fill in all required fields correctly');
       return;
     }
 
-    // Prepare FormData for submission
     const submitData = new FormData();
-    Object.keys(formData).forEach(key => {
-      if (formData[key] !== null && formData[key] !== '') {
-        submitData.append(key, formData[key]);
-      }
-    });
+Object.keys(formData).forEach(key => {
+  if (formData[key] !== null && formData[key] !== '') {
+    submitData.append(key, formData[key]);
+  }
+});
 
-    dispatch(createStudent(submitData));
+
+
+    try {
+      await dispatch(createStudent(submitData)).unwrap();
+      toast.success('Student created successfully!');
+    } catch (err) {
+      toast.error(err.message || 'Error creating student');
+    }
   };
 
   const handleCancel = () => {
@@ -243,7 +253,7 @@ const AddStudent = () => {
                         >
                           <option value="">Select Department</option>
                           {departments.map(dept => (
-                            <option key={dept.id} value={dept.departmentCode}>
+                            <option key={dept.id} value={dept.departmentName}>
                               {dept.departmentName}
                             </option>
                           ))}
@@ -409,9 +419,9 @@ const AddStudent = () => {
                       </div>
                     </div>
 
-                    <div className="col-md-6">
-                      <div className="mb-3">
-                        <label htmlFor="password" className="form-label">Password <span className="text-danger">*</span></label>
+                    <div className="col-md-6 password-field">
+                      <label htmlFor="password" className="form-label">Password <span className="text-danger">*</span></label>
+                      <div className="input-group">
                         <input
                           type="password"
                           className={`form-control ${errors.password ? 'is-invalid' : ''}`}
@@ -421,9 +431,13 @@ const AddStudent = () => {
                           value={formData.password}
                           onChange={handleInputChange}
                           required
+                          disabled
                         />
-                        {errors.password && <div className="invalid-feedback">{errors.password}</div>}
+                        <span className="input-group-text not-allowed-icon" style={{display: showNotAllowedIcon ? 'block' : 'none'}}>
+                          <i className="bi bi-x-circle text-danger" title="Password is fixed and cannot be changed"></i>
+                        </span>
                       </div>
+                      {errors.password && <div className="invalid-feedback">{errors.password}</div>}
                     </div>
                     <div className="col-md-6">
                       <div className="mb-3">
@@ -437,6 +451,7 @@ const AddStudent = () => {
                           value={formData.confirmPassword}
                           onChange={handleInputChange}
                           required
+                          disabled
                         />
                         {errors.confirmPassword && <div className="invalid-feedback">{errors.confirmPassword}</div>}
                       </div>
@@ -503,12 +518,7 @@ const AddStudent = () => {
                 </div>
               </form>
 
-              {/* Error Display */}
-              {error && (
-                <div className="alert alert-danger mt-3">
-                  {error}
-                </div>
-              )}
+
             </div>
           </div>
         </div>

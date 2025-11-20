@@ -192,6 +192,23 @@ const getAllCourses = async (limit = 10, offset = 0, filters = {}) => {
     paramIndex++;
   }
 
+  if (filters.createdBy) {
+    if (filters.createdBy === 'admin') {
+      // Get admin user ID
+      const adminQuery = `SELECT id FROM users WHERE role = 'admin' LIMIT 1`;
+      const adminResult = await pool.query(adminQuery);
+      if (adminResult.rows.length > 0) {
+        whereClause += ` AND c.created_by = $${paramIndex}`;
+        values.push(adminResult.rows[0].id);
+        paramIndex++;
+      }
+    } else {
+      whereClause += ` AND c.created_by = $${paramIndex}`;
+      values.push(filters.createdBy);
+      paramIndex++;
+    }
+  }
+
   values.push(limit, offset);
   console.log('getAllCourses - params:', { limit, offset, filterCount: Object.keys(filters).length, valueCount: values.length }); // DEBUG
   

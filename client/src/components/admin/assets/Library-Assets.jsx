@@ -63,7 +63,6 @@ const LibraryAssets = () => {
         dispatch(getAssets(filters));
       } catch (error) {
         console.error('Failed to delete asset:', error);
-        alert('Failed to delete asset');
       }
     }
   };

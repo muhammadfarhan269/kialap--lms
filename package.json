@@ -9,7 +9,10 @@
     "dev:client": "vite",
     "build": "vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "migrate": "node Backend/models/migrate.js",
+    "migrate:refresh": "node Backend/models/migrate.js refresh",
+    "migrate:rollback": "node Backend/models/migrate.js rollback"
   },
   "keywords": [],
   "author": "",
@@ -36,6 +39,7 @@
     "react-dom": "^19.2.0",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.9.5",
+    "react-toastify": "^11.0.5",
     "sass": "^1.94.0"
   },
   "devDependencies": {

@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { toast } from 'react-toastify';
 import axios from 'axios';
 
 const API_BASE_URL = 'http://localhost:5000/api';
@@ -143,10 +144,12 @@ const assetsSlice = createSlice({
         state.loading = false;
         state.assets.unshift(action.payload.data);
         state.pagination.total += 1;
+        toast.success('Asset created successfully!');
       })
       .addCase(createAsset.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(`Failed to create asset: ${action.payload}`);
       })
 
       // Get Assets
@@ -192,6 +195,7 @@ const assetsSlice = createSlice({
         if (state.currentAsset && state.currentAsset.id === action.payload.data.id) {
           state.currentAsset = action.payload.data;
         }
+        toast.success('Asset updated successfully!');
       })
       .addCase(updateAsset.rejected, (state, action) => {
         state.loading = false;
@@ -207,6 +211,7 @@ const assetsSlice = createSlice({
         state.loading = false;
         state.assets = state.assets.filter(asset => asset.id !== action.meta.arg);
         state.pagination.total -= 1;
+        toast.success('Asset deleted successfully!');
       })
       .addCase(deleteAsset.rejected, (state, action) => {
         state.loading = false;

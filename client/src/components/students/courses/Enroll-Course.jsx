@@ -25,7 +25,7 @@ const EnrollCourse = () => {
   const [enrollmentChecks, setEnrollmentChecks] = useState({});
 
   useEffect(() => {
-    // Fetch all courses
+    // Fetch courses (filtered by backend for students: active and created by admin)
     dispatch(fetchCourses({ limit: 100, offset: 0 }));
 
     // Fetch student's current enrollments

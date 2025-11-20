@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getAsset, updateAsset, clearCurrentAsset } from '../../../redux/slices/assetsSlice';
+import { toast } from 'react-toastify';
 import '../../../css/dashboard.css';
 
 const EditLibraryAsset = () => {
@@ -91,7 +92,7 @@ const EditLibraryAsset = () => {
   const handleFileSelect = (file) => {
     if (file && file.type.startsWith('image/')) {
       if (file.size > 5 * 1024 * 1024) {
-        alert('File size must be less than 5MB');
+        toast.error('File size must be less than 5MB');
         return;
       }
       setCoverImage(file);
@@ -236,12 +237,10 @@ const EditLibraryAsset = () => {
       const result = await dispatch(updateAsset({ id, data: formDataToSend })).unwrap();
       
       if (result.success) {
-        alert('Asset updated successfully!');
         navigate('/library-assets');
       }
     } catch (err) {
       console.error('Error updating asset:', err);
-      alert(`Error: ${err.message || 'Failed to update asset'}`);
     } finally {
       setSubmitLoading(false);
     }
