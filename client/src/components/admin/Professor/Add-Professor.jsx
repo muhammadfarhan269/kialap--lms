@@ -1,7 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addProfessor, clearError, clearSuccess } from '../../../redux/slices/professorSlice';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import '../../../css/dashboard.css';
 import '../../../css/dashboard-layout.css'
 
@@ -40,6 +41,17 @@ const AddProfessor = () => {
 
   const [errors, setErrors] = useState({});
   const [previewImage, setPreviewImage] = useState(null);
+
+  useEffect(() => {
+    if (success) {
+      toast.success('Professor added successfully!');
+      dispatch(clearSuccess());
+    }
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [success, error, dispatch]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

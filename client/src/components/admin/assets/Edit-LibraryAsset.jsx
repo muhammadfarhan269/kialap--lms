@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { getAsset, updateAsset, clearCurrentAsset } from '../../../redux/slices/assetsSlice';
+import { getAsset, updateAsset, clearCurrentAsset, clearError, clearSuccess } from '../../../redux/slices/assetsSlice';
 import { toast } from 'react-toastify';
 import '../../../css/dashboard.css';
 
@@ -48,6 +48,22 @@ const EditLibraryAsset = () => {
       dispatch(clearCurrentAsset());
     };
   }, [id, dispatch]);
+
+  // Handle success and error toasts
+  useEffect(() => {
+    if (success) {
+      toast.success('Asset updated successfully!');
+      dispatch(clearSuccess());
+      navigate('/library-assets');
+    }
+  }, [success, dispatch, navigate]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
 
   // Populate form when asset data is loaded
   useEffect(() => {

@@ -1,7 +1,7 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { createAsset } from '../../../redux/slices/assetsSlice';
+import { createAsset, clearError, clearSuccess } from '../../../redux/slices/assetsSlice';
 import { toast } from 'react-toastify';
 import '../../../css/dashboard.css';
 
@@ -37,6 +37,21 @@ const AddLibraryAssets = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [validated, setValidated] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
+
+  // Handle success and error toasts
+  useEffect(() => {
+    if (success) {
+      toast.success('Asset created successfully!');
+      dispatch(clearSuccess());
+    }
+  }, [success, dispatch]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
 
   // Handle form input changes
   const handleInputChange = (e) => {

@@ -2,13 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchCourseById, updateCourse } from '../../../redux/slices/courseSlice';
+import { toast } from 'react-toastify';
 import '../../../css/dashboard.css';
 
 const EditCourse = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { currentCourse, loading, error } = useSelector(state => state.course);
+  const { currentCourse, loading, error, success } = useSelector(state => state.course);
 
   // Form state
   const [formData, setFormData] = useState({
@@ -50,6 +51,22 @@ const EditCourse = () => {
       dispatch(fetchCourseById(id));
     }
   }, [dispatch, id]);
+
+  // Handle success and error toasts
+  useEffect(() => {
+    if (success) {
+      toast.success('Course updated successfully!');
+      dispatch(clearSuccess());
+      navigate('/all-courses');
+    }
+  }, [success, dispatch, navigate]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
 
   // Populate form when course data is loaded
   useEffect(() => {

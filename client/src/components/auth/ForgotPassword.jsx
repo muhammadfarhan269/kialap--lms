@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { forgotPassword, resetPassword, clearError } from '../../redux/slices/authSlice';
+import { toast } from 'react-toastify';
 
 const ForgotPassword = () => {
   const dispatch = useDispatch();
@@ -37,9 +38,11 @@ const ForgotPassword = () => {
 
     if (forgotPassword.fulfilled.match(resultAction)) {
       // Success, show success message
+      toast.success('Password reset instructions sent to your email!');
       setCurrentView('successMessage');
     } else {
       // Error is handled by the slice and can be displayed via error state
+      toast.error(resultAction.payload || 'Failed to send reset instructions');
       console.error('Forgot password failed:', resultAction.payload);
     }
   };

@@ -1,11 +1,23 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { deleteStudent, clearError, resetSuccess } from '../../../redux/slices/studentSlice';
+import { toast } from 'react-toastify';
 
 const DeleteStudent = ({ studentId, studentName, onClose, onSuccess }) => {
   const dispatch = useDispatch();
   const { loading, error, success } = useSelector((state) => state.student);
   const [showModal, setShowModal] = useState(true);
+
+  useEffect(() => {
+    if (success) {
+      toast.success('Student deleted successfully!');
+      dispatch(resetSuccess());
+    }
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [success, error, dispatch]);
 
   const handleDelete = async () => {
     try {

@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { toast } from 'react-toastify';
 
 // Helper function to make API calls with fetch
 const apiCall = async (url, options = {}) => {
@@ -168,10 +169,12 @@ const professorSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.professors.push(action.payload.professor);
+        toast.success('Professor added successfully!');
       })
       .addCase(addProfessor.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(`Failed to add professor: ${action.payload}`);
       })
       // Fetch Professors
       .addCase(fetchProfessors.pending, (state) => {
@@ -195,6 +198,7 @@ const professorSlice = createSlice({
       .addCase(fetchProfessors.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(`Failed to fetch professors: ${action.payload}`);
       })
       // Fetch Professor by ID
       .addCase(fetchProfessorById.pending, (state) => {
@@ -208,6 +212,7 @@ const professorSlice = createSlice({
       .addCase(fetchProfessorById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(`Failed to fetch professor: ${action.payload}`);
       })
       // Update Professor
       .addCase(updateProfessor.pending, (state) => {
@@ -229,6 +234,7 @@ const professorSlice = createSlice({
       .addCase(updateProfessor.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(`Failed to update professor: ${action.payload}`);
       })
       // Delete Professor
       .addCase(deleteProfessor.pending, (state) => {
@@ -241,10 +247,12 @@ const professorSlice = createSlice({
         if (state.currentProfessor?.id === action.payload) {
           state.currentProfessor = null;
         }
+        toast.success('Professor deleted successfully!');
       })
       .addCase(deleteProfessor.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(`Failed to delete professor: ${action.payload}`);
       });
   },
 });

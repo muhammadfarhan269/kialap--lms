@@ -1,5 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import { jwtDecode } from 'jwt-decode';
+import { toast } from 'react-toastify';
 
 // Async thunk for user registration
 export const registerUser = createAsyncThunk(
@@ -130,6 +131,7 @@ const authSlice = createSlice({
       state.isAuthenticated = false;
       localStorage.removeItem('accessToken');
       localStorage.removeItem('username');
+      toast.success('Logged out successfully!');
     },
     checkAuth: (state) => {
       const token = localStorage.getItem('accessToken');
@@ -157,10 +159,12 @@ const authSlice = createSlice({
         if (action.payload.user.role === 'student' && action.payload.studentDetails) {
           state.studentDetails = action.payload.studentDetails;
         }
+        toast.success('Registration successful!');
       })
       .addCase(registerUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(`Registration failed: ${action.payload}`);
       })
       // Login cases
       .addCase(loginUser.pending, (state) => {
@@ -182,6 +186,7 @@ const authSlice = createSlice({
       .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(`Login failed: ${action.payload}`);
       })
       // Forgot password cases
       .addCase(forgotPassword.pending, (state) => {
@@ -191,10 +196,12 @@ const authSlice = createSlice({
       .addCase(forgotPassword.fulfilled, (state, action) => {
         state.loading = false;
         state.error = null;
+        toast.success('Recovery email sent successfully!');
       })
       .addCase(forgotPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(`Failed to send recovery email: ${action.payload}`);
       })
       // Reset password cases
       .addCase(resetPassword.pending, (state) => {
@@ -204,10 +211,12 @@ const authSlice = createSlice({
       .addCase(resetPassword.fulfilled, (state, action) => {
         state.loading = false;
         state.error = null;
+        toast.success('Password reset successful!');
       })
       .addCase(resetPassword.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(`Password reset failed: ${action.payload}`);
       });
   },
 });

@@ -1,8 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { Link } from 'react-router-dom';
-import { fetchAllStudents } from '../../../redux/slices/studentSlice';
+import { fetchAllStudents, clearError } from '../../../redux/slices/studentSlice';
 import { fetchDepartments } from '../../../redux/slices/departmentSlice';
+import { toast } from 'react-toastify';
 
 
 const AllStudents = () => {
@@ -23,6 +24,13 @@ const AllStudents = () => {
     dispatch(fetchAllStudents({ limit: 100, offset: 0 })); // Fetch more students for client-side filtering
     dispatch(fetchDepartments()); // Fetch departments for filtering
   }, [dispatch]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
 
   // Create list of departments that have students
   useEffect(() => {

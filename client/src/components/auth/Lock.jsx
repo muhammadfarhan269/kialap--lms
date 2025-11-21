@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { toast } from 'react-toastify';
 import 'bootstrap-icons/font/bootstrap-icons.css';
 
 const Lock = () => {
@@ -47,7 +48,7 @@ const Lock = () => {
     event.preventDefault();
 
     if (!password.trim()) {
-      alert('Password is required to unlock.');
+      toast.error('Password is required to unlock.');
       return;
     }
 
@@ -66,13 +67,13 @@ const Lock = () => {
 
       if (result.accessToken) {
         localStorage.setItem('accessToken', result.accessToken);
+        toast.success('Screen unlocked successfully!');
         window.location.href = 'index.html';
       } else {
-        alert(result.message);
+        toast.error(result.message);
       }
     } catch (error) {
-      console.error('Error:', error);
-      alert('Unlock failed');
+      toast.error(error);
     }
   };
 

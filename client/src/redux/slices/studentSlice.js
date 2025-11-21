@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { toast } from 'react-toastify';
 
 // Async thunk for creating a student
 export const createStudent = createAsyncThunk(
@@ -124,6 +125,37 @@ export const updateStudent = createAsyncThunk(
   }
 );
 
+// Async thunk for deleting a student
+export const deleteStudent = createAsyncThunk(
+  'student/deleteStudent',
+  async (id, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem('accessToken');
+      if (!token) {
+        throw new Error('No access token found');
+      }
+
+      const response = await fetch(`http://localhost:5000/api/students/${id}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        }
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.message || 'Failed to delete student');
+      }
+
+      return { id, ...data };
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
 const studentSlice = createSlice({
   name: 'student',
   initialState: {
@@ -158,11 +190,13 @@ const studentSlice = createSlice({
           department: action.payload.student.department || action.payload.student.users?.department,
           student_id: action.payload.student.student_id || action.payload.student.users?.student_id
         });
+        toast.success('Student created successfully!');
       })
       .addCase(createStudent.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
         state.success = false;
+        toast.error(`Failed to create student: ${action.payload}`);
       })
       .addCase(fetchAllStudents.pending, (state) => {
         state.loading = true;
@@ -176,6 +210,7 @@ const studentSlice = createSlice({
       .addCase(fetchAllStudents.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(`Failed to fetch students: ${action.payload}`);
       })
       .addCase(fetchStudentById.pending, (state) => {
         state.loading = true;
@@ -189,6 +224,7 @@ const studentSlice = createSlice({
       .addCase(fetchStudentById.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        toast.error(`Failed to fetch student: ${action.payload}`);
       })
       .addCase(updateStudent.pending, (state) => {
         state.loading = true;
@@ -206,11 +242,13 @@ const studentSlice = createSlice({
           state.students[index] = updatedStudent;
         }
         state.currentStudent = updatedStudent;
+        toast.success('Student updated successfully!');
       })
       .addCase(updateStudent.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
         state.success = false;
+        toast.error(`Failed to update student: ${action.payload}`);
       })
       .addCase(deleteStudent.pending, (state) => {
         state.loading = true;
@@ -224,45 +262,16 @@ const studentSlice = createSlice({
         // Remove the student from the students array
         state.students = state.students.filter(student => student.id !== action.payload.id);
         state.currentStudent = null;
+        toast.success('Student deleted successfully!');
       })
       .addCase(deleteStudent.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
         state.success = false;
+        toast.error(`Failed to delete student: ${action.payload}`);
       });
   },
 });
-
-// Async thunk for deleting a student
-export const deleteStudent = createAsyncThunk(
-  'student/deleteStudent',
-  async (id, { rejectWithValue }) => {
-    try {
-      const token = localStorage.getItem('accessToken');
-      if (!token) {
-        throw new Error('No access token found');
-      }
-
-      const response = await fetch(`http://localhost:5000/api/students/${id}`, {
-        method: 'DELETE',
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Content-Type': 'application/json'
-        }
-      });
-
-      const data = await response.json();
-
-      if (!response.ok) {
-        throw new Error(data.message || 'Failed to delete student');
-      }
-
-      return { id, ...data };
-    } catch (error) {
-      return rejectWithValue(error.message);
-    }
-  }
-);
 
 export const { clearError, resetSuccess } = studentSlice.actions;
 export default studentSlice.reducer;

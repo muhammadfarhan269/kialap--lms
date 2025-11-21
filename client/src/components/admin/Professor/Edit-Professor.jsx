@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchProfessorById, updateProfessor, clearError, clearSuccess } from '../../../redux/slices/professorSlice';
+import { toast } from 'react-toastify';
 import '../../../css/dashboard.css';
 
 const EditProfessor = () => {
@@ -85,6 +86,17 @@ const EditProfessor = () => {
       }
     }
   }, [currentProfessor]);
+
+  useEffect(() => {
+    if (success) {
+      toast.success('Professor updated successfully!');
+      dispatch(clearSuccess());
+    }
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [success, error, dispatch]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

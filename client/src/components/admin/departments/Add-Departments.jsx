@@ -32,7 +32,7 @@ const AddDepartments = () => {
 
   useEffect(() => {
     if (success) {
-      alert('Department created successfully!');
+      toast.success('Department created successfully!');
       // Reset form
       setFormData({
         departmentName: '',
@@ -54,7 +54,11 @@ const AddDepartments = () => {
       });
       dispatch(resetSuccess());
     }
-  }, [success, dispatch]);
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [success, error, dispatch]);
 
   const handleInputChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -134,7 +138,7 @@ const AddDepartments = () => {
 
     // Basic validation
     if (!formData.departmentName || !formData.departmentCode || !formData.headName || !formData.headEmail) {
-      alert('Please fill in all required fields');
+      toast.error('Please fill in all required fields');
       return;
     }
 
@@ -143,7 +147,7 @@ const AddDepartments = () => {
 
   const saveDraft = () => {
     localStorage.setItem('departmentDraft', JSON.stringify(formData));
-    alert('Draft saved successfully!');
+    toast.success('Draft saved successfully!');
   };
 
   // Load draft on component mount

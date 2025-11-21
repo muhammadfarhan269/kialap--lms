@@ -3,6 +3,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { addCourse, clearError, clearSuccess } from '../../../redux/slices/courseSlice';
 import { fetchProfessors } from '../../../redux/slices/professorSlice';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import '../../../css/dashboard.css';
 
 const AddCourse = () => {
@@ -48,6 +49,7 @@ const AddCourse = () => {
 
   useEffect(() => {
     if (success) {
+      toast.success('Course created successfully!');
       navigate('/all-courses');
     }
   }, [success, navigate]);
@@ -109,7 +111,11 @@ const AddCourse = () => {
     formDataToSend.set('labFee', parseFloat(formData.labFee) || 0);
     formDataToSend.set('materialFee', parseFloat(formData.materialFee) || 0);
 
-    dispatch(addCourse(formDataToSend));
+    try {
+      await dispatch(addCourse(formDataToSend)).unwrap();
+    } catch (error) {
+      toast.error(error.message);
+    }
   };
 
   const handleReset = () => {
@@ -167,28 +173,7 @@ const AddCourse = () => {
         </div>
       </div>
 
-      {/* Error/Success Messages */}
-      {error && (
-        <div className="alert alert-danger alert-dismissible fade show" role="alert">
-          {error}
-          <button
-            type="button"
-            className="btn-close"
-            onClick={() => dispatch(clearError())}
-          ></button>
-        </div>
-      )}
 
-      {success && (
-        <div className="alert alert-success alert-dismissible fade show" role="alert">
-          Course created successfully!
-          <button
-            type="button"
-            className="btn-close"
-            onClick={() => dispatch(clearSuccess())}
-          ></button>
-        </div>
-      )}
 
       {/* Form */}
       <form onSubmit={handleSubmit} className="needs-validation" noValidate>

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
 import { fetchStudentById, updateStudent, clearError, resetSuccess } from '../../../redux/slices/studentSlice';
+import { toast } from 'react-toastify';
 import DeleteStudent from './Delete-Student';
 
 const EditStudent = () => {
@@ -73,7 +74,11 @@ const EditStudent = () => {
       dispatch(resetSuccess());
       navigate('/all-students');
     }
-  }, [success, dispatch, navigate]);
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [success, error, dispatch, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;

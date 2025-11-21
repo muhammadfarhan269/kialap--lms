@@ -1,4 +1,5 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
+import { toast } from 'react-toastify';
 
 // Helper function to make API calls with fetch
 const apiCall = async (url, options = {}) => {

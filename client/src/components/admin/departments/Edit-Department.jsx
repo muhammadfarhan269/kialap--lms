@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useParams, useNavigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import { fetchDepartmentById, updateDepartment, clearError, resetSuccess } from '../../../redux/slices/departmentSlice';
 import '../../../css/dashboard.css';
 
@@ -51,7 +52,7 @@ const EditDepartment = () => {
 
   useEffect(() => {
     if (success) {
-      alert('Department updated successfully!');
+      toast.success('Department updated successfully!');
       dispatch(resetSuccess());
       navigate('/departments');
     }
@@ -68,8 +69,8 @@ const EditDepartment = () => {
 
     try {
       await dispatch(updateDepartment({ id, updateData: formData })).unwrap();
-    } catch (err) {
-      console.error('Update failed:', err);
+    } catch (error) {
+      toast.error(error.message);
     } finally {
       setSubmitting(false);
     }

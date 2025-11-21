@@ -1,29 +1,54 @@
 import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchProfessors, deleteProfessor } from '../../../redux/slices/professorSlice';
+import { fetchProfessors, deleteProfessor, clearError, clearSuccess } from '../../../redux/slices/professorSlice';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
 import '../../../css/dashboard.css';
 
 const AllProfessor = () => {
   const dispatch = useDispatch();
-  const { professors, loading, error } = useSelector((state) => state.professor);
+  const { professors, loading, error, success } = useSelector((state) => state.professor);
   const [currentPage, setCurrentPage] = useState(1);
   const [searchTerm, setSearchTerm] = useState('');
   const [filter, setFilter] = useState('all');
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [professorToDelete, setProfessorToDelete] = useState(null);
   const limit = 10; // Items per page
 
   useEffect(() => {
     dispatch(fetchProfessors({ limit, offset: (currentPage - 1) * limit }));
   }, [dispatch, currentPage]);
 
+  useEffect(() => {
+    if (success) {
+      toast.success('Professor deleted successfully!');
+      dispatch(clearSuccess());
+    }
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [success, error, dispatch]);
+
   const handleDelete = (id) => {
-    if (window.confirm('Are you sure you want to delete this professor?')) {
-      dispatch(deleteProfessor(id));
+    setProfessorToDelete(id);
+    setShowDeleteModal(true);
+  };
+
+  const confirmDelete = () => {
+    if (professorToDelete) {
+      dispatch(deleteProfessor(professorToDelete));
+      setShowDeleteModal(false);
+      setProfessorToDelete(null);
     }
   };
 
+  const cancelDelete = () => {
+    setShowDeleteModal(false);
+    setProfessorToDelete(null);
+  };
+
   if (loading) return <div className="text-center">Loading...</div>;
-  if (error) return <div className="alert alert-danger">{error}</div>;
 
   // Compute stats
   const totalProfessors = professors.length;
@@ -264,6 +289,27 @@ const AllProfessor = () => {
           </div>
         </div>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      {showDeleteModal && (
+        <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Confirm Deletion</h5>
+                <button type="button" className="btn-close" onClick={cancelDelete}></button>
+              </div>
+              <div className="modal-body">
+                <p>Are you sure you want to delete this professor? This action cannot be undone.</p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={cancelDelete}>Cancel</button>
+                <button type="button" className="btn btn-danger" onClick={confirmDelete}>Delete</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

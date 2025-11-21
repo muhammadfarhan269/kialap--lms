@@ -126,6 +126,9 @@ const assetsSlice = createSlice({
     clearError: (state) => {
       state.error = null;
     },
+    clearSuccess: (state) => {
+      state.success = null;
+    },
     clearCurrentAsset: (state) => {
       state.currentAsset = null;
     },
@@ -220,5 +223,5 @@ const assetsSlice = createSlice({
   },
 });
 
-export const { clearError, clearCurrentAsset, setPagination } = assetsSlice.actions;
+export const { clearError, clearSuccess, clearCurrentAsset, setPagination } = assetsSlice.actions;
 export default assetsSlice.reducer;

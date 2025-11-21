@@ -46,14 +46,14 @@ const Register = () => {
 
     // Check password match
     if (formData.password !== formData.confirmPassword) {
-      alert('Passwords do not match');
+      toast.error('Passwords do not match');
       return;
     }
 
     // Check username pattern
     const usernamePattern = /^[a-zA-Z0-9_]{3,20}$/;
     if (!usernamePattern.test(formData.username)) {
-      alert('Username must be 3-20 characters, letters, numbers, and underscores only.');
+      toast.error('Username must be 3-20 characters, letters, numbers, and underscores only.');
       return;
     }
 
@@ -69,10 +69,11 @@ const Register = () => {
 
     if (registerUser.fulfilled.match(resultAction)) {
       // Registration successful, redirect to login
+      toast.success('Registration successful! Please login to continue.');
       window.location.href = '/login';
     } else {
       // Error is handled by the slice and can be displayed via error state
-      console.error('Registration failed:', resultAction.payload);
+      toast.error(resultAction.payload || 'Registration failed. Please try again.');
     }
   };
 

@@ -154,8 +154,8 @@ Object.keys(formData).forEach(key => {
     try {
       await dispatch(createStudent(submitData)).unwrap();
       toast.success('Student created successfully!');
-    } catch (err) {
-      toast.error(err.message || 'Error creating student');
+    } catch (error) {
+      toast.error(error);
     }
   };
 

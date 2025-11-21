@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchCourses, deleteCourse } from '../../../redux/slices/courseSlice';
+import { fetchCourses, deleteCourse, clearError, clearSuccess } from '../../../redux/slices/courseSlice';
+import { toast } from 'react-toastify';
 import '../../../css/dashboard.css';
 
 const AllCourse = () => {
@@ -28,6 +29,21 @@ const AllCourse = () => {
 
 		return () => clearTimeout(timer);
 	}, [searchTerm]);
+
+	// Handle success and error toasts
+	useEffect(() => {
+		if (success) {
+			toast.success('Course deleted successfully!');
+			dispatch(clearSuccess());
+		}
+	}, [success, dispatch]);
+
+	useEffect(() => {
+		if (error) {
+			toast.error(error);
+			dispatch(clearError());
+		}
+	}, [error, dispatch]);
 
 		// fetch courses when page, limit, or filters change
 		useEffect(() => {

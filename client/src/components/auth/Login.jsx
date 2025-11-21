@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser, clearError } from '../../redux/slices/authSlice';
+import { toast } from 'react-toastify';
 
 const Login = () => {
   const dispatch = useDispatch();
@@ -32,10 +33,11 @@ const Login = () => {
 
     if (loginUser.fulfilled.match(resultAction)) {
       // Login successful, navigate to dashboard
+      toast.success('Login successful! Welcome back.');
       navigate('/dashboard');
     } else {
       // Error is handled by the slice and can be displayed via error state
-      console.error('Login failed:', resultAction.payload);
+      toast.error(resultAction.payload || 'Login failed. Please check your credentials.');
     }
   };
 

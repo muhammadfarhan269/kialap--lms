@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { fetchDepartments, fetchDepartmentStats, deleteDepartment, clearError, resetSuccess } from '../../../redux/slices/departmentSlice';
 // import '../../css/dashboard-layout.css';
 import '../../../css/dashboard.css';
+import { toast } from 'react-toastify';
 
 
 const AllDepartments = () => {
@@ -22,6 +23,13 @@ const AllDepartments = () => {
     dispatch(fetchDepartments());
     dispatch(fetchDepartmentStats());
   }, [dispatch]);
+
+  useEffect(() => {
+    if (error) {
+      toast.error(error);
+      dispatch(clearError());
+    }
+  }, [error, dispatch]);
 
   const filteredDepartments = departments.filter((dept) => {
     const matchesSearch = (dept.departmentName || '').toLowerCase().includes(searchTerm.toLowerCase());
@@ -426,14 +434,14 @@ const AllDepartments = () => {
                     onClick={async () => {
                       try {
                         await dispatch(deleteDepartment(departmentToDelete.id)).unwrap();
-                        alert('Department deleted successfully!');
+                        toast.success('Department deleted successfully!');
                         setShowDeleteModal(false);
                         setDepartmentToDelete(null);
                         // Refresh the departments list
                         dispatch(fetchDepartments());
                       } catch (err) {
                         console.error('Delete failed:', err);
-                        alert('Failed to delete department. Please try again.');
+                        toast.error('Failed to delete department. Please try again.');
                       }
                     }}
                   >
