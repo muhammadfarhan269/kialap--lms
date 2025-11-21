@@ -47,6 +47,7 @@ exports.registerUser = async (req, res) => {
     if (role === 'student') {
       try {
         const studentData = {
+          userUuid: user.uuid,
           fullName: `${firstName} ${lastName}`,
           studentId: username || null,
           department: null,
@@ -116,16 +117,16 @@ exports.loginUser = async (req, res) => {
       const Student = require('../models/Student');
       const student = await Student.findStudentByUserUuid(user.uuid);
       if (student) {
-        // Fetch enrollments and courses
-        const pool = require('../config/dbConnection');
-        const enrollmentsQuery = `
-          SELECT e.id, e.enrollment_date, e.status, e.grade,
-                 c.id as course_id, c.course_name, c.course_code, c.course_description
-          FROM enrollments e
-          JOIN courses c ON e.course_id = c.id
-          WHERE e.student_id = $1
-        `;
-        const enrollmentsResult = await pool.query(enrollmentsQuery, [student.id]);
+    // Fetch enrollments and courses
+    const pool = require('../config/dbConnection');
+    const enrollmentsQuery = `
+      SELECT e.id, e.enrollment_date, e.status, e.grade,
+             c.id as course_id, c.course_name, c.course_code, c.course_description
+      FROM enrollments e
+      JOIN courses c ON e.course_id = c.id
+      WHERE e.user_uuid = $1
+    `;
+    const enrollmentsResult = await pool.query(enrollmentsQuery, [student.user_uuid]);
         studentDetails = {
           ...student,
           enrollments: enrollmentsResult.rows

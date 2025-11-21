@@ -14,6 +14,7 @@ const Sidebar = ({ isOpen, collapsed = false }) => {
   const isSubmenuActive = (submenuPaths) => submenuPaths.some(path => location.pathname === path);
 
   const isStudent = user?.role === 'student';
+  const isProfessor = user?.role === 'professor';
 
   return (
     <>
@@ -64,6 +65,44 @@ const Sidebar = ({ isOpen, collapsed = false }) => {
                   <NavLink className="nav-link" to="/grades">
                     <i className="bi bi-graph-up"></i>
                     <span>Grades</span>
+                  </NavLink>
+                </li>
+              </ul>
+            </div>
+          </>
+        ) : isProfessor ? (
+          <>
+            <div className="menu-section">
+              <div className="menu-section-title">Professor</div>
+              <ul className="nav flex-column">
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/professor-dashboard">
+                    <i className="bi bi-house-door"></i>
+                    <span>Overview</span>
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/grades">
+                    <i className="bi bi-graph-up"></i>
+                    <span>Grades</span>
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/research-history">
+                    <i className="bi bi-search"></i>
+                    <span>Research History</span>
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/student-assignments">
+                    <i className="bi bi-pencil-square"></i>
+                    <span>Assignments of Students</span>
+                  </NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/student-attendance">
+                    <i className="bi bi-check-circle"></i>
+                    <span>Attendance of Students</span>
                   </NavLink>
                 </li>
               </ul>

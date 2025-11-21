@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { fetchCourseById, updateCourse } from '../../../redux/slices/courseSlice';
+import { fetchCourseById, updateCourse, clearError, clearSuccess } from '../../../redux/slices/courseSlice';
 import { toast } from 'react-toastify';
 import '../../../css/dashboard.css';
 

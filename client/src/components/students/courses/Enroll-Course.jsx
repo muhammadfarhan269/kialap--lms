@@ -10,6 +10,7 @@ import {
   clearError,
   clearSuccess
 } from '../../../redux/slices/enrollmentSlice';
+import { toast } from 'react-toastify';
 
 const EnrollCourse = () => {
   const dispatch = useDispatch();
@@ -23,6 +24,8 @@ const EnrollCourse = () => {
   } = useSelector((state) => state.enrollment);
 
   const [enrollmentChecks, setEnrollmentChecks] = useState({});
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [selectedEnrollment, setSelectedEnrollment] = useState(null);
 
   useEffect(() => {
     // Fetch courses (filtered by backend for students: active and created by admin)
@@ -55,16 +58,28 @@ const EnrollCourse = () => {
   };
 
   const handleUnenroll = async (enrollmentId) => {
-    if (window.confirm('Are you sure you want to drop this course?')) {
-      try {
-        await dispatch(unenrollFromCourse(enrollmentId)).unwrap();
-        // Refresh enrollments and courses after successful unenrollment
-        dispatch(fetchStudentEnrollments());
-        dispatch(fetchCourses({ limit: 100, offset: 0 }));
-      } catch (error) {
-        console.error('Unenrollment failed:', error);
-      }
+    try {
+      await dispatch(unenrollFromCourse(enrollmentId)).unwrap();
+      // Refresh enrollments and courses after successful unenrollment
+      dispatch(fetchStudentEnrollments());
+      dispatch(fetchCourses({ limit: 100, offset: 0 }));
+    } catch (error) {
+      console.error('Unenrollment failed:', error);
+    
     }
+  };
+
+  const confirmUnenroll = async () => {
+    if (selectedEnrollment) {
+      await handleUnenroll(selectedEnrollment);
+      setShowConfirmModal(false);
+      setSelectedEnrollment(null);
+    }
+  };
+
+  const cancelUnenroll = () => {
+    setShowConfirmModal(false);
+    setSelectedEnrollment(null);
   };
 
   const isEnrolled = (courseId) => {
@@ -216,17 +231,20 @@ const EnrollCourse = () => {
                           <td>{getEnrollmentCount(course)}</td>
                           <td>
                             {isEnrolled(course.id) ? (
-                              <button
-                                className="btn btn-outline-danger btn-sm"
-                                onClick={() => {
-                                  const enrollment = enrollments.find(e => e.course_id === course.id && e.status === 'active');
-                                  if (enrollment) handleUnenroll(enrollment.id);
-                                }}
-                                disabled={enrollmentLoading}
-                              >
-                                <i className="bi bi-dash-circle me-1"></i>
-                                Drop
-                              </button>
+                            <button
+                              className="btn btn-outline-danger btn-sm"
+                              onClick={() => {
+                                const enrollment = enrollments.find(e => e.course_id === course.id && e.status === 'active');
+                                if (enrollment) {
+                                  setSelectedEnrollment(enrollment.id);
+                                  setShowConfirmModal(true);
+                                }
+                              }}
+                              disabled={enrollmentLoading}
+                            >
+                              <i className="bi bi-dash-circle me-1"></i>
+                              Drop
+                            </button>
                             ) : (
                               <button
                                 className="btn btn-outline-success btn-sm"
@@ -299,6 +317,31 @@ const EnrollCourse = () => {
                     </tbody>
                   </table>
                 </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">Confirm Course Drop</h5>
+                <button type="button" className="btn-close" onClick={cancelUnenroll}></button>
+              </div>
+              <div className="modal-body">
+                <p>Are you sure you want to drop this course? This action cannot be undone.</p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" onClick={cancelUnenroll}>
+                  Cancel
+                </button>
+                <button type="button" className="btn btn-danger" onClick={confirmUnenroll}>
+                  Drop Course
+                </button>
               </div>
             </div>
           </div>

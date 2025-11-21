@@ -8,33 +8,12 @@ const Student = require('../models/Student');
 // @access  Private/Student
 const enrollStudent = asyncHandler(async (req, res) => {
   const { courseId } = req.body;
-  const userId = req.user.id; // This is the user ID from JWT (users table)
+  const userUuid = req.user.uuid; // Use UUID from JWT
 
   if (!courseId) {
     res.status(400);
     throw new Error('Course ID is required');
   }
-
-  // Find the student record using the user email. If the corresponding students
-  // row does not exist but the authenticated user has role 'student', create a
-  // minimal students record so the enrollment APIs work for legacy/migrated users.
-  let student = await Student.findStudentByEmail(req.user.email);
-  if (!student) {
-    if (req.user && req.user.role === 'student') {
-      try {
-        student = await Student.createMinimalStudent({ fullName: `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || null, email: req.user.email, username: req.user.email.split('@')[0] });
-      } catch (err) {
-        console.error('Failed to create minimal student record:', err);
-      }
-    }
-  }
-
-  if (!student) {
-    res.status(404);
-    throw new Error('Student record not found. Please contact administrator.');
-  }
-
-  const studentId = student.id; // This is the actual student ID from students table
 
   // Check if course exists and is active
   const course = await Course.findCourseById(courseId);
@@ -48,20 +27,20 @@ const enrollStudent = asyncHandler(async (req, res) => {
     throw new Error('Course is not available for enrollment');
   }
 
-  // Check if student is already enrolled
-  const existingEnrollment = await Enrollment.isStudentEnrolled(studentId, courseId);
+  // Check if user is already enrolled
+  const existingEnrollment = await Enrollment.isStudentEnrolled(userUuid, courseId);
   if (existingEnrollment) {
     if (existingEnrollment.status === 'active') {
       res.status(400);
-      throw new Error('Student is already enrolled in this course');
+      throw new Error('User is already enrolled in this course');
     } else if (existingEnrollment.status === 'dropped') {
       // Re-enroll if previously dropped
       const reenrollQuery = `
         UPDATE enrollments SET status = 'active', enrollment_date = CURRENT_TIMESTAMP
-        WHERE student_id = $1 AND course_id = $2
-        RETURNING id, student_id, course_id, enrollment_date, status;
+        WHERE user_uuid = $1 AND course_id = $2
+        RETURNING id, user_uuid, course_id, enrollment_date, status;
       `;
-      const reenrollResult = await require('../config/dbConnection').query(reenrollQuery, [studentId, courseId]);
+      const reenrollResult = await require('../config/dbConnection').query(reenrollQuery, [userUuid, courseId]);
       res.status(200).json({
         success: true,
         message: 'Successfully re-enrolled in course',
@@ -78,7 +57,7 @@ const enrollStudent = asyncHandler(async (req, res) => {
     throw new Error('Course is full');
   }
 
-  const enrollment = await Enrollment.enrollStudentInCourse(studentId, courseId);
+  const enrollment = await Enrollment.enrollStudentInCourse(userUuid, courseId);
 
   res.status(201).json({
     success: true,
@@ -92,32 +71,11 @@ const enrollStudent = asyncHandler(async (req, res) => {
 // @access  Private/Student
 const unenrollStudent = asyncHandler(async (req, res) => {
   const { id } = req.params; // This is the enrollment ID
-  const userId = req.user.id; // This is the user ID from JWT (users table)
+  const userUuid = req.user.uuid; // Use UUID from JWT
 
-  // Find the student record using the user email. If the corresponding students
-  // row does not exist but the authenticated user has role 'student', create a
-  // minimal students record so the enrollment APIs work for legacy/migrated users.
-  let student = await Student.findStudentByEmail(req.user.email);
-  if (!student) {
-    if (req.user && req.user.role === 'student') {
-      try {
-        student = await Student.createMinimalStudent({ fullName: `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || null, email: req.user.email, username: req.user.email.split('@')[0] });
-      } catch (err) {
-        console.error('Failed to create minimal student record:', err);
-      }
-    }
-  }
-
-  if (!student) {
-    res.status(404);
-    throw new Error('Student record not found. Please contact administrator.');
-  }
-
-  const studentId = student.id; // This is the actual student ID from students table
-
-  // Check if enrollment exists and is active, and belongs to the student
+  // Check if enrollment exists and is active, and belongs to the user
   const existingEnrollment = await Enrollment.findEnrollmentById(id);
-  if (!existingEnrollment || existingEnrollment.student_id !== studentId || existingEnrollment.status !== 'active') {
+  if (!existingEnrollment || existingEnrollment.user_uuid !== userUuid || existingEnrollment.status !== 'active') {
     res.status(404);
     throw new Error('Active enrollment not found');
   }
@@ -140,30 +98,7 @@ const getStudentEnrollments = asyncHandler(async (req, res) => {
     throw new Error('Access denied. Student role required.');
   }
 
-  const userId = req.user.id; // This is the user ID from JWT (users table)
-
-  // Find the student record using the user email. If the corresponding students
-  // row does not exist but the authenticated user has role 'student', create a
-  // minimal students record so the enrollment APIs work for legacy/migrated users.
-  let student = await Student.findStudentByEmail(req.user.email);
-  if (!student) {
-    if (req.user && req.user.role === 'student') {
-      try {
-        student = await Student.createMinimalStudent({ fullName: `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || null, email: req.user.email, username: req.user.email.split('@')[0] });
-      } catch (err) {
-        console.error('Failed to create minimal student record:', err);
-      }
-    }
-  }
-
-  if (!student) {
-    res.status(404);
-    throw new Error('Student record not found. Please contact administrator.');
-  }
-
-  const studentId = student.id; // This is the actual student ID from students table
-
-  const enrollments = await Enrollment.getEnrollmentsByStudent(studentId);
+  const enrollments = await Enrollment.getEnrollmentsByUserUuid(req.user.uuid);
 
   res.status(200).json({
     success: true,
@@ -195,30 +130,9 @@ const checkEnrollment = asyncHandler(async (req, res) => {
   }
 
   const { courseId } = req.params;
-  const userId = req.user.id; // This is the user ID from JWT (users table)
+  const userUuid = req.user.uuid; // Use UUID from JWT
 
-  // Find the student record using the user email. If the corresponding students
-  // row does not exist but the authenticated user has role 'student', create a
-  // minimal students record so the enrollment APIs work for legacy/migrated users.
-  let student = await Student.findStudentByEmail(req.user.email);
-  if (!student) {
-    if (req.user && req.user.role === 'student') {
-      try {
-        student = await Student.createMinimalStudent({ fullName: `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || null, email: req.user.email, username: req.user.email.split('@')[0] });
-      } catch (err) {
-        console.error('Failed to create minimal student record:', err);
-      }
-    }
-  }
-
-  if (!student) {
-    res.status(404);
-    throw new Error('Student record not found. Please contact administrator.');
-  }
-
-  const studentId = student.id; // This is the actual student ID from students table
-
-  const enrollment = await Enrollment.isStudentEnrolled(studentId, courseId);
+  const enrollment = await Enrollment.isStudentEnrolled(userUuid, courseId);
 
   res.status(200).json({
     success: true,

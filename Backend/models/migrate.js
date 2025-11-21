@@ -135,12 +135,37 @@ async function rollbackMigration() {
   }
 }
 
+async function dropAndCreateEnrollments() {
+  try {
+    console.log("Dropping and recreating enrollments table...");
+
+    // Drop enrollments only
+    await pool.query('DROP TABLE IF EXISTS enrollments CASCADE;');
+    console.log("Enrollments table dropped!");
+
+    // Recreate from SQL file
+    const enrollmentsSqlFilePath = path.join(__dirname, 'createEnrollmentsTable.sql');
+    const enrollmentsSql = fs.readFileSync(enrollmentsSqlFilePath, 'utf8');
+
+    await pool.query(enrollmentsSql);
+    console.log("Enrollments table recreated!");
+
+  } catch (err) {
+    console.error("Error in enrollments migration:", err);
+  } finally {
+    await pool.end();
+  }
+}
+
+
 // Check command line arguments
 const command = process.argv[2];
 if (command === 'refresh') {
   refreshMigration();
 } else if (command === 'rollback') {
   rollbackMigration();
+}else if (command === 'enrollments') {
+  dropAndCreateEnrollments();
 } else {
   runMigration();
 }

@@ -8,7 +8,7 @@ import '../../../css/dashboard.css';
 const AllCourse = () => {
 		const navigate = useNavigate();
 		const dispatch = useDispatch();
-		const { courses, loading, error, pagination } = useSelector(state => state.course);
+	const { courses, loading, error, success, pagination } = useSelector(state => state.course);
 		const [currentPage, setCurrentPage] = useState(pagination?.page ?? 1);
 		const [limit, setLimit] = useState(pagination?.limit ?? 6);
 	const [searchTerm, setSearchTerm] = useState('');

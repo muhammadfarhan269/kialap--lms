@@ -193,9 +193,9 @@ const getAllCourses = async (limit = 10, offset = 0, filters = {}) => {
   }
 
   if (filters.createdBy) {
-    if (filters.createdBy === 'admin') {
-      // Get admin user ID
-      const adminQuery = `SELECT id FROM users WHERE role = 'admin' LIMIT 1`;
+    if (filters.createdBy === 'administrator') {
+      // Get administrator user ID
+      const adminQuery = `SELECT id FROM users WHERE role = 'administrator' LIMIT 1`;
       const adminResult = await pool.query(adminQuery);
       if (adminResult.rows.length > 0) {
         whereClause += ` AND c.created_by = $${paramIndex}`;
@@ -204,7 +204,7 @@ const getAllCourses = async (limit = 10, offset = 0, filters = {}) => {
       }
     } else {
       whereClause += ` AND c.created_by = $${paramIndex}`;
-      values.push(filters.createdBy);
+      values.push(parseInt(filters.createdBy));
       paramIndex++;
     }
   }

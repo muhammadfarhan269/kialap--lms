@@ -1,23 +1,23 @@
 const pool = require('../config/dbConnection');
 
-const enrollStudentInCourse = async (studentId, courseId) => {
+const enrollStudentInCourse = async (userUuid, courseId) => {
   const query = `
-    INSERT INTO enrollments (student_id, course_id, enrollment_date, status)
+    INSERT INTO enrollments (user_uuid, course_id, enrollment_date, status)
     VALUES ($1, $2, CURRENT_TIMESTAMP, 'active')
-    RETURNING id, student_id, course_id, enrollment_date, status;
+    RETURNING id, user_uuid, course_id, enrollment_date, status;
   `;
-  const result = await pool.query(query, [studentId, courseId]);
+  const result = await pool.query(query, [userUuid, courseId]);
   return result.rows[0];
 };
 
-const unenrollStudentFromCourse = async (studentId, courseId) => {
+const unenrollStudentFromCourse = async (userUuid, courseId) => {
   const query = `
     UPDATE enrollments
     SET status = 'dropped'
-    WHERE student_id = $1 AND course_id = $2 AND status = 'active'
-    RETURNING id, student_id, course_id, status;
+    WHERE user_uuid = $1 AND course_id = $2 AND status = 'active'
+    RETURNING id, user_uuid, course_id, status;
   `;
-  const result = await pool.query(query, [studentId, courseId]);
+  const result = await pool.query(query, [userUuid, courseId]);
   return result.rows[0];
 };
 
@@ -32,17 +32,17 @@ const unenrollStudentFromCourseById = async (id) => {
     UPDATE enrollments
     SET status = 'dropped'
     WHERE id = $1 AND status = 'active'
-    RETURNING id, student_id, course_id, status;
+    RETURNING id, user_uuid, course_id, status;
   `;
   const result = await pool.query(query, [id]);
   return result.rows[0];
 };
 
-const getEnrollmentsByStudent = async (studentId) => {
+const getEnrollmentsByUserUuid = async (userUuid) => {
   const query = `
     SELECT
       e.id,
-      e.student_id,
+      e.user_uuid,
       e.course_id,
       e.enrollment_date,
       e.status,
@@ -57,10 +57,10 @@ const getEnrollmentsByStudent = async (studentId) => {
     FROM enrollments e
     JOIN courses c ON e.course_id = c.id
     LEFT JOIN professors p ON c.professor_id = p.id
-    WHERE e.student_id = $1
+    WHERE e.user_uuid = $1
     ORDER BY e.enrollment_date DESC;
   `;
-  const result = await pool.query(query, [studentId]);
+  const result = await pool.query(query, [userUuid]);
   return result.rows;
 };
 
@@ -68,17 +68,17 @@ const getEnrollmentsByCourse = async (courseId) => {
   const query = `
     SELECT
       e.id,
-      e.student_id,
+      e.user_uuid,
       e.course_id,
       e.enrollment_date,
       e.status,
       e.grade,
-      s.full_name as "studentName",
-      s.student_id as "studentId",
-      s.email as "studentEmail",
+      u.username as "studentName",
+      u.email as "studentEmail",
       s.department as "studentDepartment"
     FROM enrollments e
-    JOIN students s ON e.student_id = s.id
+    JOIN users u ON e.user_uuid = u.uuid
+    LEFT JOIN students s ON u.uuid = s.user_uuid
     WHERE e.course_id = $1
     ORDER BY e.enrollment_date DESC;
   `;
@@ -86,12 +86,12 @@ const getEnrollmentsByCourse = async (courseId) => {
   return result.rows;
 };
 
-const isStudentEnrolled = async (studentId, courseId) => {
+const isStudentEnrolled = async (userUuid, courseId) => {
   const query = `
     SELECT id, status FROM enrollments
-    WHERE student_id = $1 AND course_id = $2;
+    WHERE user_uuid = $1 AND course_id = $2;
   `;
-  const result = await pool.query(query, [studentId, courseId]);
+  const result = await pool.query(query, [userUuid, courseId]);
   return result.rows[0];
 };
 
@@ -109,7 +109,7 @@ module.exports = {
   unenrollStudentFromCourse,
   findEnrollmentById,
   unenrollStudentFromCourseById,
-  getEnrollmentsByStudent,
+  getEnrollmentsByUserUuid,
   getEnrollmentsByCourse,
   isStudentEnrolled,
   getEnrollmentCount

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addProfessor, clearError, clearSuccess } from '../../../redux/slices/professorSlice';
+import { fetchDepartments } from '../../../redux/slices/departmentSlice';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import '../../../css/dashboard.css';
@@ -10,6 +11,7 @@ const AddProfessor = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { loading, error, success } = useSelector((state) => state.professor);
+  const { departments, loading: departmentsLoading, error: departmentsError } = useSelector((state) => state.department);
 
   const [formData, setFormData] = useState({
     title: '',
@@ -52,6 +54,11 @@ const AddProfessor = () => {
       dispatch(clearError());
     }
   }, [success, error, dispatch]);
+
+  // Fetch departments on component mount
+  useEffect(() => {
+    dispatch(fetchDepartments());
+  }, [dispatch]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -432,18 +439,16 @@ const AddProfessor = () => {
                     value={formData.department}
                     onChange={handleInputChange}
                     required
+                    disabled={departmentsLoading}
                   >
-                    <option value="">Choose Department...</option>
-                    <option value="Computer Science">Computer Science</option>
-                    <option value="Mathematics">Mathematics</option>
-                    <option value="Physics">Physics</option>
-                    <option value="Chemistry">Chemistry</option>
-                    <option value="Biology">Biology</option>
-                    <option value="English Literature">English Literature</option>
-                    <option value="History">History</option>
-                    <option value="Economics">Economics</option>
-                    <option value="Business Administration">Business Administration</option>
-                    <option value="Engineering">Engineering</option>
+                    <option value="">
+                      {departmentsLoading ? 'Loading departments...' : 'Choose Department...'}
+                    </option>
+                    {departments && departments.map((dept) => (
+                      <option key={dept.id} value={dept.departmentName}>
+                        {dept.departmentName}
+                      </option>
+                    ))}
                   </select>
                   {errors.department && <div className="invalid-feedback">{errors.department}</div>}
                 </div>

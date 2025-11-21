@@ -12,7 +12,9 @@
     "preview": "vite preview",
     "migrate": "node Backend/models/migrate.js",
     "migrate:refresh": "node Backend/models/migrate.js refresh",
-    "migrate:rollback": "node Backend/models/migrate.js rollback"
+    "migrate:rollback": "node Backend/models/migrate.js rollback",
+    "migrate:enrollments": "node Backend/models/migrate.js enrollments"
+
   },
   "keywords": [],
   "author": "",

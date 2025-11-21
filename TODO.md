@@ -1,4 +1,7 @@
-- [ ] Import toast from 'react-toastify' in Add-course.jsx
-- [ ] Replace success alert with toast.success for success message
-- [ ] Replace error alert with toast.error for error handling
-- [ ] Remove the alert divs for success and error
+# TODO: Implement Professor Sidebar Features
+
+## Tasks to Complete:
+- [ ] Add `isProfessor` variable to check user role in Sidebar.jsx
+- [ ] Modify the navigation structure to include a professor-specific menu section
+- [ ] Add menu items for Overview, Grades, Research History, Assignments of Students, and Attendance of Students
+- [ ] Ensure the menu only shows for professors and uses appropriate icons and paths
