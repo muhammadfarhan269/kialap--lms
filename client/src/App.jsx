@@ -33,6 +33,7 @@ import EnrollCoursePage from './pages/Students/Enroll-CoursePage'
 import AttendancePage from './pages/Students/AttendancePage'
 import AssignmentPage from './pages/Students/AssignmentPage'
 import GradesPage from './pages/Students/GradesPage'
+import AssignedCoursesPage from './pages/Professors/Assigned-CoursesPage'
 
 function App() {
 
@@ -63,6 +64,7 @@ function App() {
         <Route path="/attendance" element={<ProtectedRoute allowedRoles={['student']}><AttendancePage /></ProtectedRoute>} />
         <Route path="/assignments" element={<ProtectedRoute allowedRoles={['student']}><AssignmentPage /></ProtectedRoute>} />
         <Route path="/grades" element={<ProtectedRoute allowedRoles={['student']}><GradesPage /></ProtectedRoute>} />
+        <Route path="/assigned-courses" element={<ProtectedRoute allowedRoles={['professor']}><AssignedCoursesPage /></ProtectedRoute>} />
         <Route path="/courses" element={<ProtectedRoute allowedRoles={['administrator']}><AllCoursePage /></ProtectedRoute>} />
         <Route path="/all-courses" element={<ProtectedRoute allowedRoles={['administrator']}><AllCoursePage /></ProtectedRoute>} />
         <Route path="/add-course" element={<ProtectedRoute allowedRoles={['administrator']}><AddCoursesPage /></ProtectedRoute>} />

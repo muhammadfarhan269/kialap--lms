@@ -1,7 +1,10 @@
 const { createProfessor, findProfessorById, findProfessorByEmail, findProfessorByEmployeeId, findProfessorByUsername, getAllProfessors: getAllProfessorsModel, updateProfessor: updateProfessorModel, deleteProfessor: deleteProfessorModel } = require('../models/Professor');
+const { createUser, findUserByEmail, findUserByUsername } = require('../models/User');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const pool = require('../config/dbConnection');
+const bcrypt = require('bcryptjs');
 
 // Configure multer for file uploads
 const storage = multer.diskStorage({
@@ -81,6 +84,17 @@ const addProfessor = async (req, res) => {
       return res.status(400).json({ message: 'Professor with this username already exists' });
     }
 
+    // Check if user already exists
+    const existingUserEmail = await findUserByEmail(email);
+    if (existingUserEmail) {
+      return res.status(400).json({ message: 'User with this email already exists' });
+    }
+
+    const existingUserUsername = await findUserByUsername(username);
+    if (existingUserUsername) {
+      return res.status(400).json({ message: 'User with this username already exists' });
+    }
+
     // Validate required fields
     if (!password) {
       return res.status(400).json({ message: 'Password is required' });
@@ -92,42 +106,64 @@ const addProfessor = async (req, res) => {
       profileImage = req.files.profilePhoto[0].filename;
     }
 
-    // Create professor
-    const professorData = {
-      title,
-      firstName,
-      lastName,
-      email,
-      phone,
-      dateOfBirth,
-      gender,
-      address,
-      employeeId,
-      department,
-      position,
-      employmentType,
-      joiningDate,
-      salary: salary ? parseFloat(salary) : null,
-      highestDegree,
-      specialization,
-      university,
-      graduationYear: graduationYear ? parseInt(graduationYear) : null,
-      experience: experience ? parseInt(experience) : null,
-      office,
-      officeHours,
-      subjects,
-      bio,
-      profileImage,
-      username,
-      password
-    };
+    // Start transaction
+    const client = await pool.connect();
+    try {
+      await client.query('BEGIN');
 
-    const newProfessor = await createProfessor(professorData);
+      // Create user first
+      const hashedPassword = await bcrypt.hash(password, 10);
+      const user = await createUser(firstName, lastName, email, username, hashedPassword, 'professor', department, null, client);
 
-    res.status(201).json({
-      message: 'Professor added successfully',
-      professor: newProfessor
-    });
+      // Create professor
+      const professorData = {
+        userUuid: user.uuid,
+        title,
+        firstName,
+        lastName,
+        email,
+        phone,
+        dateOfBirth,
+        gender,
+        address,
+        employeeId,
+        department,
+        position,
+        employmentType,
+        joiningDate,
+        salary: salary ? parseFloat(salary) : null,
+        highestDegree,
+        specialization,
+        university,
+        graduationYear: graduationYear ? parseInt(graduationYear) : null,
+        experience: experience ? parseInt(experience) : null,
+        office,
+        officeHours,
+        subjects,
+        bio,
+        profileImage,
+        username,
+        password
+      };
+
+      const newProfessor = await createProfessor(professorData, client);
+
+      await client.query('COMMIT');
+
+      // Remove password from response
+      const { password: _, ...userResponse } = user;
+
+      res.status(201).json({
+        message: 'Professor added successfully',
+        user: userResponse,
+        professor: newProfessor
+      });
+    } catch (error) {
+      await client.query('ROLLBACK');
+      throw error;
+    } finally {
+      client.release();
+    }
   } catch (error) {
     console.error('Error adding professor:', error);
     res.status(500).json({ message: error.message });

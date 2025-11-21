@@ -97,20 +97,6 @@ exports.loginUser = async (req, res) => {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) return res.status(401).json({ message: 'Invalid credentials' });
 
-    const accessToken = jwt.sign(
-      { UserInfo: { id: user.id, uuid: user.uuid, email: user.email, role: user.role } },
-      process.env.JWT_SECRET,
-      { expiresIn: '7d' }
-    );
-
-    const refreshToken = jwt.sign(
-      { email: user.email },
-      process.env.REFRESH_SECRET,
-      { expiresIn: '30d' }
-    );
-
-    await updateRefreshToken(user.id, refreshToken);
-
     // If user is a student, fetch additional details
     let studentDetails = null;
     if (user.role === 'student') {
@@ -134,8 +120,32 @@ exports.loginUser = async (req, res) => {
       }
     }
 
+    // If user is a professor, fetch additional details
+    let professorDetails = null;
+    if (user.role === 'professor') {
+      const Professor = require('../models/Professor');
+      const professor = await Professor.findProfessorByUserUuid(user.uuid);
+      if (professor) {
+        professorDetails = professor;
+      }
+    }
+
+    const accessToken = jwt.sign(
+      { UserInfo: { id: user.id, uuid: user.uuid, email: user.email, role: user.role, professorId: professorDetails ? professorDetails.id : null } },
+      process.env.JWT_SECRET,
+      { expiresIn: '7d' }
+    );
+
+    const refreshToken = jwt.sign(
+      { email: user.email },
+      process.env.REFRESH_SECRET,
+      { expiresIn: '30d' }
+    );
+
+    await updateRefreshToken(user.id, refreshToken);
+
     res.cookie('jwt', refreshToken, { httpOnly: true, secure: true, sameSite: 'None', maxAge: 30 * 24 * 60 * 60 * 1000 });
-    res.json({ accessToken, user: { id: user.id, uuid: user.uuid, email: user.email, role: user.role, firstName: user.first_name, lastName: user.last_name, department: user.department, studentId: user.student_id }, studentDetails });
+    res.json({ accessToken, user: { id: user.id, uuid: user.uuid, email: user.email, role: user.role, firstName: user.first_name, lastName: user.last_name, department: user.department, studentId: user.student_id, professorId: professorDetails ? professorDetails.id : null }, studentDetails, professorDetails });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: err.message });

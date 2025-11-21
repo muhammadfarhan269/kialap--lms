@@ -139,7 +139,7 @@ const authSlice = createSlice({
         state.isAuthenticated = true;
         // Decode the token to get user info
         const decoded = jwtDecode(token);
-        state.user = { role: decoded.UserInfo.role, username: decoded.UserInfo.username || decoded.UserInfo.email, uuid: decoded.UserInfo.uuid };
+        state.user = { role: decoded.UserInfo.role, username: decoded.UserInfo.username || decoded.UserInfo.email, uuid: decoded.UserInfo.uuid, professorId: decoded.UserInfo.professorId };
       }
     },
   },

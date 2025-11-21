@@ -5,7 +5,7 @@ const createCourse = async (courseData) => {
     courseCode,
     courseName,
     department,
-    professorId,
+    professorUuid,
     courseDescription,
     credits = 3,
     duration = 16,
@@ -13,7 +13,7 @@ const createCourse = async (courseData) => {
     prerequisites,
     semester,
     courseType,
-    classDays, 
+    classDays,
     startTime,
     endTime,
     classroom,
@@ -30,7 +30,7 @@ const createCourse = async (courseData) => {
 
   const query = `
     INSERT INTO courses (
-      course_code, course_name, department, professor_id, course_description,
+      course_code, course_name, department, professor_uuid, course_description,
       credits, duration, max_students, prerequisites, semester, course_type,
       class_days, start_time, end_time, classroom, course_image, course_status,
       enrollment_type, online_available, certificate_offered, recorded_lectures,
@@ -39,7 +39,7 @@ const createCourse = async (courseData) => {
       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
       $17, $18, $19, $20, $21, $22, $23, $24, $25
     )
-    RETURNING id, course_code, course_name, department, professor_id,
+    RETURNING id, uuid, course_code, course_name, department, professor_uuid,
              course_description, credits, duration, max_students, prerequisites,
              semester, course_type, class_days, start_time, end_time, classroom,
              course_image, course_status, enrollment_type, online_available,
@@ -48,7 +48,7 @@ const createCourse = async (courseData) => {
   `;
 
   const values = [
-    courseCode, courseName, department, professorId, courseDescription,
+    courseCode, courseName, department, professorUuid, courseDescription,
     credits, duration, maxStudents, prerequisites, semester, courseType,
     JSON.stringify(classDays), startTime, endTime, classroom, courseImage,
     courseStatus, enrollmentType, onlineAvailable, certificateOffered,
@@ -93,7 +93,7 @@ const findCourseById = async (id) => {
       p.email as "professorEmail",
       p.department as "professorDepartment"
     FROM courses c
-    LEFT JOIN professors p ON c.professor_id = p.id
+    LEFT JOIN professors p ON c.professor_uuid = p.user_uuid
     WHERE c.id = $1
   `;
   const result = await pool.query(query, [id]);
@@ -142,7 +142,7 @@ const findCourseByCode = async (courseCode) => {
       p.email as "professorEmail",
       p.department as "professorDepartment"
     FROM courses c
-    LEFT JOIN professors p ON c.professor_id = p.id
+    LEFT JOIN professors p ON c.professor_uuid = p.user_uuid
     WHERE c.course_code = $1
   `;
   const result = await pool.query(query, [courseCode]);
@@ -211,11 +211,12 @@ const getAllCourses = async (limit = 10, offset = 0, filters = {}) => {
 
   values.push(limit, offset);
   console.log('getAllCourses - params:', { limit, offset, filterCount: Object.keys(filters).length, valueCount: values.length }); // DEBUG
-  
+
   // Prepare LIMIT/OFFSET values after filter values
   const query = `
     SELECT
       c.id,
+      c.uuid,
       c.course_code as "courseCode",
       c.course_name as "courseName",
       c.department,
@@ -224,7 +225,7 @@ const getAllCourses = async (limit = 10, offset = 0, filters = {}) => {
       CONCAT(COALESCE(p.title, ''), ' ', COALESCE(p.first_name, ''), ' ', COALESCE(p.last_name, '')) as "professorName",
       COALESCE(e.enrolled_count, 0) as "enrolledStudents"
     FROM courses c
-    LEFT JOIN professors p ON c.professor_id = p.id
+    LEFT JOIN professors p ON c.professor_uuid = p.user_uuid
     LEFT JOIN (
       SELECT course_id, COUNT(*) as enrolled_count
       FROM enrollments
@@ -238,7 +239,7 @@ const getAllCourses = async (limit = 10, offset = 0, filters = {}) => {
 
   // Run count query to get total number of matching courses (without limit)
   const countValues = values.slice(0, values.length - 2); // exclude limit & offset
-  const countQuery = `SELECT COUNT(*)::int AS total FROM courses c LEFT JOIN professors p ON c.professor_id = p.id WHERE 1=1 ${whereClause}`;
+  const countQuery = `SELECT COUNT(*)::int AS total FROM courses c LEFT JOIN professors p ON c.professor_uuid = p.user_uuid WHERE 1=1 ${whereClause}`;
   const countResult = await pool.query(countQuery, countValues);
   const total = countResult.rows[0]?.total ?? 0;
 
@@ -325,24 +326,37 @@ const deleteCourse = async (id) => {
   return result.rows[0];
 };
 
-const getCoursesByProfessor = async (professorId, limit = 10, offset = 0) => {
+const getCoursesByProfessor = async (professorUuid, limit = 10, offset = 0) => {
   const query = `
     SELECT
       c.id,
+      c.uuid as "uuid",
       c.course_code as "courseCode",
       c.course_name as "courseName",
       c.department,
+      c.course_description as "courseDescription",
       c.credits,
       c.semester,
       c.course_type as "courseType",
       c.course_status as "courseStatus",
-      c.created_at as "createdAt"
+      c.course_image as "courseImage",
+      c.created_at as "createdAt",
+      COALESCE(e.enrolled_count, 0) as "enrolledStudents",
+      CONCAT(COALESCE(p.title, ''), ' ', COALESCE(p.first_name, ''), ' ', COALESCE(p.last_name, '')) as "professorName"
     FROM courses c
-    WHERE c.professor_id = $1
+    LEFT JOIN professors p ON c.professor_uuid = p.user_uuid
+    LEFT JOIN (
+      SELECT course_id, COUNT(*) as enrolled_count
+      FROM enrollments
+      WHERE status = 'active'
+      GROUP BY course_id
+    ) e ON c.id = e.course_id
+    WHERE c.professor_uuid = $1
     ORDER BY c.created_at DESC
     LIMIT $2 OFFSET $3
   `;
-  const result = await pool.query(query, [professorId, limit, offset]);
+  const result = await pool.query(query, [professorUuid, limit, offset]);
+  console.log(result);
   return result.rows;
 };
 
@@ -350,16 +364,24 @@ const getCoursesByDepartment = async (department, limit = 10, offset = 0) => {
   const query = `
     SELECT
       c.id,
+      c.uuid,
       c.course_code as "courseCode",
       c.course_name as "courseName",
       c.credits,
       c.semester,
       c.course_type as "courseType",
       c.course_status as "courseStatus",
-      CONCAT(p.title, ' ', p.first_name, ' ', p.last_name) as "professorName",
-      c.created_at as "createdAt"
+      CONCAT(COALESCE(p.title, ''), ' ', COALESCE(p.first_name, ''), ' ', COALESCE(p.last_name, '')) as "professorName",
+      c.created_at as "createdAt",
+      COALESCE(e.enrolled_count, 0) as "enrolledStudents"
     FROM courses c
-    LEFT JOIN professors p ON c.professor_id = p.id
+    LEFT JOIN professors p ON c.professor_uuid = p.user_uuid
+    LEFT JOIN (
+      SELECT course_id, COUNT(*) as enrolled_count
+      FROM enrollments
+      WHERE status = 'active'
+      GROUP BY course_id
+    ) e ON c.id = e.course_id
     WHERE c.department = $1
     ORDER BY c.created_at DESC
     LIMIT $2 OFFSET $3

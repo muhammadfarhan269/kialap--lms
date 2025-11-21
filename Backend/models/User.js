@@ -54,4 +54,10 @@ const updatePassword = async (userId, hashedPassword) => {
   await pool.query(query, [hashedPassword, userId]);
 };
 
-module.exports = { createUser, findUserByEmail, updateRefreshToken, findUserByRefreshToken, clearRefreshToken, updateResetToken, findUserByResetToken, clearResetToken, updatePassword };
+const findUserByUsername = async (username) => {
+  const query = 'SELECT * FROM users WHERE username = $1';
+  const result = await pool.query(query, [username]);
+  return result.rows[0];
+};
+
+module.exports = { createUser, findUserByEmail, updateRefreshToken, findUserByRefreshToken, clearRefreshToken, updateResetToken, findUserByResetToken, clearResetToken, updatePassword, findUserByUsername };

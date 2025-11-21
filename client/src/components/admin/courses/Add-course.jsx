@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { addCourse, clearError, clearSuccess } from '../../../redux/slices/courseSlice';
 import { fetchProfessors } from '../../../redux/slices/professorSlice';
+import { fetchDepartments } from '../../../redux/slices/departmentSlice';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import '../../../css/dashboard.css';
@@ -12,12 +13,13 @@ const AddCourse = () => {
 
   const { loading, error, success } = useSelector((state) => state.course);
   const { professors } = useSelector((state) => state.professor);
+  const { departments, loading: departmentsLoading } = useSelector((state) => state.department);
 
   const [formData, setFormData] = useState({
     courseCode: '',
     courseName: '',
     department: '',
-    professorId: '',
+    professorUuid: '',
     description: '',
     credits: 3,
     duration: 16,
@@ -45,6 +47,7 @@ const AddCourse = () => {
 
   useEffect(() => {
     dispatch(fetchProfessors());
+    dispatch(fetchDepartments());
   }, [dispatch]);
 
   useEffect(() => {
@@ -123,7 +126,7 @@ const AddCourse = () => {
       courseCode: '',
       courseName: '',
       department: '',
-      professorId: '',
+      professorUuid: '',
       description: '',
       credits: 3,
       duration: 16,
@@ -232,34 +235,34 @@ const AddCourse = () => {
                       value={formData.department}
                       onChange={handleInputChange}
                       required
+                      disabled={departmentsLoading}
                     >
-                      <option value="">Select Department</option>
-                      <option value="cs">Computer Science</option>
-                      <option value="math">Mathematics</option>
-                      <option value="physics">Physics</option>
-                      <option value="chemistry">Chemistry</option>
-                      <option value="biology">Biology</option>
-                      <option value="business">Business Administration</option>
-                      <option value="engineering">Engineering</option>
-                      <option value="english">English Literature</option>
+                      <option value="">
+                        {departmentsLoading ? 'Loading departments...' : 'Select Department'}
+                      </option>
+                      {departments && departments.map((dept) => (
+                        <option key={dept.id} value={dept.departmentName}>
+                          {dept.departmentName}
+                        </option>
+                      ))}
                     </select>
                     <div className="invalid-feedback">Please select a department.</div>
                   </div>
                   <div>
-                    <label htmlFor="professorId" className="form-label text-start">
+                    <label htmlFor="professorUuid" className="form-label text-start">
                       Professor <span className="text-danger">*</span>
                     </label>
                     <select
                       className="form-select"
-                      id="professorId"
-                      name="professorId"
-                      value={formData.professorId}
+                      id="professorUuid"
+                      name="professorUuid"
+                      value={formData.professorUuid}
                       onChange={handleInputChange}
                       required
                     >
                       <option value="">Select Professor</option>
                       {professors.map((professor) => (
-                        <option key={professor.id} value={professor.id}>
+                        <option key={professor.id} value={professor.userUuid}>
                           {professor.name}
                         </option>
                       ))}

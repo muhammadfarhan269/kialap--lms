@@ -1,8 +1,9 @@
 const pool = require('../config/dbConnection');
 const bcrypt = require('bcryptjs');
 
-const createProfessor = async (professorData) => {
+const createProfessor = async (professorData, client = pool) => {
   const {
+    userUuid,
     title,
     firstName,
     lastName,
@@ -37,13 +38,13 @@ const createProfessor = async (professorData) => {
 
   const query = `
     INSERT INTO professors (
-      title, first_name, last_name, email, phone, date_of_birth, gender, address,
+      user_uuid, title, first_name, last_name, email, phone, date_of_birth, gender, address,
       employee_id, department, position, employment_type, joining_date, salary,
       highest_degree, specialization, university, graduation_year, experience,
       office, office_hours, subjects, bio, profile_image, username, password, account_status, role
     ) VALUES (
       $1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, $15, $16,
-      $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28
+      $17, $18, $19, $20, $21, $22, $23, $24, $25, $26, $27, $28, $29
     )
     RETURNING id, title, first_name, last_name, email, phone, date_of_birth,
              gender, address, employee_id, department, position, employment_type,
@@ -53,18 +54,23 @@ const createProfessor = async (professorData) => {
   `;
 
   const values = [
-    title, firstName, lastName, email, phone, dateOfBirth, gender, address,
+    userUuid, title, firstName, lastName, email, phone, dateOfBirth, gender, address,
     employeeId, department, position, employmentType, joiningDate, salary,
     highestDegree, specialization, university, graduationYear, experience,
     office, officeHours, subjects, bio, profileImage, username, hashedPassword, accountStatus, role
   ];
 
-  const result = await pool.query(query, values);
+  const result = await client.query(query, values);
   return result.rows[0];
 };
 
 const findProfessorById = async (id) => {
-  const query = 'SELECT * FROM professors WHERE id = $1';
+  const query = `
+    SELECT p.*, u.first_name, u.last_name, u.email, u.role, u.department
+    FROM professors p
+    JOIN users u ON p.user_uuid = u.uuid
+    WHERE p.id = $1
+  `;
   const result = await pool.query(query, [id]);
   return result.rows[0];
 };
@@ -87,10 +93,22 @@ const findProfessorByUsername = async (username) => {
   return result.rows[0];
 };
 
+const findProfessorByUserUuid = async (userUuid) => {
+  const query = `
+    SELECT p.*, u.first_name, u.last_name, u.email, u.role, u.department
+    FROM professors p
+    JOIN users u ON p.user_uuid = u.uuid
+    WHERE p.user_uuid = $1
+  `;
+  const result = await pool.query(query, [userUuid]);
+  return result.rows[0];
+};
+
 const getAllProfessors = async (limit = 10, offset = 0) => {
   const query = `
     SELECT
       id,
+      user_uuid as "userUuid",
       CONCAT(COALESCE(title, ''), ' ', first_name, ' ', last_name) as name,
       title,
       first_name as "firstName",
@@ -149,6 +167,7 @@ module.exports = {
   findProfessorByEmail,
   findProfessorByEmployeeId,
   findProfessorByUsername,
+  findProfessorByUserUuid,
   getAllProfessors,
   updateProfessor,
   deleteProfessor

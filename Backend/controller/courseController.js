@@ -34,7 +34,7 @@ const upload = multer({
   { name: 'courseCode', maxCount: 1 },
   { name: 'courseName', maxCount: 1 },
   { name: 'department', maxCount: 1 },
-  { name: 'professorId', maxCount: 1 },
+  { name: 'professorUuid', maxCount: 1 },
   { name: 'description', maxCount: 1 },
   { name: 'credits', maxCount: 1 },
   { name: 'duration', maxCount: 1 },
@@ -64,7 +64,7 @@ const createCourse = asyncHandler(async (req, res) => {
     courseCode,
     courseName,
     department,
-    professorId,
+    professorUuid,
     description,
     credits,
     duration,
@@ -99,7 +99,7 @@ const createCourse = asyncHandler(async (req, res) => {
     res.status(400);
     throw new Error('Department is required');
   }
-  if (!professorId || professorId === '') {
+  if (!professorUuid || professorUuid.trim() === '') {
     res.status(400);
     throw new Error('Professor is required');
   }
@@ -141,7 +141,7 @@ const createCourse = asyncHandler(async (req, res) => {
     courseCode,
     courseName,
     department,
-    professorId: professorId && professorId !== '' ? parseIntSafe(professorId, null) : null,
+    professorUuid: professorUuid && professorUuid !== '' ? professorUuid : null,
     courseDescription: description,
     credits: parseIntSafe(credits, 3),
     duration: parseIntSafe(duration, 16),

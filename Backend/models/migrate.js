@@ -57,11 +57,79 @@ async function runMigration(closePool = true) {
     await pool.query(professorsSql);
     console.log('Professors table created successfully!');
 
+    // Alter professors table to add user_uuid if not exists
+    console.log('Altering professors table...');
+    await pool.query(`DO $$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'professors' AND column_name = 'user_uuid') THEN
+            ALTER TABLE professors ADD COLUMN user_uuid UUID;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE table_schema = 'public' AND table_name = 'professors' AND constraint_name = 'fk_professor_user_uuid') THEN
+            ALTER TABLE professors ADD CONSTRAINT fk_professor_user_uuid FOREIGN KEY (user_uuid) REFERENCES users(uuid) ON DELETE CASCADE;
+        END IF;
+        IF NOT EXISTS (SELECT 1 FROM information_schema.table_constraints WHERE table_schema = 'public' AND table_name = 'professors' AND constraint_name = 'unique_professor_user_uuid') THEN
+            ALTER TABLE professors ADD CONSTRAINT unique_professor_user_uuid UNIQUE(user_uuid);
+        END IF;
+    END
+    $$;`);
+    console.log('Professors table altered successfully!');
+
+    // Update existing professors to link with users via UUID
+    console.log('Updating existing professor records...');
+    const updateProfessorsQuery = `
+      UPDATE professors
+      SET user_uuid = users.uuid
+      FROM users
+      WHERE professors.email = users.email AND professors.user_uuid IS NULL;
+    `;
+    await pool.query(updateProfessorsQuery);
+    console.log('Existing professors updated with user_uuid!');
+
     // Read and execute courses table SQL
     const coursesSqlFilePath = path.join(__dirname, 'createCoursesTable.sql');
     const coursesSql = fs.readFileSync(coursesSqlFilePath, 'utf8');
     await pool.query(coursesSql);
     console.log('Courses table created successfully!');
+
+    // Alter courses table to add uuid if not exists
+    console.log('Altering courses table to add uuid...');
+    await pool.query(`DO $$
+    BEGIN
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'courses' AND column_name = 'uuid') THEN
+            ALTER TABLE courses ADD COLUMN uuid UUID DEFAULT gen_random_uuid() UNIQUE;
+            -- Update existing courses with uuid
+            UPDATE courses SET uuid = gen_random_uuid() WHERE uuid IS NULL;
+        END IF;
+    END
+    $$;`);
+    console.log('Courses table altered successfully!');
+
+    // Alter courses table to change professor_id to professor_uuid
+    console.log('Altering courses table to use professor_uuid...');
+    await pool.query(`DO $$
+    BEGIN
+        -- Rename column if it exists as professor_id
+        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'courses' AND column_name = 'professor_id') THEN
+            -- Drop the old foreign key constraint
+            ALTER TABLE courses DROP CONSTRAINT IF EXISTS courses_professor_id_fkey;
+            -- Add temporary column
+            ALTER TABLE courses ADD COLUMN temp_prof_uuid UUID;
+            -- Update temporary column with user_uuid
+            UPDATE courses SET temp_prof_uuid = professors.user_uuid FROM professors WHERE courses.professor_id = professors.id;
+            -- Drop old column
+            ALTER TABLE courses DROP COLUMN professor_id;
+            -- Rename temporary column
+            ALTER TABLE courses RENAME COLUMN temp_prof_uuid TO professor_uuid;
+            -- Add foreign key to professors(user_uuid)
+            ALTER TABLE courses ADD CONSTRAINT fk_course_professor_uuid FOREIGN KEY (professor_uuid) REFERENCES professors(user_uuid) ON DELETE SET NULL;
+        ELSIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'courses' AND column_name = 'professor_uuid') THEN
+            -- If neither professor_id nor professor_uuid exists, add professor_uuid
+            ALTER TABLE courses ADD COLUMN professor_uuid UUID;
+            ALTER TABLE courses ADD CONSTRAINT fk_course_professor_uuid FOREIGN KEY (professor_uuid) REFERENCES professors(user_uuid) ON DELETE SET NULL;
+        END IF;
+    END
+    $$;`);
+    console.log('Courses table professor_uuid altered successfully!');
 
     const assetsSqlFilePath = path.join(__dirname, 'createAssetsTable.sql');
     const assetsSql = fs.readFileSync(assetsSqlFilePath, 'utf8');
