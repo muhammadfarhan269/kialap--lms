@@ -104,32 +104,23 @@ async function runMigration(closePool = true) {
     $$;`);
     console.log('Courses table altered successfully!');
 
-    // Alter courses table to change professor_id to professor_uuid
-    console.log('Altering courses table to use professor_uuid...');
-    await pool.query(`DO $$
+    // Read and execute assignments table SQL
+    const assignmentsSqlFilePath = path.join(__dirname, 'createAssignmentsTable.sql');
+    const assignmentsSql = fs.readFileSync(assignmentsSqlFilePath, 'utf8');
+    await pool.query(assignmentsSql);
+    console.log('Assignments table created successfully!');
+
+    // Alter courses table to ensure professor_uuid exists
+    console.log('Ensuring courses table has professor_uuid column with foreign key...');
+await pool.query(`DO $$
     BEGIN
-        -- Rename column if it exists as professor_id
-        IF EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'courses' AND column_name = 'professor_id') THEN
-            -- Drop the old foreign key constraint
-            ALTER TABLE courses DROP CONSTRAINT IF EXISTS courses_professor_id_fkey;
-            -- Add temporary column
-            ALTER TABLE courses ADD COLUMN temp_prof_uuid UUID;
-            -- Update temporary column with user_uuid
-            UPDATE courses SET temp_prof_uuid = professors.user_uuid FROM professors WHERE courses.professor_id = professors.id;
-            -- Drop old column
-            ALTER TABLE courses DROP COLUMN professor_id;
-            -- Rename temporary column
-            ALTER TABLE courses RENAME COLUMN temp_prof_uuid TO professor_uuid;
-            -- Add foreign key to professors(user_uuid)
-            ALTER TABLE courses ADD CONSTRAINT fk_course_professor_uuid FOREIGN KEY (professor_uuid) REFERENCES professors(user_uuid) ON DELETE SET NULL;
-        ELSIF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'courses' AND column_name = 'professor_uuid') THEN
-            -- If neither professor_id nor professor_uuid exists, add professor_uuid
+        IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_schema = 'public' AND table_name = 'courses' AND column_name = 'professor_uuid') THEN
             ALTER TABLE courses ADD COLUMN professor_uuid UUID;
             ALTER TABLE courses ADD CONSTRAINT fk_course_professor_uuid FOREIGN KEY (professor_uuid) REFERENCES professors(user_uuid) ON DELETE SET NULL;
         END IF;
     END
     $$;`);
-    console.log('Courses table professor_uuid altered successfully!');
+    console.log('Courses table professor_uuid ensured successfully!');
 
     const assetsSqlFilePath = path.join(__dirname, 'createAssetsTable.sql');
     const assetsSql = fs.readFileSync(assetsSqlFilePath, 'utf8');
@@ -228,12 +219,37 @@ async function dropAndCreateEnrollments() {
 
 // Check command line arguments
 const command = process.argv[2];
+
+async function dropAndCreateAssignments() {
+  try {
+    console.log("Dropping and recreating assignments table...");
+
+    // Drop assignments table if exists cascading
+    await pool.query('DROP TABLE IF EXISTS assignments CASCADE;');
+    console.log("Assignments table dropped!");
+
+    // Read and execute assignments table creation SQL
+    const assignmentsSqlFilePath = path.join(__dirname, 'createAssignmentsTable.sql');
+    const assignmentsSql = fs.readFileSync(assignmentsSqlFilePath, 'utf8');
+
+    await pool.query(assignmentsSql);
+    console.log("Assignments table recreated!");
+
+  } catch (err) {
+    console.error("Error in assignments migration:", err);
+  } finally {
+    await pool.end();
+  }
+}
+
 if (command === 'refresh') {
   refreshMigration();
 } else if (command === 'rollback') {
   rollbackMigration();
-}else if (command === 'enrollments') {
+} else if (command === 'enrollments') {
   dropAndCreateEnrollments();
+} else if (command === 'assignments') {
+  dropAndCreateAssignments();
 } else {
   runMigration();
 }

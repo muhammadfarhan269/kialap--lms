@@ -6,6 +6,7 @@ import courseReducer from './slices/courseSlice';
 import assetsReducer from './slices/assetsSlice';
 import departmentReducer from './slices/departmentSlice';
 import enrollmentReducer from './slices/enrollmentSlice';
+import assignmentReducer from './slices/assignmentSlice';
 
 const store = configureStore({
   reducer: {
@@ -16,6 +17,7 @@ const store = configureStore({
     assets: assetsReducer,
     department: departmentReducer,
     enrollment: enrollmentReducer,
+    assignments: assignmentReducer,
   },
 });
 

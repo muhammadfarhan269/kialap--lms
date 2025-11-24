@@ -89,21 +89,29 @@ const unenrollStudent = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Get student's enrollments
-// @route   GET /api/enrollments/student
-// @access  Private/Student
 const getStudentEnrollments = asyncHandler(async (req, res) => {
-  if (req.user.role !== 'student') {
-    res.status(403);
-    throw new Error('Access denied. Student role required.');
-  }
+    try {
+        console.log('getStudentEnrollments invoked. User:', req.user);
+        if (req.user.role !== 'student') {
+            res.status(403);
+            throw new Error('Access denied. Student role required.');
+        }
+        if (!req.user.uuid) {
+            res.status(400);
+            throw new Error('User UUID missing in token.');
+        }
 
-  const enrollments = await Enrollment.getEnrollmentsByUserUuid(req.user.uuid);
+        const enrollments = await Enrollment.getEnrollmentsByUserUuid(req.user.uuid);
 
-  res.status(200).json({
-    success: true,
-    data: enrollments
-  });
+        res.status(200).json({
+            success: true,
+            data: enrollments
+        });
+    } catch (error) {
+        console.error('Error in getStudentEnrollments:', error);
+        res.status(res.statusCode !== 200 ? res.statusCode : 500);
+        res.json({ message: error.message || 'Internal Server Error' });
+    }
 });
 
 // @desc    Get course enrollments (for professors/admins)

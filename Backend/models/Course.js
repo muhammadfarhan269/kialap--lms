@@ -87,6 +87,7 @@ const findCourseById = async (id) => {
       c.lab_fee as "labFee",
       c.material_fee as "materialFee",
       c.total_fee as "totalFee",
+      c.professor_uuid as "professorUuid",
       c.created_at as "createdAt",
       c.updated_at as "updatedAt",
       CONCAT(COALESCE(p.title, ''), ' ', COALESCE(p.first_name, ''), ' ', COALESCE(p.last_name, '')) as "professorName",

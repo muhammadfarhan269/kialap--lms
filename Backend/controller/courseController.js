@@ -3,6 +3,8 @@ const asyncHandler = require('express-async-handler');
 const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
+const pool = require('../config/dbConnection'); 
+
 
 // Configure multer for course image uploads
 const storage = multer.diskStorage({
@@ -279,25 +281,57 @@ const deleteCourse = asyncHandler(async (req, res) => {
   });
 });
 
-// @desc    Get courses by professor
-// @route   GET /api/courses/professor/:professorId
-// @access  Private
 const getCoursesByProfessor = asyncHandler(async (req, res) => {
-  const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
-  const offset = (page - 1) * limit;
-
-  const courses = await Course.getCoursesByProfessor(req.params.professorId, limit, offset);
-
-  res.status(200).json({
-    success: true,
-    data: courses,
-    pagination: {
-      page,
-      limit,
-      total: courses.length
+  try {
+    const professorId = req.params.professorId;
+    if (!professorId || professorId.trim() === '') {
+      console.error('Validation error: Professor ID is missing or empty');
+      res.status(400);
+      throw new Error('Professor ID is required and cannot be empty');
     }
-  });
+
+    console.log('Fetching courses for professor:', professorId);
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    // Additional validation for professorId format (UUID v4 regex)
+    const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
+    if (!uuidV4Regex.test(professorId)) {
+      console.error('Validation error: Invalid Professor ID format', professorId);
+      res.status(400);
+      throw new Error('Invalid Professor ID format');
+    }
+
+    // Check if professor exists in the database
+    const professorCheck = await pool.query('SELECT 1 FROM professors WHERE user_uuid = $1 LIMIT 1', [professorId]);
+    if (professorCheck.rowCount === 0) {
+      console.error('Professor not found for ID:', professorId);
+      res.status(404);
+      throw new Error('Professor not found');
+    }
+
+    const courses = await Course.getCoursesByProfessor(professorId, limit, offset);
+
+    console.log(`Courses fetched for professor ${professorId}:`, courses.length);
+
+    res.status(200).json({
+      success: true,
+      data: courses,
+      pagination: {
+        page,
+        limit,
+        total: courses.length
+      }
+    });
+  } catch (error) {
+    console.error('Error fetching courses by professor:', error);
+    res.status(res.statusCode === 200 ? 500 : res.statusCode).json({
+      success: false,
+      message: error.message || 'Failed to fetch courses by professor'
+    });
+  }
 });
 
 // @desc    Get courses by department

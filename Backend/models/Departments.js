@@ -17,7 +17,6 @@ class Department {
         this.currentStudents = data.currentstudents;
         this.maxCapacity = data.maxcapacity;
         this.facultyCount = data.facultycount;
-        this.annualBudget = data.annualbudget;
         this.budgetYear = data.budgetyear;
         this.allowOnlineApplication = data.allowonlineapplication;
         this.enableNotifications = data.enablenotifications;
@@ -90,21 +89,47 @@ class Department {
 
     // Update department
     static async update(id, updateData) {
+        const camelToDbMap = {
+            departmentName: 'departmentname',
+            departmentCode: 'departmentcode',
+            establishedYear: 'establishedyear',
+            departmentStatus: 'departmentstatus',
+            description: 'description',
+            headName: 'headname',
+            headTitle: 'headtitle',
+            headEmail: 'heademail',
+            headPhone: 'headphone',
+            officeLocation: 'officelocation',
+            appointmentDate: 'appointmentdate',
+            currentStudents: 'currentstudents',
+            maxCapacity: 'maxcapacity',
+            facultyCount: 'facultycount',
+            budgetYear: 'budgetyear',
+            allowOnlineApplication: 'allowonlineapplication',
+            enableNotifications: 'enablenotifications',
+            publiclyVisible: 'publiclyvisible',
+            departmentWebsite: 'departmentwebsite',
+            socialMedia: 'socialmedia'
+        };
+
         const fields = [];
         const values = [];
         let paramIndex = 1;
 
         Object.keys(updateData).forEach(key => {
             if (updateData[key] !== undefined) {
-                fields.push(`${key} = $${paramIndex}`);
-                values.push(updateData[key]);
-                paramIndex++;
+                const dbKey = camelToDbMap[key];
+                if (dbKey) {
+                    fields.push(`${dbKey} = $${paramIndex}`);
+                    values.push(updateData[key]);
+                    paramIndex++;
+                }
             }
         });
 
         if (fields.length === 0) return false;
 
-        fields.push(`updatedAt = CURRENT_TIMESTAMP`);
+        fields.push(`updatedat = CURRENT_TIMESTAMP`);
         const sql = `UPDATE departments SET ${fields.join(', ')} WHERE id = $${paramIndex}`;
         values.push(id);
 

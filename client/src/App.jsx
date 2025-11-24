@@ -5,6 +5,8 @@ import 'bootstrap/dist/js/bootstrap.bundle.min.js'
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom'
 import { Provider } from 'react-redux'
 import store from './redux/store'
+import { ToastContainer } from 'react-toastify';
+import 'react-toastify/dist/ReactToastify.css';
 import RegisterPage from './pages/auth/RegisterPage'
 import LoginPage from './pages/auth/LoginPage'
 import ForgotPasswordPage from './pages/auth/ForgotPasswordPage'
@@ -34,11 +36,15 @@ import AttendancePage from './pages/Students/AttendancePage'
 import AssignmentPage from './pages/Students/AssignmentPage'
 import GradesPage from './pages/Students/GradesPage'
 import AssignedCoursesPage from './pages/Professors/Assigned-CoursesPage'
+import ProfessorGradesPage from './pages/Professors/GradesPage'
+import AddAssignmentPage from './pages/Professors/Add-AssignmentPage';
+
 
 function App() {
 
   return (
       <Provider store={store}>
+        <ToastContainer />
         <Router>
           <Routes>
         <Route path="/" element={<LoginPage />} />
@@ -60,11 +66,15 @@ function App() {
         <Route path="/add-student" element={<ProtectedRoute allowedRoles={['administrator']}><AddStudentPage /></ProtectedRoute>} />
         <Route path="/edit-student/:id" element={<ProtectedRoute allowedRoles={['administrator']}><EditStudentPage /></ProtectedRoute>} />
         <Route path="/student-profile" element={<ProtectedRoute><Layout><div>Student Profile</div></Layout></ProtectedRoute>} />
+
         <Route path="/enroll-course" element={<ProtectedRoute allowedRoles={['student']}><EnrollCoursePage /></ProtectedRoute>} />
         <Route path="/attendance" element={<ProtectedRoute allowedRoles={['student']}><AttendancePage /></ProtectedRoute>} />
         <Route path="/assignments" element={<ProtectedRoute allowedRoles={['student']}><AssignmentPage /></ProtectedRoute>} />
         <Route path="/grades" element={<ProtectedRoute allowedRoles={['student']}><GradesPage /></ProtectedRoute>} />
         <Route path="/assigned-courses" element={<ProtectedRoute allowedRoles={['professor']}><AssignedCoursesPage /></ProtectedRoute>} />
+
+        <Route path="/professor-grades" element={<ProtectedRoute allowedRoles={['professor']}><ProfessorGradesPage /></ProtectedRoute>} />
+        <Route path="/student-assignments" element={<ProtectedRoute allowedRoles={['professor']}><AddAssignmentPage /></ProtectedRoute>} />
         <Route path="/courses" element={<ProtectedRoute allowedRoles={['administrator']}><AllCoursePage /></ProtectedRoute>} />
         <Route path="/all-courses" element={<ProtectedRoute allowedRoles={['administrator']}><AllCoursePage /></ProtectedRoute>} />
         <Route path="/add-course" element={<ProtectedRoute allowedRoles={['administrator']}><AddCoursesPage /></ProtectedRoute>} />

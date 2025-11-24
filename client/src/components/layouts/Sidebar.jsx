@@ -88,7 +88,7 @@ const Sidebar = ({ isOpen, collapsed = false }) => {
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink className="nav-link" to="/grades">
+                  <NavLink className="nav-link" to="/professor-grades">
                     <i className="bi bi-graph-up"></i>
                     <span>Grades</span>
                   </NavLink>

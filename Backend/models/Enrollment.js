@@ -56,7 +56,7 @@ const getEnrollmentsByUserUuid = async (userUuid) => {
       CONCAT(p.title, ' ', p.first_name, ' ', p.last_name) as "professorName"
     FROM enrollments e
     JOIN courses c ON e.course_id = c.id
-    LEFT JOIN professors p ON c.professor_id = p.id
+    LEFT JOIN professors p ON c.professor_uuid = p.user_uuid
     WHERE e.user_uuid = $1
     ORDER BY e.enrollment_date DESC;
   `;

@@ -19,7 +19,6 @@ const EditDepartment = () => {
     headEmail: '',
     headPhone: '',
     officeLocation: '',
-    annualBudget: '',
     description: '',
   });
 
@@ -43,7 +42,6 @@ const EditDepartment = () => {
         headEmail: currentDepartment.headEmail || '',
         headPhone: currentDepartment.headPhone || '',
         officeLocation: currentDepartment.officeLocation || '',
-        annualBudget: currentDepartment.annualBudget || '',
         description: currentDepartment.description || '',
       });
       setIsFormLoaded(true);
@@ -244,19 +242,6 @@ const EditDepartment = () => {
                         name="officeLocation"
                         value={formData.officeLocation}
                         onChange={handleInputChange}
-                      />
-                    </div>
-
-                    <div className="mb-3">
-                      <label htmlFor="deptBudget" className="form-label">Annual Budget ($)</label>
-                      <input
-                        type="number"
-                        className="form-control"
-                        id="deptBudget"
-                        name="annualBudget"
-                        value={formData.annualBudget}
-                        onChange={handleInputChange}
-                        min="0"
                       />
                     </div>
 
