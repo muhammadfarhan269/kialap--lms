@@ -121,18 +121,29 @@ const updateAssignmentStatus = async (id, professorUuid, status) => {
 
 // Update assignment (general update)
 const updateAssignment = async (id, updateData) => {
+  // Defensive: ensure updateData is a plain object
+  if (!updateData || typeof updateData !== 'object' || Array.isArray(updateData)) {
+    console.warn('updateAssignment received invalid updateData:', updateData);
+    return null;
+  }
+
   const fields = [];
   const values = [];
   let paramIndex = 1;
 
-  Object.keys(updateData).forEach(key => {
-    if (updateData[key] !== undefined) {
-      const dbKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
-      fields.push(`${dbKey} = $${paramIndex}`);
-      values.push(updateData[key]);
-      paramIndex++;
-    }
-  });
+  try {
+    Object.keys(updateData).forEach(key => {
+      if (updateData[key] !== undefined) {
+        const dbKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+        fields.push(`${dbKey} = $${paramIndex}`);
+        values.push(updateData[key]);
+        paramIndex++;
+      }
+    });
+  } catch (err) {
+    console.error('Error processing updateData keys:', err);
+    return null;
+  }
 
   if (fields.length === 0) return null;
 

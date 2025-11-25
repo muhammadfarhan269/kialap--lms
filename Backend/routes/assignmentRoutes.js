@@ -33,7 +33,7 @@ router.get('/:id', getAssignment);
 router.put('/:id/status', verifyRole('professor'), updateAssignmentStatus);
 
 // Update assignment (professor only)
-router.put('/:id', verifyRole('professor'), updateAssignment);
+router.put('/:id', verifyRole('professor'), upload, updateAssignment);
 
 // Delete assignment (professor only)
 router.delete('/:id', verifyRole('professor'), deleteAssignment);

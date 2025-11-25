@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useSearchParams } from 'react-router-dom';
+import { fetchAssignmentById, updateAssignment } from '../../../redux/slices/assignmentSlice';
 import { useDispatch, useSelector } from 'react-redux';
 import { createAssignment, clearError, clearSuccess } from '../../../redux/slices/assignmentSlice';
 import { fetchCoursesByProfessor } from '../../../redux/slices/courseSlice';
@@ -24,18 +26,42 @@ const AddAssignment = () => {
 
   const [filePreview, setFilePreview] = useState(null);
   const fileInputRef = useRef(null);
+  const [searchParams] = useSearchParams();
+  const assignmentId = searchParams.get('id');
+  const [isEditing, setIsEditing] = useState(false);
 
   // Fetch professor's courses on mount
   useEffect(() => {
     if (user?.uuid) {
       dispatch(fetchCoursesByProfessor(user.uuid));
     }
+    // If editing, load assignment
+    if (assignmentId) {
+      setIsEditing(true);
+      dispatch(fetchAssignmentById(assignmentId)).unwrap().then((res) => {
+        const data = res.data || res;
+        if (data) {
+          setFormData(prev => ({
+            ...prev,
+            title: data.title || '',
+            dueDate: data.dueDate ? new Date(data.dueDate).toISOString().slice(0,16) : '',
+            status: data.status || 'Pending',
+            courseId: String(data.courseId || data.course_id || ''),
+          }));
+          if (data.filePath) setFilePreview(data.filePath);
+        }
+      }).catch(() => {});
+    }
   }, [dispatch, user]);
 
   // Handle success/error messages
   useEffect(() => {
     if (success) {
-      toast.success('Assignment created successfully!');
+      if (isEditing) {
+        toast.success('Assignment updated successfully!');
+      } else {
+        toast.success('Assignment created successfully!');
+      }
       navigate('/professor/assignments');
       dispatch(clearSuccess());
     }
@@ -105,9 +131,13 @@ const AddAssignment = () => {
     }
 
     try {
-      await dispatch(createAssignment(formDataToSend)).unwrap();
+      if (isEditing && assignmentId) {
+        await dispatch(updateAssignment({ id: assignmentId, assignmentData: formDataToSend })).unwrap();
+      } else {
+        await dispatch(createAssignment(formDataToSend)).unwrap();
+      }
     } catch (error) {
-      toast.error(error.message || 'Failed to create assignment');
+      toast.error(error.message || 'Failed to create/update assignment');
     }
   };
 
@@ -125,8 +155,8 @@ const AddAssignment = () => {
   return (
     <div className="add-assignment-container">
       <div className="form-wrapper">
-        <h2 className="form-title">Add Assignment</h2>
-        <p className="form-subtitle">Create a new assignment for your students</p>
+        <h2 className="form-title">{isEditing ? 'Edit Assignment' : 'Add Assignment'}</h2>
+        <p className="form-subtitle">{isEditing ? 'Update assignment details' : 'Create a new assignment for your students'}</p>
 
         <form onSubmit={handleSubmit} className="assignment-form">
           {/* Assignment Title */}
@@ -252,7 +282,7 @@ const AddAssignment = () => {
               className="btn btn-primary"
               disabled={loading}
             >
-              {loading ? 'Creating Assignment...' : 'Create Assignment'}
+              {loading ? (isEditing ? 'Updating Assignment...' : 'Creating Assignment...') : (isEditing ? 'Update Assignment' : 'Create Assignment')}
             </button>
             <button
               type="button"

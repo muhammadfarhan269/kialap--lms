@@ -36,12 +36,27 @@ const upload = multer({
 }).single('assignmentFile');
 
 // Wrap upload so multer errors are forwarded to Express error handler
+// Also ensure req.body exists for form fields
 const uploadMiddleware = (req, res, next) => {
+  // Initialize req.body if not present (Multer should do this, but be defensive)
+  req.body = req.body || {};
+  
   upload(req, res, (err) => {
     if (err) {
       // Multer error or file validation error
       return next(err);
     }
+    
+    // After Multer, ensure req.body is a plain object with parsed fields
+    if (!req.body || typeof req.body !== 'object') {
+      req.body = {};
+    }
+    
+    console.log('After Multer - req.body:', req.body);
+    if (req.file) {
+      console.log('After Multer - file:', req.file.fieldname, req.file.filename);
+    }
+    
     next();
   });
 };
@@ -200,8 +215,24 @@ const updateAssignment = asyncHandler(async (req, res) => {
     throw new Error('You are not authorized to update this assignment');
   }
 
+  // Prepare update data (support FormData file uploads)
+  const updateData = { ...(req.body || {}) };
+  console.log('updateAssignment handler - req.body:', req.body);
+  console.log('updateAssignment handler - updateData:', updateData);
+  if (req.file) {
+    // add uploaded filename as filePath
+    updateData.filePath = req.file.filename;
+    console.log('Assignment file uploaded (update):', req.file.filename);
+  }
+
+  console.log('Before calling model updateAssignment - final updateData:', updateData);
   // Update assignment
-  const updatedAssignment = await Assignment.updateAssignment(id, req.body);
+  const updatedAssignment = await Assignment.updateAssignment(id, updateData);
+
+  if (!updatedAssignment) {
+    res.status(400);
+    throw new Error('No valid fields provided to update or assignment not found');
+  }
 
   res.status(200).json({
     success: true,

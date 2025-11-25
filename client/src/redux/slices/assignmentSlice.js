@@ -108,6 +108,26 @@ export const updateAssignment = createAsyncThunk(
   'assignment/updateAssignment',
   async ({ id, assignmentData }, { rejectWithValue }) => {
     try {
+      // If assignmentData is a FormData (contains file), use fetch directly and avoid setting Content-Type
+      if (assignmentData instanceof FormData) {
+        const token = localStorage.getItem('accessToken');
+        const response = await fetch(`http://localhost:5000/api/assignments/${id}`, {
+          method: 'PUT',
+          body: assignmentData,
+          credentials: 'include',
+          headers: {
+            ...(token && { Authorization: `Bearer ${token}` }),
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: 'Failed to update assignment' }));
+          throw new Error(errorData.message || 'Failed to update assignment');
+        }
+
+        return response.json();
+      }
+
       return await apiCall(`http://localhost:5000/api/assignments/${id}`, {
         method: 'PUT',
         body: JSON.stringify(assignmentData),
@@ -256,6 +276,9 @@ const assignmentSlice = createSlice({
         if (state.currentAssignment?.id === updatedAssignment.id) {
           state.currentAssignment = updatedAssignment;
         }
+        // Update assignmentsByProfessor and assignmentsByCourse lists if present
+        state.assignmentsByProfessor = state.assignmentsByProfessor.map(a => (a.id === updatedAssignment.id ? updatedAssignment : a));
+        state.assignmentsByCourse = state.assignmentsByCourse.map(a => (a.id === updatedAssignment.id ? updatedAssignment : a));
       })
       .addCase(updateAssignment.rejected, (state, action) => {
         state.loading = false;
@@ -272,6 +295,8 @@ const assignmentSlice = createSlice({
         state.loading = false;
         state.success = true;
         state.assignments = state.assignments.filter(a => a.id !== action.meta.arg);
+        state.assignmentsByProfessor = state.assignmentsByProfessor.filter(a => a.id !== action.meta.arg);
+        state.assignmentsByCourse = state.assignmentsByCourse.filter(a => a.id !== action.meta.arg);
       })
       .addCase(deleteAssignment.rejected, (state, action) => {
         state.loading = false;
