@@ -74,6 +74,7 @@ const ListAssignments = () => {
                 <th>Due Date</th>
                 <th>Status</th>
                 <th>File</th>
+                <th>Submissions</th>
                 <th>Actions</th>
               </tr>
             </thead>
@@ -90,6 +91,15 @@ const ListAssignments = () => {
                     ) : (
                       <span className="muted">—</span>
                     )}
+                  </td>
+                  <td>
+                    <button 
+                      className="btn btn-sm btn-outline-success" 
+                      onClick={() => navigate(`/professor/assignments/${a.id}/submissions`)}
+                      title="View submitted assignments"
+                    >
+                      <i className="bi bi-eye-fill"></i> See Submitted
+                    </button>
                   </td>
                   <td>
                     <button 

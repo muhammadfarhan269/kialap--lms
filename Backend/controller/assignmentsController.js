@@ -484,6 +484,68 @@ const submitAssignment = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Get all submissions for an assignment (professor only)
+// @route   GET /api/assignments/:id/submissions
+// @access  Private/Professor
+const getSubmissionsForAssignment = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const professorUuid = req.user.uuid;
+
+  // Verify assignment exists and belongs to professor
+  const assignment = await Assignment.findAssignmentById(id);
+  if (!assignment) {
+    res.status(404);
+    throw new Error('Assignment not found');
+  }
+
+  if (assignment.professorUuid !== professorUuid && req.user.role !== 'administrator') {
+    res.status(403);
+    throw new Error('You are not authorized to view submissions for this assignment');
+  }
+
+  // Ensure submissions table exists
+  const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS submissions (
+      id SERIAL PRIMARY KEY,
+      assignment_id INTEGER REFERENCES assignments(id) ON DELETE CASCADE,
+      student_uuid UUID,
+      file_path TEXT,
+      status VARCHAR(50),
+      submitted_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+  await pool.query(createTableQuery);
+
+  // Get all submissions for this assignment with student details
+  const query = `
+    SELECT 
+      s.id,
+      s.assignment_id as "assignmentId",
+      s.student_uuid as "studentUuid",
+      s.file_path as "filePath",
+      s.status,
+      s.submitted_at as "submittedAt",
+      u.full_name as "studentName",
+      u.email as "studentEmail",
+      st.enrollment_id as "studentId"
+    FROM submissions s
+    LEFT JOIN users u ON s.student_uuid = u.uuid
+    LEFT JOIN students st ON s.student_uuid = st.uuid
+    WHERE s.assignment_id = $1
+    ORDER BY s.submitted_at DESC;
+  `;
+
+  const result = await pool.query(query, [id]);
+
+  res.status(200).json({
+    success: true,
+    data: {
+      assignment: assignment,
+      submissions: result.rows
+    }
+  });
+});
+
 module.exports = {
   createAssignment,
   getAssignmentsByProfessor,

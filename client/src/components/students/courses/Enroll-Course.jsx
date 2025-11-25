@@ -140,21 +140,6 @@ const EnrollCourse = () => {
             </div>
           </div>
         </div>
-        <div className="col-md-6">
-          <div className="card bg-success text-white">
-            <div className="card-body">
-              <div className="d-flex align-items-center">
-                <div className="me-3">
-                  <i className="bi bi-people fs-1"></i>
-                </div>
-                <div>
-                  <h5 className="card-title mb-1">Total Enrolled Students</h5>
-                  <h2 className="mb-0">{totalEnrolledStudents}</h2>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
       </div>
 
       {/* Success/Error Messages */}

@@ -39,6 +39,7 @@ import AssignedCoursesPage from './pages/Professors/Assigned-CoursesPage'
 import ProfessorGradesPage from './pages/Professors/GradesPage'
 import AddAssignmentPage from './pages/Professors/Add-AssignmentPage';
 import ListAssignmentsPage from './pages/Professors/List-AssignmentsPage';
+import ViewSubmittedAssignmentsPage from './pages/Professors/View-SubmitedAssignmentsPage';
 
 
 function App() {
@@ -77,6 +78,7 @@ function App() {
         <Route path="/professor-grades" element={<ProtectedRoute allowedRoles={['professor']}><ProfessorGradesPage /></ProtectedRoute>} />
         <Route path="/student-assignments" element={<ProtectedRoute allowedRoles={['professor']}><AddAssignmentPage /></ProtectedRoute>} />
         <Route path="/professor/assignments" element={<ProtectedRoute allowedRoles={['professor']}><ListAssignmentsPage /></ProtectedRoute>} />
+        <Route path="/professor/assignments/:assignmentId/submissions" element={<ProtectedRoute allowedRoles={['professor']}><ViewSubmittedAssignmentsPage /></ProtectedRoute>} />
         <Route path="/add-assignment" element={<ProtectedRoute allowedRoles={['professor']}><AddAssignmentPage /></ProtectedRoute>} />
         <Route path="/courses" element={<ProtectedRoute allowedRoles={['administrator']}><AllCoursePage /></ProtectedRoute>} />
         <Route path="/all-courses" element={<ProtectedRoute allowedRoles={['administrator']}><AllCoursePage /></ProtectedRoute>} />

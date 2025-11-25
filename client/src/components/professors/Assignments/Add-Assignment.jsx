@@ -155,7 +155,17 @@ const AddAssignment = () => {
   return (
     <div className="add-assignment-container">
       <div className="form-wrapper">
-        <h2 className="form-title">{isEditing ? 'Edit Assignment' : 'Add Assignment'}</h2>
+        <div className="form-header">
+          <h2 className="form-title">{isEditing ? 'Edit Assignment' : 'Add Assignment'}</h2>
+          <button 
+            type="button"
+            className="close-btn"
+            onClick={() => navigate('/professor/assignments')}
+            title="Close"
+          >
+            ×
+          </button>
+        </div>
         <p className="form-subtitle">{isEditing ? 'Update assignment details' : 'Create a new assignment for your students'}</p>
 
         <form onSubmit={handleSubmit} className="assignment-form">
@@ -310,6 +320,39 @@ const AddAssignment = () => {
           padding: 30px;
           max-width: 600px;
           margin: 0 auto;
+        }
+
+        .form-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 10px;
+          position: relative;
+        }
+
+        .close-btn {
+          background: transparent;
+          border: none;
+          font-size: 28px;
+          cursor: pointer;
+          color: #666;
+          padding: 0;
+          width: 32px;
+          height: 32px;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 4px;
+          transition: all 0.2s;
+        }
+
+        .close-btn:hover {
+          color: #333;
+          background-color: #f0f0f0;
+        }
+
+        .close-btn:active {
+          background-color: #e0e0e0;
         }
 
         .loading-text {

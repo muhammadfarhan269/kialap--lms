@@ -10,7 +10,8 @@ const {
   getAssignmentsByCourse,
   upload,
   submissionUpload,
-  submitAssignment
+  submitAssignment,
+  getSubmissionsForAssignment
 } = require('../controller/assignmentsController');
 
 const verifyJWT = require('../middleware/verifyJWT');
@@ -27,6 +28,9 @@ router.get('/professor/:professorUuid', getAssignmentsByProfessor);
 
 // Get assignments by course
 router.get('/course/:courseId', getAssignmentsByCourse);
+
+// Get submissions for an assignment (professor only)
+router.get('/:id/submissions', getSubmissionsForAssignment);
 
 // Student submit assignment (authenticated students)
 router.post('/:id/submit', submissionUpload, submitAssignment);
