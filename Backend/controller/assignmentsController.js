@@ -525,12 +525,13 @@ const getSubmissionsForAssignment = asyncHandler(async (req, res) => {
       s.file_path as "filePath",
       s.status,
       s.submitted_at as "submittedAt",
-      u.full_name as "studentName",
+      u.first_name as "studentFirstName",
+      u.last_name as "studentLastName",
       u.email as "studentEmail",
-      st.enrollment_id as "studentId"
+      st.student_id as "studentId"
     FROM submissions s
     LEFT JOIN users u ON s.student_uuid = u.uuid
-    LEFT JOIN students st ON s.student_uuid = st.uuid
+    LEFT JOIN students st ON s.student_uuid = st.user_uuid
     WHERE s.assignment_id = $1
     ORDER BY s.submitted_at DESC;
   `;
@@ -555,6 +556,7 @@ module.exports = {
   deleteAssignment,
   getAssignmentsByCourse,
   submitAssignment,
+  getSubmissionsForAssignment,
   upload: uploadMiddleware,
   submissionUpload: submissionUploadMiddleware
 };
