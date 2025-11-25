@@ -75,6 +75,8 @@ function App() {
 
         <Route path="/professor-grades" element={<ProtectedRoute allowedRoles={['professor']}><ProfessorGradesPage /></ProtectedRoute>} />
         <Route path="/student-assignments" element={<ProtectedRoute allowedRoles={['professor']}><AddAssignmentPage /></ProtectedRoute>} />
+        <Route path="/professor/assignments" element={<ProtectedRoute allowedRoles={['professor']}><AddAssignmentPage /></ProtectedRoute>} />
+        <Route path="/add-assignment" element={<ProtectedRoute allowedRoles={['professor']}><AddAssignmentPage /></ProtectedRoute>} />
         <Route path="/courses" element={<ProtectedRoute allowedRoles={['administrator']}><AllCoursePage /></ProtectedRoute>} />
         <Route path="/all-courses" element={<ProtectedRoute allowedRoles={['administrator']}><AllCoursePage /></ProtectedRoute>} />
         <Route path="/add-course" element={<ProtectedRoute allowedRoles={['administrator']}><AddCoursesPage /></ProtectedRoute>} />

@@ -1,140 +1,284 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
-import axios from 'axios';
+import { toast } from 'react-toastify';
 
-const initialState = {
-  assignments: [],
-  loading: false,
-  error: null,
+// Helper function to make API calls with fetch
+const apiCall = async (url, options = {}) => {
+  const token = localStorage.getItem('accessToken');
+  const defaultOptions = {
+    credentials: 'include',
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token && { Authorization: `Bearer ${token}` }),
+    },
+    ...options,
+  };
+
+  const response = await fetch(url, defaultOptions);
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ message: 'An error occurred' }));
+    throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+  }
+
+  return response.json();
 };
 
-// Fetch assignments for logged-in professor
-export const fetchAssignments = createAsyncThunk(
-  'assignments/fetchAssignments',
-  async (_, thunkAPI) => {
+// Async thunk for creating an assignment
+export const createAssignment = createAsyncThunk(
+  'assignment/createAssignment',
+  async (assignmentData, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('accessToken'); // Get token from localStorage
-      const response = await axios.get('/api/assignments', {
+      const token = localStorage.getItem('accessToken');
+
+      const response = await fetch('http://localhost:5000/api/assignments', {
+        method: 'POST',
+        body: assignmentData, // FormData object
+        credentials: 'include',
         headers: {
-          Authorization: `Bearer ${token}`, // Add token here
+          ...(token && { Authorization: `Bearer ${token}` }),
+          // Don't set Content-Type for FormData, let browser set it with boundary
         },
       });
-      return response.data;
-    } catch (error) {
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        'Failed to fetch assignments';
-      return thunkAPI.rejectWithValue(message);
-    }
-  }
-);
 
-// Create new assignment
-export const createAssignment = createAsyncThunk(
-  'assignments/createAssignment',
-  async (assignmentData, thunkAPI) => {
-    try {
-      const token = localStorage.getItem('accessToken'); // Get token from localStorage
-      const formData = new FormData();
-      formData.append('title', assignmentData.title);
-      formData.append('dueDate', assignmentData.dueDate);
-      formData.append('courseId', assignmentData.courseId);
-      if (assignmentData.file) {
-        formData.append('file', assignmentData.file);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: 'Failed to create assignment' }));
+        throw new Error(errorData.message || 'Failed to create assignment');
       }
 
-      const response = await axios.post('/api/assignments', formData, {
-        headers: {
-          'Content-Type': 'multipart/form-data',
-          Authorization: `Bearer ${token}`, // Add token here
-        },
-      });
-
-      return response.data;
+      return response.json();
     } catch (error) {
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        'Failed to create assignment';
-      return thunkAPI.rejectWithValue(message);
+      return rejectWithValue(error.message);
     }
   }
 );
 
-// Update assignment status
-export const updateAssignmentStatus = createAsyncThunk(
-  'assignments/updateAssignmentStatus',
-  async ({ assignmentId, status }, thunkAPI) => {
+// Async thunk for fetching assignments by professor
+export const fetchAssignmentsByProfessor = createAsyncThunk(
+  'assignment/fetchAssignmentsByProfessor',
+  async (professorUuid, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem('accessToken'); // Get token
-      const response = await axios.put(
-        `/api/assignments/${assignmentId}/status`,
-        { status },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`, // Add token here
-          },
-        }
-      );
-      return response.data;
+      return await apiCall(`http://localhost:5000/api/assignments/professor/${professorUuid}`);
     } catch (error) {
-      const message =
-        error.response?.data?.message ||
-        error.message ||
-        'Failed to update assignment status';
-      return thunkAPI.rejectWithValue(message);
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Async thunk for fetching assignments by course
+export const fetchAssignmentsByCourse = createAsyncThunk(
+  'assignment/fetchAssignmentsByCourse',
+  async (courseId, { rejectWithValue }) => {
+    try {
+      return await apiCall(`http://localhost:5000/api/assignments/course/${courseId}`);
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Async thunk for fetching a single assignment
+export const fetchAssignmentById = createAsyncThunk(
+  'assignment/fetchAssignmentById',
+  async (id, { rejectWithValue }) => {
+    try {
+      return await apiCall(`http://localhost:5000/api/assignments/${id}`);
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Async thunk for updating assignment status
+export const updateAssignmentStatus = createAsyncThunk(
+  'assignment/updateAssignmentStatus',
+  async ({ id, status }, { rejectWithValue }) => {
+    try {
+      return await apiCall(`http://localhost:5000/api/assignments/${id}/status`, {
+        method: 'PUT',
+        body: JSON.stringify({ status }),
+      });
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Async thunk for updating assignment
+export const updateAssignment = createAsyncThunk(
+  'assignment/updateAssignment',
+  async ({ id, assignmentData }, { rejectWithValue }) => {
+    try {
+      return await apiCall(`http://localhost:5000/api/assignments/${id}`, {
+        method: 'PUT',
+        body: JSON.stringify(assignmentData),
+      });
+    } catch (error) {
+      return rejectWithValue(error.message);
+    }
+  }
+);
+
+// Async thunk for deleting an assignment
+export const deleteAssignment = createAsyncThunk(
+  'assignment/deleteAssignment',
+  async (id, { rejectWithValue }) => {
+    try {
+      return await apiCall(`http://localhost:5000/api/assignments/${id}`, {
+        method: 'DELETE',
+      });
+    } catch (error) {
+      return rejectWithValue(error.message);
     }
   }
 );
 
 const assignmentSlice = createSlice({
-  name: 'assignments',
-  initialState,
-  reducers: {},
+  name: 'assignment',
+  initialState: {
+    assignments: [],
+    assignmentsByProfessor: [],
+    assignmentsByCourse: [],
+    currentAssignment: null,
+    loading: false,
+    error: null,
+    success: false,
+  },
+  reducers: {
+    clearError: (state) => {
+      state.error = null;
+    },
+    clearSuccess: (state) => {
+      state.success = false;
+    },
+    clearCurrentAssignment: (state) => {
+      state.currentAssignment = null;
+    },
+  },
   extraReducers: (builder) => {
+    // Create assignment
     builder
-      .addCase(fetchAssignments.pending, (state) => {
-        state.loading = true;
-        state.error = null;
-      })
-      .addCase(fetchAssignments.fulfilled, (state, action) => {
-        state.loading = false;
-        state.assignments = action.payload;
-        state.error = null;
-      })
-      .addCase(fetchAssignments.rejected, (state, action) => {
-        state.loading = false;
-        state.error = action.payload;
-      })
       .addCase(createAssignment.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
       .addCase(createAssignment.fulfilled, (state, action) => {
         state.loading = false;
-        state.assignments.push(action.payload);
-        state.error = null;
+        state.success = true;
+        state.assignments.push(action.payload.data);
       })
       .addCase(createAssignment.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+      });
+
+    // Fetch assignments by professor
+    builder
+      .addCase(fetchAssignmentsByProfessor.pending, (state) => {
+        state.loading = true;
+        state.error = null;
       })
+      .addCase(fetchAssignmentsByProfessor.fulfilled, (state, action) => {
+        state.loading = false;
+        state.assignmentsByProfessor = action.payload.data || [];
+      })
+      .addCase(fetchAssignmentsByProfessor.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+
+    // Fetch assignments by course
+    builder
+      .addCase(fetchAssignmentsByCourse.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAssignmentsByCourse.fulfilled, (state, action) => {
+        state.loading = false;
+        state.assignmentsByCourse = action.payload.data || [];
+      })
+      .addCase(fetchAssignmentsByCourse.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+
+    // Fetch single assignment
+    builder
+      .addCase(fetchAssignmentById.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchAssignmentById.fulfilled, (state, action) => {
+        state.loading = false;
+        state.currentAssignment = action.payload.data;
+      })
+      .addCase(fetchAssignmentById.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+
+    // Update assignment status
+    builder
       .addCase(updateAssignmentStatus.pending, (state) => {
+        state.loading = true;
         state.error = null;
       })
       .addCase(updateAssignmentStatus.fulfilled, (state, action) => {
-        const index = state.assignments.findIndex(
-          (a) => a.id === action.payload.id
-        );
+        state.loading = false;
+        state.success = true;
+        const updatedAssignment = action.payload.data;
+        const index = state.assignments.findIndex(a => a.id === updatedAssignment.id);
         if (index !== -1) {
-          state.assignments[index] = action.payload;
+          state.assignments[index] = updatedAssignment;
         }
-        state.error = null;
+        if (state.currentAssignment?.id === updatedAssignment.id) {
+          state.currentAssignment = updatedAssignment;
+        }
       })
       .addCase(updateAssignmentStatus.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+
+    // Update assignment
+    builder
+      .addCase(updateAssignment.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(updateAssignment.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        const updatedAssignment = action.payload.data;
+        const index = state.assignments.findIndex(a => a.id === updatedAssignment.id);
+        if (index !== -1) {
+          state.assignments[index] = updatedAssignment;
+        }
+        if (state.currentAssignment?.id === updatedAssignment.id) {
+          state.currentAssignment = updatedAssignment;
+        }
+      })
+      .addCase(updateAssignment.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload;
+      });
+
+    // Delete assignment
+    builder
+      .addCase(deleteAssignment.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteAssignment.fulfilled, (state, action) => {
+        state.loading = false;
+        state.success = true;
+        state.assignments = state.assignments.filter(a => a.id !== action.meta.arg);
+      })
+      .addCase(deleteAssignment.rejected, (state, action) => {
+        state.loading = false;
         state.error = action.payload;
       });
   },
 });
 
+export const { clearError, clearSuccess, clearCurrentAssignment } = assignmentSlice.actions;
 export default assignmentSlice.reducer;

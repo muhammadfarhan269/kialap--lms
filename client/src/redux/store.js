@@ -17,7 +17,7 @@ const store = configureStore({
     assets: assetsReducer,
     department: departmentReducer,
     enrollment: enrollmentReducer,
-    assignments: assignmentReducer,
+    assignment: assignmentReducer,
   },
 });
 

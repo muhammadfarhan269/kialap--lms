@@ -19,6 +19,8 @@ app.use(cookieParser());
 
 // Serve static files from public directory
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
+// Serve uploaded assignment files
+app.use('/assignments', express.static(path.join(__dirname, '../public/assignments')));
 
 // Test DB connection
 pool.query('SELECT NOW()', (err, res) => {
@@ -35,7 +37,7 @@ app.use('/api/assets', require('./routes/assetsRoutes'));
 app.use('/api/departments', require('./routes/departmentRoutes'));
 
 app.use('/api/enrollments', require('./routes/enrollmentRoutes'));
-//app.use('/api/assignments', require('./routes/assignmentRoutes'));
+app.use('/api/assignments', require('./routes/assignmentRoutes'));
 
 // Global error handling middleware - must be last middleware
 app.use((err, req, res, next) => {

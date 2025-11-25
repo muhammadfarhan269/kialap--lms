@@ -2,66 +2,160 @@ const pool = require('../config/dbConnection');
 const { v4: uuidv4 } = require('uuid');
 
 // Create a new assignment
-const createAssignment = async ({ title, dueDate, status = 'Pending', filePath = null, courseId, professorId }) => {
+const createAssignment = async ({ title, dueDate, status = 'Pending', filePath = null, courseId, professorUuid }) => {
   const id = uuidv4();
   const query = `
-    INSERT INTO assignments (id, title, due_date, status, file_path, course_uuid, professor_uuid, created_at, updated_at)
+    INSERT INTO assignments (uuid, title, due_date, status, file_path, course_id, professor_uuid, created_at, updated_at)
     VALUES ($1, $2, $3, $4, $5, $6, $7, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP)
-    RETURNING *;
+    RETURNING id, uuid, title, due_date, status, file_path, course_id, professor_uuid, created_at, updated_at;
   `;
-  const values = [id, title, dueDate, status, filePath, courseId, professorId];
+  const values = [id, title, dueDate, status, filePath, courseId, professorUuid];
 
   const result = await pool.query(query, values);
   return result.rows[0];
 };
 
-// Find assignments by professor id, with optional additional filters & order by due_date asc
-const findAssignmentsByProfessorId = async (professorId) => {
+// Find assignments by professor uuid with course details
+const findAssignmentsByProfessorId = async (professorUuid) => {
   const query = `
-    SELECT a.*, c.course_code AS "courseCode", c.course_name AS "courseName"
+    SELECT 
+      a.id,
+      a.uuid,
+      a.title,
+      a.due_date as "dueDate",
+      a.status,
+      a.file_path as "filePath",
+      a.course_id as "courseId",
+      a.professor_uuid as "professorUuid",
+      a.created_at as "createdAt",
+      a.updated_at as "updatedAt",
+      c.course_code as "courseCode", 
+      c.course_name as "courseName"
     FROM assignments a
-    LEFT JOIN courses c ON a.course_uuid = c.id
+    LEFT JOIN courses c ON a.course_id = c.id
     WHERE a.professor_uuid = $1
     ORDER BY a.due_date ASC;
   `;
-  const result = await pool.query(query, [professorId]);
+  const result = await pool.query(query, [professorUuid]);
   return result.rows;
 };
 
-// Find assignment by arbitrary filters (only supports id and professorId for now)
-const findAssignment = async ({ id, professorId }) => {
+// Find assignment by id and professor uuid
+const findAssignment = async ({ id, professorUuid }) => {
   let conditions = [];
   let values = [];
   let index = 1;
 
   if (id) {
-    conditions.push(`id = $${index++}`);
+    conditions.push(`a.id = $${index++}`);
     values.push(id);
   }
-  if (professorId) {
-    conditions.push(`professor_uuid = $${index++}`);
-    values.push(professorId);
+  if (professorUuid) {
+    conditions.push(`a.professor_uuid = $${index++}`);
+    values.push(professorUuid);
   }
 
   if (conditions.length === 0) return null;
 
   const whereClause = conditions.join(' AND ');
-  const query = `SELECT * FROM assignments WHERE ${whereClause} LIMIT 1;`;
+  const query = `
+    SELECT 
+      a.id,
+      a.uuid,
+      a.title,
+      a.due_date as "dueDate",
+      a.status,
+      a.file_path as "filePath",
+      a.course_id as "courseId",
+      a.professor_uuid as "professorUuid",
+      a.created_at as "createdAt",
+      a.updated_at as "updatedAt",
+      c.course_code as "courseCode", 
+      c.course_name as "courseName"
+    FROM assignments a
+    LEFT JOIN courses c ON a.course_id = c.id
+    WHERE ${whereClause} 
+    LIMIT 1;
+  `;
 
   const result = await pool.query(query, values);
   return result.rows[0];
 };
 
-// Update assignment status by id and professor_id
-const updateAssignmentStatus = async (id, professorId, status) => {
+// Find assignment by id
+const findAssignmentById = async (id) => {
+  const query = `
+    SELECT 
+      a.id,
+      a.uuid,
+      a.title,
+      a.due_date as "dueDate",
+      a.status,
+      a.file_path as "filePath",
+      a.course_id as "courseId",
+      a.professor_uuid as "professorUuid",
+      a.created_at as "createdAt",
+      a.updated_at as "updatedAt",
+      c.course_code as "courseCode", 
+      c.course_name as "courseName"
+    FROM assignments a
+    LEFT JOIN courses c ON a.course_id = c.id
+    WHERE a.id = $1;
+  `;
+  const result = await pool.query(query, [id]);
+  return result.rows[0];
+};
+
+// Update assignment status by id and professor_uuid
+const updateAssignmentStatus = async (id, professorUuid, status) => {
   const query = `
     UPDATE assignments
     SET status = $1, updated_at = CURRENT_TIMESTAMP
     WHERE id = $2 AND professor_uuid = $3
-    RETURNING *;
+    RETURNING id, uuid, title, due_date as "dueDate", status, file_path as "filePath", course_id as "courseId", professor_uuid as "professorUuid", created_at as "createdAt", updated_at as "updatedAt";
   `;
-  const values = [status, id, professorId];
+  const values = [status, id, professorUuid];
   const result = await pool.query(query, values);
+  return result.rows[0];
+};
+
+// Update assignment (general update)
+const updateAssignment = async (id, updateData) => {
+  const fields = [];
+  const values = [];
+  let paramIndex = 1;
+
+  Object.keys(updateData).forEach(key => {
+    if (updateData[key] !== undefined) {
+      const dbKey = key.replace(/([A-Z])/g, '_$1').toLowerCase();
+      fields.push(`${dbKey} = $${paramIndex}`);
+      values.push(updateData[key]);
+      paramIndex++;
+    }
+  });
+
+  if (fields.length === 0) return null;
+
+  values.push(id);
+  const query = `
+    UPDATE assignments 
+    SET ${fields.join(', ')}, updated_at = CURRENT_TIMESTAMP 
+    WHERE id = $${paramIndex} 
+    RETURNING id, uuid, title, due_date as "dueDate", status, file_path as "filePath", course_id as "courseId", professor_uuid as "professorUuid", created_at as "createdAt", updated_at as "updatedAt";
+  `;
+
+  const result = await pool.query(query, values);
+  return result.rows[0];
+};
+
+// Delete assignment
+const deleteAssignment = async (id, professorUuid) => {
+  const query = `
+    DELETE FROM assignments 
+    WHERE id = $1 AND professor_uuid = $2 
+    RETURNING id;
+  `;
+  const result = await pool.query(query, [id, professorUuid]);
   return result.rows[0];
 };
 
@@ -69,5 +163,8 @@ module.exports = {
   createAssignment,
   findAssignmentsByProfessorId,
   findAssignment,
-  updateAssignmentStatus
+  findAssignmentById,
+  updateAssignmentStatus,
+  updateAssignment,
+  deleteAssignment
 };

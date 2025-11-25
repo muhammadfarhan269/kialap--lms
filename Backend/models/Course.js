@@ -352,7 +352,7 @@ const getCoursesByProfessor = async (professorUuid, limit = 10, offset = 0) => {
       WHERE status = 'active'
       GROUP BY course_id
     ) e ON c.id = e.course_id
-    WHERE c.professor_uuid = $1
+    WHERE c.professor_uuid = $1 AND c.course_status = 'active'
     ORDER BY c.created_at DESC
     LIMIT $2 OFFSET $3
   `;

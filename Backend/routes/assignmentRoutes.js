@@ -1,46 +1,41 @@
 const express = require('express');
 const router = express.Router();
+const {
+  createAssignment,
+  getAssignmentsByProfessor,
+  getAssignment,
+  updateAssignmentStatus,
+  updateAssignment,
+  deleteAssignment,
+  getAssignmentsByCourse,
+  upload
+} = require('../controller/assignmentsController');
 
-const assignmentsController = require('../controller/assignmentsController');
-const verifyJWT = require('../middleware/verifyJWT'); // assuming JWT middleware for auth
-const multer = require('multer');
+const verifyJWT = require('../middleware/verifyJWT');
+const verifyRole = require('../middleware/verifyRole');
 
-// Configure multer for file upload
-const storage = multer.diskStorage({
-  destination: function(req, file, cb) {
-    cb(null, './uploads/assignments');
-  },
-  filename: function(req, file, cb) {
-    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
-    cb(null, uniqueSuffix + '-' + file.originalname);
-  }
-});
-
-const fileFilter = (req, file, cb) => {
-  // Accept only doc, docx, pdf files
-  if (!file.originalname.match(/\.(doc|docx|pdf)$/)) {
-    return cb(new Error('Only Word or PDF files are allowed!'), false);
-  }
-  cb(null, true);
-};
-
-const upload = multer({ storage, fileFilter });
-
+// All routes require authentication
 router.use(verifyJWT);
 
-// Create assignment with file upload
-router.post('/',
-  upload.single('file'),
-  assignmentsController.createAssignment
-);
+// Create assignment (professor only)
+router.post('/', verifyRole('professor'), upload, createAssignment);
 
-// Get all assignments for professor
-router.get('/', assignmentsController.getAssignmentsByProfessor);
+// Get assignments by professor
+router.get('/professor/:professorUuid', getAssignmentsByProfessor);
 
-// Update assignment status
-router.put('/:assignmentId/status', assignmentsController.updateAssignmentStatus);
+// Get assignments by course
+router.get('/course/:courseId', getAssignmentsByCourse);
 
-// Get submitted assessments for an assignment
-router.get('/:assignmentId/submissions', assignmentsController.getSubmittedAssessments);
+// Get single assignment
+router.get('/:id', getAssignment);
+
+// Update assignment status (professor only)
+router.put('/:id/status', verifyRole('professor'), updateAssignmentStatus);
+
+// Update assignment (professor only)
+router.put('/:id', verifyRole('professor'), updateAssignment);
+
+// Delete assignment (professor only)
+router.delete('/:id', verifyRole('professor'), deleteAssignment);
 
 module.exports = router;
