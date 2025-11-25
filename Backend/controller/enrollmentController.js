@@ -92,10 +92,7 @@ const unenrollStudent = asyncHandler(async (req, res) => {
 const getStudentEnrollments = asyncHandler(async (req, res) => {
     try {
         console.log('getStudentEnrollments invoked. User:', req.user);
-        if (req.user.role !== 'student') {
-            res.status(403);
-            throw new Error('Access denied. Student role required.');
-        }
+        
         if (!req.user.uuid) {
             res.status(400);
             throw new Error('User UUID missing in token.');
@@ -130,13 +127,8 @@ const getCourseEnrollments = asyncHandler(async (req, res) => {
 
 // @desc    Check if student is enrolled in course
 // @route   GET /api/enrollments/check/:courseId
-// @access  Private/Student
+// @access  Private
 const checkEnrollment = asyncHandler(async (req, res) => {
-  if (req.user.role !== 'student') {
-    res.status(403);
-    throw new Error('Access denied. Student role required.');
-  }
-
   const { courseId } = req.params;
   const userUuid = req.user.uuid; // Use UUID from JWT
 

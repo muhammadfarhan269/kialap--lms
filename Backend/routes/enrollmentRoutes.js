@@ -15,11 +15,11 @@ const verifyStudent = require('../middleware/verifyStudent');
 // All routes require authentication
 router.use(verifyJWT);
 
-// Student routes
+// Student routes - allow both student role and any authenticated user
 router.post('/', verifyStudent, enrollStudent);
 router.delete('/:id', verifyStudent, unenrollStudent);
-router.get('/student', verifyStudent, getStudentEnrollments);
-router.get('/check/:courseId', verifyStudent, checkEnrollment);
+router.get('/student', getStudentEnrollments);  // Allow any authenticated user
+router.get('/check/:courseId', checkEnrollment);  // Allow any authenticated user
 
 // Admin/Professor routes for viewing enrollments
 router.get('/course/:courseId', verifyAdmin, getCourseEnrollments);

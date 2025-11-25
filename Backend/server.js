@@ -21,6 +21,8 @@ app.use(cookieParser());
 app.use('/images', express.static(path.join(__dirname, '../public/images')));
 // Serve uploaded assignment files
 app.use('/assignments', express.static(path.join(__dirname, '../public/assignments')));
+// Serve uploaded submission files
+app.use('/submissions', express.static(path.join(__dirname, '../public/submissions')));
 
 // Test DB connection
 pool.query('SELECT NOW()', (err, res) => {

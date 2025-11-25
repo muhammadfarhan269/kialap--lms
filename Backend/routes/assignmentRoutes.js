@@ -8,7 +8,9 @@ const {
   updateAssignment,
   deleteAssignment,
   getAssignmentsByCourse,
-  upload
+  upload,
+  submissionUpload,
+  submitAssignment
 } = require('../controller/assignmentsController');
 
 const verifyJWT = require('../middleware/verifyJWT');
@@ -25,6 +27,9 @@ router.get('/professor/:professorUuid', getAssignmentsByProfessor);
 
 // Get assignments by course
 router.get('/course/:courseId', getAssignmentsByCourse);
+
+// Student submit assignment (authenticated students)
+router.post('/:id/submit', submissionUpload, submitAssignment);
 
 // Get single assignment
 router.get('/:id', getAssignment);

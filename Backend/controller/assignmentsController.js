@@ -5,6 +5,7 @@ const multer = require('multer');
 const path = require('path');
 const fs = require('fs');
 const pool = require('../config/dbConnection');
+const Enrollment = require('../models/Enrollment');
 
 // Configure multer for assignment file uploads
 const storage = multer.diskStorage({
@@ -57,6 +58,45 @@ const uploadMiddleware = (req, res, next) => {
       console.log('After Multer - file:', req.file.fieldname, req.file.filename);
     }
     
+    next();
+  });
+};
+
+// Configure multer for student submission uploads (store in public/submissions)
+const submissionStorage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    const uploadDir = path.join(__dirname, '../../public/submissions');
+    if (!fs.existsSync(uploadDir)) {
+      fs.mkdirSync(uploadDir, { recursive: true });
+    }
+    cb(null, uploadDir);
+  },
+  filename: (req, file, cb) => {
+    const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+    cb(null, 'submission-' + uniqueSuffix + path.extname(file.originalname));
+  }
+});
+
+const submissionUpload = multer({
+  storage: submissionStorage,
+  limits: { fileSize: 10 * 1024 * 1024 },
+  fileFilter: (req, file, cb) => {
+    const allowedMimes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+    if (allowedMimes.includes(file.mimetype)) {
+      cb(null, true);
+    } else {
+      cb(new Error('Only PDF and Word files are allowed!'), false);
+    }
+  }
+}).single('submissionFile');
+
+const submissionUploadMiddleware = (req, res, next) => {
+  req.body = req.body || {};
+  submissionUpload(req, res, (err) => {
+    if (err) return next(err);
+    if (!req.body || typeof req.body !== 'object') req.body = {};
+    console.log('After submission Multer - req.body:', req.body);
+    if (req.file) console.log('After submission Multer - file:', req.file.filename);
     next();
   });
 };
@@ -270,19 +310,35 @@ const deleteAssignment = asyncHandler(async (req, res) => {
 
 // @desc    Get assignments for a specific course
 // @route   GET /api/assignments/course/:courseId
-// @access  Private/Professor
+// @access  Private/Professor/Student
 const getAssignmentsByCourse = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
-  const professorUuid = req.user.uuid;
+  const userUuid = req.user.uuid;
 
-  // Verify course belongs to professor
+  // Verify course exists
   const course = await Course.findCourseById(courseId);
   if (!course) {
     res.status(404);
     throw new Error('Course not found');
   }
 
-  if (course.professorUuid !== professorUuid && req.user.role !== 'administrator') {
+  // For professors: check if they own the course
+  // For students: check if they are enrolled
+  // For admins: allow access
+  if (req.user.role === 'professor') {
+    if (course.professorUuid !== userUuid && req.user.role !== 'administrator') {
+      res.status(403);
+      throw new Error('You are not authorized to view assignments for this course');
+    }
+  } else if (req.user.role === 'student') {
+    // Verify student is enrolled in this course (use model helper)
+    const enrollment = await Enrollment.isStudentEnrolled(userUuid, courseId);
+    console.log('Enrollment check for user', userUuid, 'course', courseId, 'result:', enrollment);
+    if (!enrollment || enrollment.status !== 'active') {
+      res.status(403);
+      throw new Error('You are not enrolled in this course');
+    }
+  } else if (req.user.role !== 'administrator') {
     res.status(403);
     throw new Error('You are not authorized to view assignments for this course');
   }
@@ -301,18 +357,130 @@ const getAssignmentsByCourse = asyncHandler(async (req, res) => {
       a.created_at as "createdAt",
       a.updated_at as "updatedAt",
       c.course_code as "courseCode", 
-      c.course_name as "courseName"
+      c.course_name as "courseName",
+      s.id as "submissionId",
+      s.file_path as "studentFilePath",
+      s.status as "studentSubmissionStatus",
+      s.submitted_at as "studentSubmittedAt"
     FROM assignments a
     LEFT JOIN courses c ON a.course_id = c.id
+    LEFT JOIN submissions s ON s.assignment_id = a.id AND s.student_uuid = $2
     WHERE a.course_id = $1
     ORDER BY a.due_date ASC;
   `;
 
-  const result = await pool.query(query, [courseId]);
+  let result;
+  try {
+    result = await pool.query(query, [courseId, userUuid]);
+  } catch (err) {
+    // If the submissions table doesn't exist yet, fall back to a query without the join
+    if (err && err.message && err.message.toLowerCase().includes('submissions')) {
+      const fallbackQuery = `
+        SELECT 
+          a.id,
+          a.uuid,
+          a.title,
+          a.due_date as "dueDate",
+          a.status,
+          a.file_path as "filePath",
+          a.course_id as "courseId",
+          a.professor_uuid as "professorUuid",
+          a.created_at as "createdAt",
+          a.updated_at as "updatedAt",
+          c.course_code as "courseCode", 
+          c.course_name as "courseName"
+        FROM assignments a
+        LEFT JOIN courses c ON a.course_id = c.id
+        WHERE a.course_id = $1
+        ORDER BY a.due_date ASC;
+      `;
+      result = await pool.query(fallbackQuery, [courseId]);
+    } else {
+      throw err;
+    }
+  }
 
   res.status(200).json({
     success: true,
     data: result.rows
+  });
+});
+
+// @desc    Student submit assignment (upload file)
+// @route   POST /api/assignments/:id/submit
+// @access  Private (student)
+const submitAssignment = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const studentUuid = req.user.uuid;
+
+  // Verify assignment exists
+  const assignment = await Assignment.findAssignmentById(id);
+  if (!assignment) {
+    res.status(404);
+    throw new Error('Assignment not found');
+  }
+
+  // Verify student is enrolled in the course
+  const enrollment = await Enrollment.isStudentEnrolled(studentUuid, assignment.courseId);
+  if (!enrollment || enrollment.status !== 'active') {
+    res.status(403);
+    throw new Error('You are not enrolled in this course');
+  }
+
+  // Ensure file was uploaded
+  if (!req.file) {
+    res.status(400);
+    throw new Error('No submission file uploaded');
+  }
+
+  const filePath = req.file.filename;
+
+  // Ensure submissions table exists (no separate model file created per request)
+  const createTableQuery = `
+    CREATE TABLE IF NOT EXISTS submissions (
+      id SERIAL PRIMARY KEY,
+      assignment_id INTEGER REFERENCES assignments(id) ON DELETE CASCADE,
+      student_uuid UUID,
+      file_path TEXT,
+      status VARCHAR(50),
+      submitted_at TIMESTAMPTZ DEFAULT CURRENT_TIMESTAMP
+    );
+  `;
+  await pool.query(createTableQuery);
+  // Prevent duplicate submission by same student for the same assignment
+  const checkQuery = `SELECT id FROM submissions WHERE assignment_id = $1 AND student_uuid = $2 LIMIT 1;`;
+  const checkResult = await pool.query(checkQuery, [id, studentUuid]);
+  if (checkResult.rows && checkResult.rows.length > 0) {
+    res.status(409);
+    throw new Error('You have already submitted this assignment');
+  }
+
+  // Insert submission record
+  const insertQuery = `
+    INSERT INTO submissions (assignment_id, student_uuid, file_path, status)
+    VALUES ($1, $2, $3, $4)
+    RETURNING id, assignment_id as "assignmentId", student_uuid as "studentUuid", file_path as "filePath", status, submitted_at as "submittedAt";
+  `;
+  // Determine submission status: if upload is after due date, mark as 'Late'
+  let computedStatus = 'Submitted';
+  try {
+    if (assignment.dueDate) {
+      const due = new Date(assignment.dueDate);
+      const now = new Date();
+      if (now > due) computedStatus = 'Late';
+    }
+  } catch (err) {
+    console.warn('Could not compute dueDate comparison, defaulting to Submitted', err);
+  }
+
+  const submissionStatus = (req.body.submissionStatus) ? req.body.submissionStatus : computedStatus;
+  const insertValues = [id, studentUuid, filePath, submissionStatus];
+  const result = await pool.query(insertQuery, insertValues);
+
+  res.status(201).json({
+    success: true,
+    message: 'Submission saved successfully',
+    data: result.rows[0]
   });
 });
 
@@ -324,5 +492,7 @@ module.exports = {
   updateAssignment,
   deleteAssignment,
   getAssignmentsByCourse,
-  upload: uploadMiddleware
+  submitAssignment,
+  upload: uploadMiddleware,
+  submissionUpload: submissionUploadMiddleware
 };
