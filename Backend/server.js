@@ -40,6 +40,10 @@ app.use('/api/departments', require('./routes/departmentRoutes'));
 
 app.use('/api/enrollments', require('./routes/enrollmentRoutes'));
 app.use('/api/assignments', require('./routes/assignmentRoutes'));
+app.use('/api/grades', require('./routes/gradesRoutes'));
+app.use('/api/grading-weights', require('./routes/gradingWeightRoutes'));
+app.use('/api/reports', require('./routes/reportRoutes'));
+app.use('/api/final-grades', require('./routes/finalGradesRoutes'));
 
 // Global error handling middleware - must be last middleware
 app.use((err, req, res, next) => {

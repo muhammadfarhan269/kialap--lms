@@ -1,70 +1,98 @@
-import React, { useEffect, useState } from 'react';
-import { useSelector } from 'react-redux';
+import React, { useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { useDispatch, useSelector } from 'react-redux';
+import Layout from '../layouts/Layout';
+import { fetchProfessorCourses } from '../../redux/slices/coursesSlice';
+import { FaUsers, FaInfoCircle, FaChevronRight } from 'react-icons/fa';
+
+// Small responsive styles for the cards (injected once)
+const injectGradesPageStyles = () => {
+  const id = 'grades-page-responsive-styles';
+  if (typeof document === 'undefined' || document.getElementById(id)) return;
+  const style = document.createElement('style');
+  style.id = id;
+  style.innerHTML = `
+    .grade-card { transition: transform .18s ease, box-shadow .18s ease; cursor: pointer; }
+    .grade-card:focus { outline: 3px solid rgba(13,110,253,.25); }
+    .grade-card .card-body { min-height: 110px; }
+    @media (max-width: 576px) {
+      .grade-card .card-body { min-height: 90px; }
+      .grade-card .card-title { font-size: 1rem; }
+      .grade-card .card-text { font-size: .875rem; }
+    }
+  `;
+  document.head.appendChild(style);
+};
 
 const GradesPage = () => {
-  const { user } = useSelector((state) => state.auth);
-  const [grades, setGrades] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const { list: courses, loading: coursesLoading } = useSelector(state => state.courses || {});
 
   useEffect(() => {
-    const fetchGrades = async () => {
-      try {
-        const token = localStorage.getItem('accessToken');
-        const response = await fetch(`/api/professor/${user?.uuid}/grades`, {
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        });
+    dispatch(fetchProfessorCourses());
+      injectGradesPageStyles();
+  }, [dispatch]);
 
-        if (!response.ok) {
-          throw new Error('Failed to fetch grades');
-        }
-
-        const data = await response.json();
-        setGrades(Array.isArray(data.data) ? data.data : []);
-      } catch (err) {
-        setError(err.message);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    if (user && user.uuid) {
-      fetchGrades();
-    }
-  }, [user]);
-
-  if (loading) return <div>Loading grades...</div>;
-  if (error) return <div className="alert alert-danger">{error}</div>;
-  if (!grades.length) return <div>No grades to display.</div>;
+  const handleCourseClick = (courseId) => {
+    navigate(`/professor/grades/${courseId}`);
+  };
 
   return (
-    <div className="container">
-      <h3>Professor Grades</h3>
-      <table className="table table-striped">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Course</th>
-            <th>Student</th>
-            <th>Grade</th>
-            <th>Comments</th>
-          </tr>
-        </thead>
-        <tbody>
-          {grades.map((grade, index) => (
-            <tr key={grade.id || index}>
-              <td>{index + 1}</td>
-              <td>{grade.courseName || grade.course}</td>
-              <td>{grade.studentName || grade.student}</td>
-              <td>{grade.grade}</td>
-              <td>{grade.comments || '-'}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+    <Layout>
+      <div className="container">
+        <h2 className="mb-4">Grade Management</h2>
+
+        {coursesLoading ? (
+          <p className="text-muted">Loading your courses...</p>
+        ) : courses && courses.length > 0 ? (
+          <div className="row">
+            {courses.map(course => (
+              <div key={course.id} className="col-12 col-sm-6 col-md-4 mb-3">
+                <div
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`Manage grades for ${course.courseCode}`}
+                  className="card h-100 grade-card"
+                  onClick={() => handleCourseClick(course.id)}
+                  onKeyPress={(e) => { if (e.key === 'Enter' || e.key === ' ') handleCourseClick(course.id); }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.transform = 'translateY(-6px)';
+                    e.currentTarget.style.boxShadow = '0 6px 18px rgba(0,0,0,0.12)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.transform = 'translateY(0)';
+                    e.currentTarget.style.boxShadow = '0 1px 4px rgba(0,0,0,0.08)';
+                  }}
+                >
+                  <div className="card-body d-flex flex-column justify-content-between">
+                    <div>
+                      <h5 className="card-title mb-1">{course.courseCode}</h5>
+                      <p className="card-text text-muted mb-2 text-truncate">{course.courseName}</p>
+                    </div>
+                    <div className="d-flex justify-content-between align-items-center mt-2">
+                      <small className="text-muted d-flex align-items-center">
+                        <FaUsers className="me-2" /> {course.enrolledStudents} students
+                      </small>
+                      <span className="badge bg-primary">{course.credits} credits</span>
+                    </div>
+                  </div>
+                  <div className="card-footer bg-white border-top d-flex justify-content-between align-items-center">
+                    <small className="text-muted">Click to manage grades</small>
+                    <FaChevronRight className="text-muted" />
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="alert alert-info d-flex align-items-center" role="alert">
+            <FaInfoCircle className="me-2" />
+            <div>You don't have any courses assigned yet.</div>
+          </div>
+        )}
+      </div>
+    </Layout>
   );
 };
 

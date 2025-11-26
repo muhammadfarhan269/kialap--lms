@@ -250,11 +250,47 @@ const deleteProfessor = async (req, res) => {
   }
 };
 
+const getProfessorCourses = async (req, res) => {
+  try {
+    // Get professor UUID from JWT token
+    const professorUuid = req.user.uuid;
+    
+    const query = `
+      SELECT
+        c.id,
+        c.course_code as "courseCode",
+        c.course_name as "courseName",
+        c.department,
+        c.credits,
+        c.semester,
+        c.course_type as "courseType",
+        c.course_status as "courseStatus",
+        COALESCE(e.enrolled_count, 0) as "enrolledStudents"
+      FROM courses c
+      LEFT JOIN (
+        SELECT course_id, COUNT(*) as enrolled_count
+        FROM enrollments
+        WHERE status = 'active'
+        GROUP BY course_id
+      ) e ON c.id = e.course_id
+      WHERE c.professor_uuid = $1 AND c.course_status = 'active'
+      ORDER BY c.created_at DESC
+    `;
+    
+    const result = await pool.query(query, [professorUuid]);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Error fetching professor courses:', error);
+    res.status(500).json({ message: error.message });
+  }
+};
+
 module.exports = {
   addProfessor,
   getAllProfessors,
   getProfessorById,
   updateProfessor,
   deleteProfessor,
+  getProfessorCourses,
   upload
 };

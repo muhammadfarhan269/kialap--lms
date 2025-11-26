@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
+import { FaDownload, FaArrowLeft, FaUser, FaEnvelope, FaFileAlt } from 'react-icons/fa';
 
 const ViewSubmittedAssignments = () => {
   const { assignmentId } = useParams();
@@ -79,10 +80,11 @@ const ViewSubmittedAssignments = () => {
     <div className="view-submissions-container">
       <div className="submissions-header">
         <button 
-          className="btn btn-secondary"
+          className="btn btn-secondary d-flex align-items-center"
           onClick={() => navigate('/professor/assignments')}
+          aria-label="Back to assignments"
         >
-          ← Back to Assignments
+          <FaArrowLeft className="me-2" /> Back to Assignments
         </button>
         <h2>Assignment Submissions</h2>
       </div>
@@ -123,7 +125,7 @@ const ViewSubmittedAssignments = () => {
 
       {!loading && submissions.length > 0 && (
         <div className="table-responsive">
-          <table className="submissions-table">
+          <table className="submissions-table table table-striped table-hover" style={{ minWidth: 950 }}>
             <thead>
               <tr>
                 <th>Student Name</th>
@@ -136,20 +138,28 @@ const ViewSubmittedAssignments = () => {
             <tbody>
               {submissions.map((submission) => (
                 <tr key={submission.id}>
-                  <td>{submission.studentName || 'Unknown'}</td>
-                  <td>{submission.studentEmail || 'N/A'}</td>
-                  <td>{getStatusBadge(submission.status)}</td>
-                  <td>{new Date(submission.submittedAt).toLocaleString()}</td>
-                  <td>
+                  <td data-label="Student Name">
+                    <div className="d-flex align-items-center gap-2">
+                      <FaUser />
+                      <span>{submission.studentName || 'Unknown'}</span>
+                    </div>
+                  </td>
+                  <td data-label="Email">
+                    <div className="d-flex align-items-center gap-2"><FaEnvelope /> <span>{submission.studentEmail || 'N/A'}</span></div>
+                  </td>
+                  <td data-label="Status">{getStatusBadge(submission.status)}</td>
+                  <td data-label="Submitted At">{new Date(submission.submittedAt).toLocaleString()}</td>
+                  <td data-label="File">
                     {submission.filePath ? (
                       <button
-                        className="btn btn-sm btn-link"
+                        className="btn btn-sm btn-outline-primary d-flex align-items-center"
                         onClick={() => handleDownload(submission.filePath)}
+                        title="Download submission"
                       >
-                        View Assignment
+                        <FaDownload /> <span className="ms-2 d-none d-sm-inline">Download</span>
                       </button>
                     ) : (
-                      <span className="muted">—</span>
+                      <span className="muted d-inline-flex align-items-center"><FaFileAlt className="me-2"/> —</span>
                     )}
                   </td>
                 </tr>
@@ -180,6 +190,8 @@ const ViewSubmittedAssignments = () => {
           color: #333;
           flex: 1;
         }
+
+        .submissions-header .btn { display:inline-flex; align-items:center; gap:8px; }
 
         .assignment-info {
           background: white;
@@ -243,6 +255,7 @@ const ViewSubmittedAssignments = () => {
         .submissions-table {
           width: 100%;
           border-collapse: collapse;
+          min-width: 900px;
         }
 
         .submissions-table th {
@@ -258,6 +271,8 @@ const ViewSubmittedAssignments = () => {
           padding: 12px;
           border-bottom: 1px solid #e6e6e6;
         }
+
+        .submissions-table td .me-2 { margin-right: .5rem; }
 
         .submissions-table tbody tr:hover {
           background: #fafafa;
@@ -313,6 +328,16 @@ const ViewSubmittedAssignments = () => {
 
         .muted {
           color: #888;
+        }
+
+        /* Mobile stacked table */
+        @media (max-width: 575px) {
+          .submissions-table thead { display: none; }
+          .submissions-table, .submissions-table tbody, .submissions-table tr, .submissions-table td { display: block; width: 100%; }
+          .submissions-table tr { margin-bottom: 0.75rem; border: 1px solid #e9ecef; border-radius: .25rem; padding: .5rem; }
+          .submissions-table td { text-align: right; padding-left: 50%; position: relative; border: none; }
+          .submissions-table td::before { content: attr(data-label); position: absolute; left: 0; width: 45%; padding-left: .75rem; font-weight: 600; text-align: left; }
+          .submissions-table td .d-none.d-sm-inline { display: none !important; }
         }
       `}</style>
     </div>

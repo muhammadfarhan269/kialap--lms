@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
+import { FaEye, FaImage, FaTimesCircle, FaCalendarAlt } from 'react-icons/fa';
 
 const AssignedCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -35,6 +36,31 @@ const AssignedCourses = () => {
     }
   }, [user]);
 
+  // Inject small responsive styles for the table and modal (one-time)
+  useEffect(() => {
+    const id = 'assigned-courses-responsive-styles';
+    if (typeof document === 'undefined' || document.getElementById(id)) return;
+    const style = document.createElement('style');
+    style.id = id;
+    style.innerHTML = `
+      .assigned-courses-table img { width: 100px; height: 64px; object-fit: cover; }
+      .assigned-courses-table td, .assigned-courses-table th { vertical-align: middle; }
+      @media (max-width: 991px) {
+        .assigned-courses-table img { width: 80px; height: 56px; }
+      }
+      @media (max-width: 575px) {
+        .assigned-courses-table thead { display: none; }
+        .assigned-courses-table, .assigned-courses-table tbody, .assigned-courses-table tr, .assigned-courses-table td { display: block; width: 100%; }
+        .assigned-courses-table tr { margin-bottom: 0.75rem; border: 1px solid #e9ecef; border-radius: .25rem; padding: .5rem; }
+        .assigned-courses-table td { text-align: right; padding-left: 50%; position: relative; }
+        .assigned-courses-table td::before { content: attr(data-label); position: absolute; left: 0; width: 45%; padding-left: .75rem; font-weight: 600; text-align: left; }
+      }
+      /* Make modal wider on large screens */
+      .modal-xl { max-width: 1100px; }
+    `;
+    document.head.appendChild(style);
+  }, []);
+
   const handleViewDetails = (course) => {
     setSelectedCourse(course);  // open modal
   };
@@ -60,66 +86,67 @@ const AssignedCourses = () => {
             <p>No active courses assigned yet.</p>
           ) : (
             <div className="table-responsive">
-              <table className="table table-bordered table-striped">
+              <table className="table table-bordered table-striped table-hover assigned-courses-table">
                 <thead className="table-dark">
                   <tr>
-                    <th>#</th>
-                    <th>Course Image</th>
-                    <th>Name</th>
-                    <th>Code</th>
-                    <th>Department</th>
-                    <th>Credits</th>
-                    <th>Semester</th>
-                    <th>Type</th>
-                    <th>Enrolled</th>
-                    <th>Status</th>
-                    <th>Description</th>
-                    <th>Created At</th>
-                    <th>Action</th>
+                    <th style={{ minWidth: 40 }}>#</th>
+                    <th style={{ minWidth: 120 }}>Course Image</th>
+                    <th style={{ minWidth: 220 }}>Name</th>
+                    <th style={{ minWidth: 120 }}>Code</th>
+                    <th style={{ minWidth: 160 }}>Department</th>
+                    <th style={{ minWidth: 80 }}>Credits</th>
+                    <th style={{ minWidth: 100 }}>Semester</th>
+                    <th style={{ minWidth: 100 }}>Type</th>
+                    <th style={{ minWidth: 100 }}>Enrolled</th>
+                    <th style={{ minWidth: 100 }}>Status</th>
+                    <th style={{ minWidth: 220 }}>Description</th>
+                    <th style={{ minWidth: 140 }}>Created At</th>
+                    <th style={{ minWidth: 120, textAlign: 'center' }}>Action</th>
                   </tr>
                 </thead>
 
                 <tbody>
                   {activeCourses.map((course, index) => (
                     <tr key={course.id}>
-                      <td>{index + 1}</td>
-                      <td>
+                      <td data-label="#">{index + 1}</td>
+                      <td data-label="Course Image">
                         {course.courseImage ? (
                           <img
                             src={`/images/${course.courseImage}`}
                             alt={course.courseName}
-                            style={{ width: '60px', height: '40px', objectFit: 'cover' }}
+                            className="rounded"
                           />
                         ) : (
-                          'No Image'
+                          <div className="text-muted d-flex align-items-center"><FaImage className="me-2"/> No Image</div>
                         )}
                       </td>
-                      <td>{course.courseName}</td>
-                      <td>{course.courseCode}</td>
-                      <td>{course.department}</td>
-                      <td>{course.credits}</td>
-                      <td>{course.semester}</td>
-                      <td>{course.courseType}</td>
-                      <td>{course.enrolledStudents}</td>
-                      <td>
+                      <td data-label="Name">{course.courseName}</td>
+                      <td data-label="Code">{course.courseCode}</td>
+                      <td data-label="Department">{course.department}</td>
+                      <td data-label="Credits">{course.credits}</td>
+                      <td data-label="Semester">{course.semester}</td>
+                      <td data-label="Type">{course.courseType}</td>
+                      <td data-label="Enrolled">{course.enrolledStudents}</td>
+                      <td data-label="Status">
                         <span className={`badge ${course.courseStatus === 'active' ? 'bg-success' : 'bg-secondary'}`}>
                           {course.courseStatus}
                         </span>
                       </td>
-                      <td>
+                      <td data-label="Description">
                         {course.courseDescription
                           ? course.courseDescription.length > 80
                             ? course.courseDescription.substring(0, 80) + '...'
                             : course.courseDescription
                           : '—'}
                       </td>
-                      <td>{new Date(course.createdAt).toLocaleDateString()}</td>
-                      <td>
+                      <td data-label="Created At">{new Date(course.createdAt).toLocaleDateString()}</td>
+                      <td data-label="Action" className="text-center">
                         <button
-                          className="btn btn-primary btn-sm"
+                          className="btn btn-outline-primary btn-sm d-flex align-items-center justify-content-center"
                           onClick={() => handleViewDetails(course)}
+                          title={`View ${course.courseName}`}
                         >
-                          View
+                          <FaEye /> <span className="ms-2 d-none d-sm-inline">View</span>
                         </button>
                       </td>
                     </tr>
@@ -135,42 +162,51 @@ const AssignedCourses = () => {
       {/* ================= MODAL ====================== */}
       {selectedCourse && (
         <div className="modal fade show" style={{ display: 'block', background: 'rgba(0,0,0,0.5)' }}>
-          <div className="modal-dialog modal-lg">
+          <div className="modal-dialog modal-xl">
             <div className="modal-content">
 
-              <div className="modal-header">
+              <div className="modal-header d-flex align-items-center">
                 <h5 className="modal-title">{selectedCourse.courseName} – Details</h5>
-                <button className="btn-close" onClick={closeModal}></button>
+                <button className="btn-close ms-auto" onClick={closeModal} aria-label="Close"></button>
               </div>
 
               <div className="modal-body">
-                <div className="row">
+                <div className="row gy-3">
 
-                  <div className="col-md-4 text-center">
+                  <div className="col-12 col-md-4 text-center">
                     {selectedCourse.courseImage ? (
                       <img
                         src={`/images/${selectedCourse.courseImage}`}
                         alt="Course"
-                        className="img-fluid rounded"
+                        className="img-fluid rounded mb-2"
+                        style={{ maxHeight: 220, width: '100%', objectFit: 'cover' }}
                       />
                     ) : (
-                      <div className="text-muted">No Image</div>
+                      <div className="text-muted d-flex align-items-center justify-content-center" style={{ height: 160 }}>
+                        <FaImage className="me-2" /> No Image
+                      </div>
                     )}
+                    <div className="mt-2 d-flex justify-content-center gap-2">
+                      <span className="badge bg-info text-dark"><FaCalendarAlt className="me-1"/> {selectedCourse.semester}</span>
+                      <span className="badge bg-primary">{selectedCourse.credits} credits</span>
+                    </div>
                   </div>
 
-                  <div className="col-md-8">
-                    <p><strong>Course Code:</strong> {selectedCourse.courseCode}</p>
-                    <p><strong>Department:</strong> {selectedCourse.department}</p>
-                    <p><strong>Credits:</strong> {selectedCourse.credits}</p>
-                    <p><strong>Semester:</strong> {selectedCourse.semester}</p>
-                    <p><strong>Course Type:</strong> {selectedCourse.courseType}</p>
-                    <p><strong>Enrolled Students:</strong> {selectedCourse.enrolledStudents}</p>
-                    <p><strong>Status:</strong> {selectedCourse.courseStatus}</p>
-                    <p><strong>Class Days:</strong> {selectedCourse.classDays}</p>
-                    <p><strong>Time:</strong> {selectedCourse.startTime} - {selectedCourse.endTime}</p>
-                    <p><strong>Classroom:</strong> {selectedCourse.classroom}</p>
-                    <p><strong>Description:</strong><br /> {selectedCourse.courseDescription}</p>
-                    <p><strong>Total Fee:</strong> {selectedCourse.totalFee}</p>
+                  <div className="col-12 col-md-8">
+                    <div className="row">
+                      <div className="col-12 col-sm-6"><p><strong>Course Code:</strong> {selectedCourse.courseCode}</p></div>
+                      <div className="col-12 col-sm-6"><p><strong>Department:</strong> {selectedCourse.department}</p></div>
+                      <div className="col-12 col-sm-6"><p><strong>Credits:</strong> {selectedCourse.credits}</p></div>
+                      <div className="col-12 col-sm-6"><p><strong>Semester:</strong> {selectedCourse.semester}</p></div>
+                      <div className="col-12 col-sm-6"><p><strong>Course Type:</strong> {selectedCourse.courseType}</p></div>
+                      <div className="col-12 col-sm-6"><p><strong>Enrolled Students:</strong> {selectedCourse.enrolledStudents}</p></div>
+                      <div className="col-12 col-sm-6"><p><strong>Status:</strong> {selectedCourse.courseStatus}</p></div>
+                      <div className="col-12 col-sm-6"><p><strong>Class Days:</strong> {selectedCourse.classDays}</p></div>
+                      <div className="col-12 col-sm-6"><p><strong>Time:</strong> {selectedCourse.startTime} - {selectedCourse.endTime}</p></div>
+                      <div className="col-12 col-sm-6"><p><strong>Classroom:</strong> {selectedCourse.classroom}</p></div>
+                      <div className="col-12"><p><strong>Description:</strong><br /> {selectedCourse.courseDescription}</p></div>
+                      <div className="col-12 col-sm-6"><p><strong>Total Fee:</strong> {selectedCourse.totalFee}</p></div>
+                    </div>
                   </div>
 
                 </div>

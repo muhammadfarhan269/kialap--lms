@@ -11,6 +11,7 @@ import {
   clearSuccess
 } from '../../../redux/slices/enrollmentSlice';
 import { toast } from 'react-toastify';
+import { FaBook, FaPlusCircle, FaMinusCircle, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
 
 const EnrollCourse = () => {
   const dispatch = useDispatch();
@@ -111,7 +112,6 @@ const EnrollCourse = () => {
 
   // Calculate summary statistics
   const totalCourses = courses.length;
-  const totalEnrolledStudents = courses.reduce((sum, course) => sum + (course.enrolledStudents || 0), 0);
 
   return (
     <div className="container-fluid">
@@ -125,12 +125,12 @@ const EnrollCourse = () => {
 
       {/* Summary Statistics */}
       <div className="row mb-4">
-        <div className="col-md-6">
+        <div className="col-md-6 mx-auto">
           <div className="card bg-primary text-white">
-            <div className="card-body">
-              <div className="d-flex align-items-center">
-                <div className="me-3">
-                  <i className="bi bi-book fs-1"></i>
+            <div className="card-body text-center">
+              <div className="d-flex align-items-center justify-content-center flex-column">
+                <div className="fs-1 mb-2">
+                  <FaBook />
                 </div>
                 <div>
                   <h5 className="card-title mb-1">Total Courses</h5>
@@ -146,9 +146,9 @@ const EnrollCourse = () => {
       {success && (
         <div className="row">
           <div className="col-12">
-            <div className="alert alert-success alert-dismissible fade show" role="alert">
-              <i className="bi bi-check-circle-fill me-2"></i>
-              Operation completed successfully!
+            <div className="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+              <FaCheckCircle className="me-2" />
+              <div className="me-auto">Operation completed successfully!</div>
               <button type="button" className="btn-close" onClick={() => dispatch(clearSuccess())}></button>
             </div>
           </div>
@@ -158,9 +158,9 @@ const EnrollCourse = () => {
       {(coursesError || enrollmentError) && (
         <div className="row">
           <div className="col-12">
-            <div className="alert alert-danger alert-dismissible fade show" role="alert">
-              <i className="bi bi-exclamation-triangle-fill me-2"></i>
-              {coursesError || enrollmentError}
+            <div className="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
+              <FaExclamationTriangle className="me-2" />
+              <div className="me-auto">{coursesError || enrollmentError}</div>
               <button type="button" className="btn-close" onClick={() => dispatch(clearError())}></button>
             </div>
           </div>
@@ -182,7 +182,7 @@ const EnrollCourse = () => {
                 </div>
               ) : (
                 <div className="table-responsive">
-                  <table className="table table-hover">
+                  <table className="table table-hover" style={{ minWidth: 1000 }}>
                     <thead className="table-light">
                       <tr>
                         <th>Course Code</th>
@@ -197,10 +197,10 @@ const EnrollCourse = () => {
                     <tbody>
                       {courses.map((course) => (
                         <tr key={course.id}>
-                          <td>
+                          <td data-label="Course Code">
                             <code>{course.courseCode}</code>
                           </td>
-                          <td>
+                          <td data-label="Course Name">
                             <strong>{course.courseName}</strong>
                             {course.courseDescription && (
                               <div className="small text-muted mt-1">
@@ -210,14 +210,14 @@ const EnrollCourse = () => {
                               </div>
                             )}
                           </td>
-                          <td>{course.department}</td>
-                          <td>{course.professorName || 'TBD'}</td>
-                          <td>{course.credits}</td>
-                          <td>{getEnrollmentCount(course)}</td>
-                          <td>
+                          <td data-label="Department">{course.department}</td>
+                          <td data-label="Professor">{course.professorName || 'TBD'}</td>
+                          <td data-label="Credits">{course.credits}</td>
+                          <td data-label="Students">{getEnrollmentCount(course)}</td>
+                          <td data-label="Actions">
                             {isEnrolled(course.id) ? (
                             <button
-                              className="btn btn-outline-danger btn-sm"
+                              className="btn btn-outline-danger btn-sm d-flex align-items-center"
                               onClick={() => {
                                 const enrollment = enrollments.find(e => e.course_id === course.id && e.status === 'active');
                                 if (enrollment) {
@@ -227,17 +227,15 @@ const EnrollCourse = () => {
                               }}
                               disabled={enrollmentLoading}
                             >
-                              <i className="bi bi-dash-circle me-1"></i>
-                              Drop
+                              <FaMinusCircle /> <span className="ms-2 d-none d-sm-inline">Drop</span>
                             </button>
                             ) : (
                               <button
-                                className="btn btn-outline-success btn-sm"
+                                className="btn btn-outline-success btn-sm d-flex align-items-center"
                                 onClick={() => handleEnroll(course.id)}
                                 disabled={enrollmentLoading}
                               >
-                                <i className="bi bi-plus-circle me-1"></i>
-                                Enroll
+                                <FaPlusCircle /> <span className="ms-2 d-none d-sm-inline">Enroll</span>
                               </button>
                             )}
                           </td>
@@ -293,8 +291,7 @@ const EnrollCourse = () => {
                               onClick={() => handleUnenroll(enrollment.id)}
                               disabled={enrollmentLoading}
                             >
-                              <i className="bi bi-dash-circle me-1"></i>
-                              Drop
+                              <FaMinusCircle /> <span className="ms-2 d-none d-sm-inline">Drop</span>
                             </button>
                           </td>
                         </tr>
@@ -332,6 +329,17 @@ const EnrollCourse = () => {
           </div>
         </div>
       )}
+      <style>{`
+        /* Mobile stacked rows for course tables */
+        @media (max-width: 575px) {
+          .table thead { display: none; }
+          .table, .table tbody, .table tr, .table td { display: block; width: 100%; }
+          .table tr { margin-bottom: 0.75rem; border: 1px solid #e9ecef; border-radius: .25rem; padding: .5rem; }
+          .table td { text-align: right; padding-left: 50%; position: relative; border: none; }
+          .table td::before { content: attr(data-label); position: absolute; left: 0; width: 45%; padding-left: .75rem; font-weight: 600; text-align: left; }
+          .d-none.d-sm-inline { display: none !important; }
+        }
+      `}</style>
     </div>
   );
 };

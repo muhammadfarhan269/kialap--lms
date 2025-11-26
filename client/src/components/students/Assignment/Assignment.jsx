@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { FaFileAlt, FaDownload, FaUpload, FaTimes, FaClock } from 'react-icons/fa';
 
 const Assignment = () => {
   const dispatch = useDispatch();
@@ -204,9 +205,19 @@ const Assignment = () => {
 
   return (
     <div className="assignment-container">
-      <div className="assignment-header">
-        <h2>My Assignments</h2>
-        <p className="subtitle">Assignments assigned by your professors</p>
+      <div className="assignment-header d-flex align-items-center justify-content-between flex-wrap">
+        <div className="d-flex align-items-center gap-3">
+          <div className="icon-box bg-primary text-white d-flex align-items-center justify-content-center rounded" style={{ width:56, height:56 }}>
+            <FaFileAlt />
+          </div>
+          <div>
+            <h2 className="mb-0">My Assignments</h2>
+            <p className="subtitle mb-0">Assignments assigned by your professors</p>
+          </div>
+        </div>
+        <div className="ms-auto mt-2 mt-sm-0">
+          <small className="text-muted">{assignments.length} assignment(s)</small>
+        </div>
       </div>
 
       {loading && <div className="alert alert-info">Loading assignments...</div>}
@@ -220,7 +231,7 @@ const Assignment = () => {
 
       {!loading && assignments.length > 0 && (
         <div className="table-responsive">
-          <table className="assignments-table">
+          <table className="assignments-table table table-striped table-hover" style={{ minWidth: 900 }}>
             <thead>
               <tr>
                 <th>Title</th>
@@ -234,29 +245,29 @@ const Assignment = () => {
             <tbody>
               {assignments.map((assignment) => (
                 <tr key={assignment.id || assignment.uuid}>
-                  <td>{assignment.title}</td>
-                  <td>{assignment.courseName || 'N/A'}</td>
-                  <td>{new Date(assignment.dueDate).toLocaleString()}</td>
-                  <td>{getStatusBadge(assignment.studentSubmissionStatus || assignment.status)}</td>
-                  <td>
+                  <td data-label="Title">{assignment.title}</td>
+                  <td data-label="Course">{assignment.courseName || 'N/A'}</td>
+                  <td data-label="Due Date">{new Date(assignment.dueDate).toLocaleString()}</td>
+                  <td data-label="Status">{getStatusBadge(assignment.studentSubmissionStatus || assignment.status)}</td>
+                  <td data-label="File">
                     {assignment.filePath ? (
                       <button
-                        className="btn btn-sm btn-link"
+                        className="btn btn-sm btn-outline-primary d-flex align-items-center"
                         onClick={() => handleDownload(assignment.filePath)}
                       >
-                        Download
+                        <FaDownload /> <span className="ms-2 d-none d-sm-inline">Download</span>
                       </button>
                     ) : (
-                      <span className="muted">—</span>
+                      <span className="muted d-inline-flex align-items-center"><FaFileAlt className="me-2"/> —</span>
                     )}
                   </td>
-                  <td>
+                  <td data-label="Actions">
                     <button
-                      className="btn btn-sm btn-primary"
+                      className="btn btn-sm btn-primary d-flex align-items-center"
                       onClick={() => handleUploadClick(assignment)}
                       disabled={assignment.status === 'Graded' || assignment.studentSubmissionStatus === 'Submitted'}
                     >
-                      Submit
+                      <FaUpload /> <span className="ms-2 d-none d-sm-inline">Submit</span>
                     </button>
                   </td>
                 </tr>
@@ -270,13 +281,14 @@ const Assignment = () => {
       {showUploadModal && (
         <div className="modal-overlay">
           <div className="modal-content">
-            <div className="modal-header">
-              <h3>Submit Assignment: {selectedAssignment?.title}</h3>
+            <div className="modal-header d-flex align-items-center justify-content-between">
+              <h3 className="mb-0"><FaUpload className="me-2"/> Submit Assignment</h3>
               <button 
                 className="close-btn"
                 onClick={() => setShowUploadModal(false)}
+                aria-label="Close upload modal"
               >
-                ×
+                <FaTimes />
               </button>
             </div>
             <div className="modal-body">
@@ -290,8 +302,8 @@ const Assignment = () => {
                     onChange={handleFileSelect}
                     accept=".pdf,.doc,.docx"
                   />
-                  <label htmlFor="submissionFile" className="file-input-label">
-                    {submissionFile ? `Selected: ${submissionFile.name}` : 'Choose PDF or Word file'}
+                  <label htmlFor="submissionFile" className="file-input-label d-flex align-items-center gap-2">
+                    <FaFileAlt /> {submissionFile ? `Selected: ${submissionFile.name}` : 'Choose PDF or Word file'}
                   </label>
                 </div>
                 <small className="form-helper">
@@ -307,11 +319,11 @@ const Assignment = () => {
                 Cancel
               </button>
               <button
-                className="btn btn-primary"
+                className="btn btn-primary d-flex align-items-center"
                 onClick={handleSubmitAssignment}
                 disabled={submittingId === selectedAssignment?.id || !submissionFile}
               >
-                {submittingId === selectedAssignment?.id ? 'Submitting...' : 'Submit Assignment'}
+                {submittingId === selectedAssignment?.id ? (<><FaClock className="me-2"/> Submitting...</>) : (<><FaUpload className="me-2"/> Submit Assignment</>)}
               </button>
             </div>
           </div>
@@ -455,6 +467,17 @@ const Assignment = () => {
 
         .muted {
           color: #888;
+        }
+
+        /* Responsive stacked rows for assignments table */
+        @media (max-width: 575px) {
+          .assignments-table thead { display: none; }
+          .assignments-table, .assignments-table tbody, .assignments-table tr, .assignments-table td { display: block; width: 100%; }
+          .assignments-table tr { margin-bottom: 0.75rem; border: 1px solid #e9ecef; border-radius: .25rem; padding: .5rem; }
+          .assignments-table td { text-align: right; padding-left: 50%; position: relative; border: none; }
+          .assignments-table td::before { content: attr(data-label); position: absolute; left: 0; width: 45%; padding-left: .75rem; font-weight: 600; text-align: left; }
+          .d-none.d-sm-inline { display: none !important; }
+          .modal-content { width: 94%; max-width: 94%; }
         }
 
         /* Modal Styles */

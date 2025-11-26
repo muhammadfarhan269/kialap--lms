@@ -7,6 +7,11 @@ import assetsReducer from './slices/assetsSlice';
 import departmentReducer from './slices/departmentSlice';
 import enrollmentReducer from './slices/enrollmentSlice';
 import assignmentReducer from './slices/assignmentSlice';
+import gradingWeightsReducer from './slices/gradingWeightsSlice';
+import gradesReducer from './slices/gradesSlice';
+import studentCourseGradesReducer from './slices/studentCourseGradesSlice';
+import coursesReducer from './slices/coursesSlice';
+import enrolledStudentsReducer from './slices/enrolledStudentsSlice';
 
 const store = configureStore({
   reducer: {
@@ -18,6 +23,11 @@ const store = configureStore({
     department: departmentReducer,
     enrollment: enrollmentReducer,
     assignment: assignmentReducer,
+    gradingWeights: gradingWeightsReducer,
+    grades: gradesReducer,
+    studentCourseGrades: studentCourseGradesReducer,
+    courses: coursesReducer,
+    enrolledStudents: enrolledStudentsReducer,
   },
 });
 
