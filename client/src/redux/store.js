@@ -10,6 +10,7 @@ import assignmentReducer from './slices/assignmentSlice';
 import gradingWeightsReducer from './slices/gradingWeightsSlice';
 import gradesReducer from './slices/gradesSlice';
 import studentCourseGradesReducer from './slices/studentCourseGradesSlice';
+import allCoursesGradesReducer from './slices/allCoursesGradesSlice';
 import coursesReducer from './slices/coursesSlice';
 import enrolledStudentsReducer from './slices/enrolledStudentsSlice';
 
@@ -26,6 +27,7 @@ const store = configureStore({
     gradingWeights: gradingWeightsReducer,
     grades: gradesReducer,
     studentCourseGrades: studentCourseGradesReducer,
+    allCoursesGrades: allCoursesGradesReducer,
     courses: coursesReducer,
     enrolledStudents: enrolledStudentsReducer,
   },

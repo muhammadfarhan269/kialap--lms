@@ -42,6 +42,7 @@ app.use('/api/enrollments', require('./routes/enrollmentRoutes'));
 app.use('/api/assignments', require('./routes/assignmentRoutes'));
 app.use('/api/grades', require('./routes/gradesRoutes'));
 app.use('/api/grading-weights', require('./routes/gradingWeightRoutes'));
+app.use('/api/assessment-weights', require('./routes/assessmentWeightRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
 app.use('/api/final-grades', require('./routes/finalGradesRoutes'));
 

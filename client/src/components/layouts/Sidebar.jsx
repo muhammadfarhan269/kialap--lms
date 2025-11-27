@@ -67,6 +67,12 @@ const Sidebar = ({ isOpen, collapsed = false }) => {
                     <span>Grades</span>
                   </NavLink>
                 </li>
+                <li className="nav-item">
+                  <NavLink className="nav-link" to="/transcript">
+                    <i className="bi bi-file-earmark-text"></i>
+                    <span>Transcript</span>
+                  </NavLink>
+                </li>
               </ul>
             </div>
           </>

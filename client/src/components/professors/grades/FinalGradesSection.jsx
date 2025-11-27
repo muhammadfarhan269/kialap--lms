@@ -22,10 +22,16 @@ const FinalGradesSection = ({ students, courseId, courseGrades }) => {
   }, [courseGrades, weights]);
 
   const getLetterGrade = (percentage) => {
-    if (percentage >= 90) return 'A';
-    if (percentage >= 80) return 'B';
-    if (percentage >= 70) return 'C';
-    if (percentage >= 60) return 'D';
+    if (percentage >= 85) return 'A';
+    if (percentage >= 80) return 'A−';
+    if (percentage >= 75) return 'B+';
+    if (percentage >= 71) return 'B';
+    if (percentage >= 68) return 'B−';
+    if (percentage >= 64) return 'C+';
+    if (percentage >= 61) return 'C';
+    if (percentage >= 58) return 'C−';
+    if (percentage >= 54) return 'D+';
+    if (percentage >= 50) return 'D';
     return 'F';
   };
 
@@ -176,9 +182,15 @@ const FinalGradesSection = ({ students, courseId, courseGrades }) => {
   const getGradeColor = (letterGrade) => {
     const colors = {
       'A': 'success',
+      'A−': 'success',
+      'B+': 'info',
       'B': 'info',
+      'B−': 'info',
+      'C+': 'warning',
       'C': 'warning',
-      'D': 'warning',
+      'C−': 'warning',
+      'D+': 'danger',
+      'D': 'danger',
       'F': 'danger'
     };
     return colors[letterGrade] || 'secondary';
@@ -267,7 +279,7 @@ const FinalGradesSection = ({ students, courseId, courseGrades }) => {
                       finalWeightedScore: parseFloat(g.totalWeightedObtained) || 0,
                       weightSum: parseFloat(g.totalWeightSum) || 0,
                       finalPercentage: parseFloat(g.finalPercentage) || 0,
-                      letterGrade: g.letterGrade
+                      letterGrade: null  // Let backend calculate letter grade from percentage
                     }))
                   };
                   const res = await fetch('http://localhost:5000/api/final-grades', {

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchStudentGradesForCourse } from '../../../redux/slices/gradesSlice';
 import { fetchStudentCourseGrade } from '../../../redux/slices/studentCourseGradesSlice';
+import StudentGradesDashboard from './StudentGradesDashboard';
 
 const MyGrades = ({ courseId }) => {
   const dispatch = useDispatch();
@@ -16,6 +17,8 @@ const MyGrades = ({ courseId }) => {
       dispatch(fetchStudentCourseGrade({ studentUuid: userUuid, courseId }));
     }
   }, [userUuid, courseId, dispatch]);
+
+  if (!courseId) return <StudentGradesDashboard />;
 
   return (
     <div>

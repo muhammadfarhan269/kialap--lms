@@ -134,6 +134,40 @@ const MultiAssessmentSection = ({ assessmentType, students, courseId, initialGra
     }
   }, []);
 
+  // Fetch course-level grading weights to use as defaults when a column weight is missing
+  const [courseTypeWeight, setCourseTypeWeight] = useState(null);
+  useEffect(() => {
+    let mounted = true;
+    async function loadCourseWeights() {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const res = await fetch(`http://localhost:5000/api/grading-weights/${courseId}`, { headers: { Authorization: `Bearer ${token}` } });
+        // If no course-level grading weights exist the API returns 404 — treat as no weights configured
+        if (res.status === 404) {
+          if (!mounted) return;
+          setCourseTypeWeight(null);
+          return;
+        }
+        if (!res.ok) return; // other errors — silently ignore here
+        const data = await res.json();
+        if (!mounted) return;
+        if (data && data.data) {
+          const mapping = {
+            assignment: data.data.assignment_weight,
+            quiz: data.data.quiz_weight,
+            midterm: data.data.midterm_weight,
+            final: data.data.final_weight
+          };
+          setCourseTypeWeight(mapping[assessmentType] || null);
+        }
+      } catch (err) {
+        // ignore
+      }
+    }
+    loadCourseWeights();
+    return () => { mounted = false; };
+  }, [courseId, assessmentType]);
+
   // Save columns to localStorage whenever they change
   useEffect(() => {
     localStorage.setItem(columnsStorageKey, JSON.stringify(columns));
@@ -271,6 +305,14 @@ const MultiAssessmentSection = ({ assessmentType, students, courseId, initialGra
               score: parseFloat(gradeData.obtainedMarks) || 0,
               maxScore: parseFloat(gradeData.totalMarks) || 0
             };
+            // Determine weight to send: prefer column-level input, otherwise distribute course-type weight equally
+            let w = null;
+            if (weights && weights[col.id] !== undefined && weights[col.id] !== null && weights[col.id] !== '') {
+              w = Number(weights[col.id]);
+            } else if (courseTypeWeight !== null && columns.length > 0) {
+              w = Number(courseTypeWeight) / columns.length;
+            }
+            if (w !== null && !isNaN(w)) payload.weight = w;
             // Always create new for demo; you can add logic to update if grade exists
             const res = await fetch('http://localhost:5000/api/grades', {
               method: 'POST',

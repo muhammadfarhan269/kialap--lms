@@ -139,7 +139,6 @@ await pool.query(`DO $$
     await pool.query(enrollmentsSql);
     console.log('Enrollments table created successfully!');
 
-    console.log('Migration completed successfully!');
     // Read and execute grades table SQL
     const gradesSqlFilePath = path.join(__dirname, 'createGradesTable.sql');
     const gradesSql = fs.readFileSync(gradesSqlFilePath, 'utf8');
@@ -151,6 +150,14 @@ await pool.query(`DO $$
     const gradingWeightsSql = fs.readFileSync(gradingWeightsSqlFilePath, 'utf8');
     await pool.query(gradingWeightsSql);
     console.log('Grading Weights table created successfully!');
+
+    // Read and execute assessment weights table SQL
+    const assessmentWeightsSqlFilePath = path.join(__dirname, 'createAssessmentWeightsTable.sql');
+    if (fs.existsSync(assessmentWeightsSqlFilePath)) {
+      const assessmentWeightsSql = fs.readFileSync(assessmentWeightsSqlFilePath, 'utf8');
+      await pool.query(assessmentWeightsSql);
+      console.log('Assessment Weights table created successfully!');
+    }
 
     // Read and execute final grades table SQL
     const finalGradesSqlFilePath = path.join(__dirname, 'createFinalGradesTable.sql');

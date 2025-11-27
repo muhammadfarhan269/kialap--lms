@@ -1,6 +1,25 @@
 const pool = require('../config/dbConnection');
 
+// Helper function to convert percentage to letter grade using the grading scale
+const getLetterGrade = (percentage) => {
+  const pct = parseFloat(percentage) || 0;
+  if (pct >= 85) return 'A';
+  if (pct >= 80) return 'A−';
+  if (pct >= 75) return 'B+';
+  if (pct >= 71) return 'B';
+  if (pct >= 68) return 'B−';
+  if (pct >= 64) return 'C+';
+  if (pct >= 61) return 'C';
+  if (pct >= 58) return 'C−';
+  if (pct >= 54) return 'D+';
+  if (pct >= 50) return 'D';
+  return 'F';
+};
+
 const upsertFinalGrade = async ({ studentUuid, courseId, finalWeightedScore, weightSum, finalPercentage, letterGrade = null, professorUuid = null, notes = null }) => {
+  // Auto-calculate letter grade if not provided
+  const calculatedLetterGrade = letterGrade || getLetterGrade(finalPercentage);
+  
   const query = `
     INSERT INTO final_grades (student_uuid, course_id, final_weighted_score, weight_sum, final_percentage, letter_grade, professor_uuid, notes, computed_at)
     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, CURRENT_TIMESTAMP)
@@ -14,7 +33,7 @@ const upsertFinalGrade = async ({ studentUuid, courseId, finalWeightedScore, wei
       computed_at = CURRENT_TIMESTAMP
     RETURNING *;
   `;
-  const values = [studentUuid, courseId, finalWeightedScore, weightSum, finalPercentage, letterGrade, professorUuid, notes];
+  const values = [studentUuid, courseId, finalWeightedScore, weightSum, finalPercentage, calculatedLetterGrade, professorUuid, notes];
   const result = await pool.query(query, values);
   return result.rows[0];
 };
@@ -25,7 +44,22 @@ const getFinalGradesByCourse = async (courseId) => {
   return result.rows;
 };
 
+const getFinalGrade = async (studentUuid, courseId) => {
+  const query = `SELECT * FROM final_grades WHERE student_uuid = $1 AND course_id = $2 LIMIT 1;`;
+  const result = await pool.query(query, [studentUuid, courseId]);
+  return result.rows[0];
+};
+
+const getFinalGradesByStudent = async (studentUuid) => {
+  const query = `SELECT * FROM final_grades WHERE student_uuid = $1 ORDER BY computed_at DESC;`;
+  const result = await pool.query(query, [studentUuid]);
+  return result.rows;
+};
+
 module.exports = {
+  getLetterGrade,
   upsertFinalGrade,
-  getFinalGradesByCourse
+  getFinalGradesByCourse,
+  getFinalGrade,
+  getFinalGradesByStudent
 };

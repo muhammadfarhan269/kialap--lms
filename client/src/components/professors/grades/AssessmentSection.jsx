@@ -1,11 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { createGrade, updateGrade } from '../../../redux/slices/gradesSlice';
+import { FaSave } from 'react-icons/fa';
 
 const AssessmentSection = ({ assessmentType, students, courseId, initialGrades }) => {
   const dispatch = useDispatch();
   const [grades, setGrades] = useState({});
   const [saving, setSaving] = useState(false);
+  const [weight, setWeight] = useState('');
+
+  // Fetch course-level grading weights to use as default
+  useEffect(() => {
+    let mounted = true;
+    async function loadWeights() {
+      try {
+        const token = localStorage.getItem('accessToken');
+        const res = await fetch(`http://localhost:5000/api/grading-weights/${courseId}`, { headers: { Authorization: `Bearer ${token}` } });
+        // If no course-level grading weights exist the API may return 404 — treat as no weights configured
+        if (res.status === 404) {
+          if (!mounted) return;
+          setWeight(null);
+          return;
+        }
+        if (!res.ok) return; // other errors — silently ignore here
+        const data = await res.json();
+        if (!mounted) return;
+        if (data && data.data) {
+          const mapping = {
+            assignment: data.data.assignment_weight,
+            quiz: data.data.quiz_weight,
+            midterm: data.data.midterm_weight,
+            final: data.data.final_weight
+          };
+          if (mapping[assessmentType] !== undefined) setWeight(mapping[assessmentType]);
+        }
+      } catch (err) {
+        // ignore
+      }
+    }
+    loadWeights();
+    return () => { mounted = false; };
+  }, [courseId, assessmentType]);
 
   useEffect(() => {
     const initialData = {};
@@ -49,6 +84,11 @@ const AssessmentSection = ({ assessmentType, students, courseId, initialGrades }
             maxScore: gradeData.totalMarks
           };
 
+          // include weight automatically (use component weight as default)
+          if (weight !== undefined && weight !== null && weight !== '') {
+            payload.weight = Number(weight);
+          }
+
           if (gradeData.id) {
             // Update existing
             const res = await fetch(`http://localhost:5000/api/grades/${gradeData.id}`, {
@@ -57,7 +97,7 @@ const AssessmentSection = ({ assessmentType, students, courseId, initialGrades }
                 'Content-Type': 'application/json',
                 Authorization: `Bearer ${token}`
               },
-              body: JSON.stringify({ score: payload.score, max_score: payload.maxScore })
+              body: JSON.stringify({ score: payload.score, max_score: payload.maxScore, weight: payload.weight })
             });
             if (!res.ok) throw new Error('Failed to update grade');
           } else {

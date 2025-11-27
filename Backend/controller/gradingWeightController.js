@@ -6,7 +6,7 @@ const getWeights = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
   const weights = await GradingWeight.getWeightsByCourse(courseId);
   if (!weights) {
-    return res.status(404).json({ success: false, message: 'No grading weights found for this course' });
+    return res.status(200).json({ success: false, message: 'No grading weights found for this course', data: null });
   }
   res.json({ success: true, data: weights });
 });
