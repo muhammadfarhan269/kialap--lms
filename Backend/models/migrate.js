@@ -166,6 +166,14 @@ await pool.query(`DO $$
       await pool.query(finalGradesSql);
       console.log('Final Grades table created successfully!');
     }
+
+    // Read and execute attendance tables SQL
+    const attendanceSqlFilePath = path.join(__dirname, 'createAttendanceTable.sql');
+    if (fs.existsSync(attendanceSqlFilePath)) {
+      const attendanceSql = fs.readFileSync(attendanceSqlFilePath, 'utf8');
+      await pool.query(attendanceSql);
+      console.log('Attendance tables (attendances, attendance_corrections, attendance_history) created successfully!');
+    }
   } catch (err) {
     console.error('Migration failed:', err);
   } finally {

@@ -57,7 +57,7 @@ const getEnrollmentsByUserUuid = async (userUuid) => {
     FROM enrollments e
     JOIN courses c ON e.course_id = c.id
     LEFT JOIN professors p ON c.professor_uuid = p.user_uuid
-    WHERE e.user_uuid = $1
+    WHERE e.user_uuid = $1 AND e.status = 'active' AND c.course_status = 'active'
     ORDER BY e.enrollment_date DESC;
   `;
   const result = await pool.query(query, [userUuid]);
@@ -75,11 +75,15 @@ const getEnrollmentsByCourse = async (courseId) => {
       e.grade,
       u.username as "studentName",
       u.email as "studentEmail",
+      u.first_name,
+      u.last_name,
+      s.id as "student_id",
       s.department as "studentDepartment"
     FROM enrollments e
     JOIN users u ON e.user_uuid = u.uuid
     LEFT JOIN students s ON u.uuid = s.user_uuid
-    WHERE e.course_id = $1
+    JOIN courses c ON e.course_id = c.id
+    WHERE e.course_id = $1 AND e.status = 'active' AND c.course_status = 'active'
     ORDER BY e.enrollment_date DESC;
   `;
   const result = await pool.query(query, [courseId]);

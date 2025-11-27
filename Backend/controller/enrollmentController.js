@@ -98,12 +98,10 @@ const getStudentEnrollments = asyncHandler(async (req, res) => {
             throw new Error('User UUID missing in token.');
         }
 
-        const enrollments = await Enrollment.getEnrollmentsByUserUuid(req.user.uuid);
+          const enrollments = await Enrollment.getEnrollmentsByUserUuid(req.user.uuid);
 
-        res.status(200).json({
-            success: true,
-            data: enrollments
-        });
+          // Return the enrollments array directly to match frontend expectation
+          res.status(200).json(enrollments);
     } catch (error) {
         console.error('Error in getStudentEnrollments:', error);
         res.status(res.statusCode !== 200 ? res.statusCode : 500);

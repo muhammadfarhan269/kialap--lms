@@ -157,12 +157,13 @@ const Transcript = () => {
         }
         // Fetch enrollments + final grades in parallel
         const [enRes, fgRes] = await Promise.all([
-          axios.get(`/api/enrollments/student`, { headers: { Authorization: `Bearer ${token}` } }),
+          axios.get(`/api/enrollments/student-courses`, { headers: { Authorization: `Bearer ${token}` } }),
           axios.get(`/api/final-grades/student/${user.uuid}/summary`, { headers: { Authorization: `Bearer ${token}` } })
         ]);
 
-        const enrollments = enRes.data?.data || [];
-        const finalGrades = fgRes.data?.data || [];
+        // Handle both array and wrapped response formats
+        const enrollments = Array.isArray(enRes.data) ? enRes.data : (enRes.data?.data || []);
+        const finalGrades = Array.isArray(fgRes.data) ? fgRes.data : (fgRes.data?.data || []);
 
         // build a map course_id -> final grade row for quick lookup
         const fgMap = {};

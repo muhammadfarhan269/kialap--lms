@@ -39,7 +39,8 @@ const Assignment = () => {
         if (!response.ok) throw new Error('Failed to fetch enrolled courses');
         
         const data = await response.json();
-        const enrollments = data.data || [];
+        // Handle both array format and wrapped format (data.data)
+        const enrollments = Array.isArray(data) ? data : (data.data || []);
         console.debug('Fetched enrollments:', enrollments);
         // Only include active enrollments
         const courseIds = enrollments
@@ -82,7 +83,9 @@ const Assignment = () => {
             
             if (response.ok) {
               const data = await response.json();
-              allAssignments.push(...(data.data || []));
+              // Handle both wrapped and unwrapped response formats
+              const assignmentData = Array.isArray(data) ? data : (data.data || []);
+              allAssignments.push(...assignmentData);
             }
           } catch (err) {
             console.error(`Error fetching assignments for course ${courseId}:`, err);

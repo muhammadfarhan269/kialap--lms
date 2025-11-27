@@ -45,6 +45,7 @@ app.use('/api/grading-weights', require('./routes/gradingWeightRoutes'));
 app.use('/api/assessment-weights', require('./routes/assessmentWeightRoutes'));
 app.use('/api/reports', require('./routes/reportRoutes'));
 app.use('/api/final-grades', require('./routes/finalGradesRoutes'));
+app.use('/api/attendance', require('./routes/attendanceRoutes'));
 
 // Global error handling middleware - must be last middleware
 app.use((err, req, res, next) => {

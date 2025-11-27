@@ -355,6 +355,36 @@ const getCoursesByDepartment = asyncHandler(async (req, res) => {
   });
 });
 
+// @desc    Get courses assigned to the authenticated professor
+// @route   GET /api/courses/assigned
+// @access  Private/Professor
+const getAssignedCourses = asyncHandler(async (req, res) => {
+  try {
+    // Get professor UUID from the JWT token (attached by verifyJWT middleware)
+    const professorUuid = req.user?.uuid;
+
+    if (!professorUuid) {
+      res.status(401);
+      throw new Error('Unauthorized: Professor ID not found in token');
+    }
+
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const offset = (page - 1) * limit;
+
+    // Fetch courses for this professor
+    const courses = await Course.getCoursesByProfessor(professorUuid, limit, offset);
+
+    res.status(200).json(courses);
+  } catch (error) {
+    console.error('Error fetching assigned courses:', error);
+    res.status(res.statusCode === 200 ? 500 : res.statusCode).json({
+      success: false,
+      message: error.message || 'Failed to fetch assigned courses'
+    });
+  }
+});
+
 module.exports = {
   createCourse,
   getCourses,
@@ -363,5 +393,6 @@ module.exports = {
   deleteCourse,
   getCoursesByProfessor,
   getCoursesByDepartment,
+  getAssignedCourses,
   upload
 };

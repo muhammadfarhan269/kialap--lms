@@ -44,6 +44,8 @@ import ViewSubmittedAssignmentsPage from './pages/Professors/View-SubmitedAssign
 import ClassGradeReportPage from './pages/Professors/ClassGradeReportPage';
 import StudentGradeDetailPage from './pages/Professors/StudentGradeDetailPage';
 import CourseGradesPage from './pages/Professors/CourseGradesPage';
+import StudentAttendancePage from './pages/Students/Attendance';
+import ProfessorAttendancePage from './pages/Professors/Attendance';
 
 
 function App() {
@@ -74,11 +76,14 @@ function App() {
         <Route path="/student-profile" element={<ProtectedRoute><Layout><div>Student Profile</div></Layout></ProtectedRoute>} />
 
         <Route path="/enroll-course" element={<ProtectedRoute allowedRoles={['student']}><EnrollCoursePage /></ProtectedRoute>} />
-        <Route path="/attendance" element={<ProtectedRoute allowedRoles={['student']}><AttendancePage /></ProtectedRoute>} />
+        <Route path="/attendance" element={<ProtectedRoute allowedRoles={['student']}><StudentAttendancePage /></ProtectedRoute>} />
+        <Route path="/attendance/:courseId" element={<ProtectedRoute allowedRoles={['student']}><StudentAttendancePage /></ProtectedRoute>} />
         <Route path="/assignments" element={<ProtectedRoute allowedRoles={['student']}><AssignmentPage /></ProtectedRoute>} />
         <Route path="/grades" element={<ProtectedRoute allowedRoles={['student']}><GradesPage /></ProtectedRoute>} />
         <Route path="/transcript" element={<ProtectedRoute allowedRoles={['student']}><TranscriptPage /></ProtectedRoute>} />
         <Route path="/assigned-courses" element={<ProtectedRoute allowedRoles={['professor']}><AssignedCoursesPage /></ProtectedRoute>} />
+        <Route path="/professor/attendance" element={<ProtectedRoute allowedRoles={['professor']}><ProfessorAttendancePage /></ProtectedRoute>} />
+        <Route path="/professor/attendance/:courseId" element={<ProtectedRoute allowedRoles={['professor']}><ProfessorAttendancePage /></ProtectedRoute>} />
 
         <Route path="/professor-grades" element={<ProtectedRoute allowedRoles={['professor']}><ProfessorGradesPage /></ProtectedRoute>} />
         <Route path="/professor/grades/:courseId" element={<ProtectedRoute allowedRoles={['professor']}><CourseGradesPage /></ProtectedRoute>} />

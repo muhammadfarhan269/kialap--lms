@@ -112,7 +112,7 @@ const Sidebar = ({ isOpen, collapsed = false }) => {
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink className="nav-link" to="/student-attendance">
+                  <NavLink className="nav-link" to="/professor/attendance">
                     <i className="bi bi-check-circle"></i>
                     <span>Attendance of Students</span>
                   </NavLink>

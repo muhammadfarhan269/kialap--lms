@@ -8,6 +8,7 @@ const {
   deleteCourse,
   getCoursesByProfessor,
   getCoursesByDepartment,
+  getAssignedCourses,
   upload
 } = require('../controller/courseController');
 
@@ -24,6 +25,8 @@ router.delete('/:id', verifyAdmin, deleteCourse);
 
 // All authenticated users can GET courses
 router.get('/', getCourses);
+// Get courses assigned to authenticated professor
+router.get('/assigned', getAssignedCourses);
 // Specific routes before dynamic id route
 router.get('/professor/:professorId',getCoursesByProfessor);
 router.get('/department/:department', getCoursesByDepartment);

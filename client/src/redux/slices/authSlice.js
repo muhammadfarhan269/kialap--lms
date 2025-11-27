@@ -117,6 +117,7 @@ const authSlice = createSlice({
   initialState: {
     user: null,
     studentDetails: null,
+    token: localStorage.getItem('accessToken') || null,
     loading: false,
     error: null,
     isAuthenticated: false,
@@ -129,6 +130,7 @@ const authSlice = createSlice({
       state.user = null;
       state.studentDetails = null;
       state.isAuthenticated = false;
+      state.token = null;
       localStorage.removeItem('accessToken');
       localStorage.removeItem('username');
       toast.success('Logged out successfully!');
@@ -137,6 +139,7 @@ const authSlice = createSlice({
       const token = localStorage.getItem('accessToken');
       if (token) {
         state.isAuthenticated = true;
+        state.token = token;
         // Decode the token to get user info
         const decoded = jwtDecode(token);
         state.user = { role: decoded.UserInfo.role, username: decoded.UserInfo.username || decoded.UserInfo.email, uuid: decoded.UserInfo.uuid, professorId: decoded.UserInfo.professorId };
@@ -153,6 +156,7 @@ const authSlice = createSlice({
       .addCase(registerUser.fulfilled, (state, action) => {
         state.loading = false;
         state.user = action.payload.user;
+        state.token = action.payload.accessToken || localStorage.getItem('accessToken') || null;
         state.isAuthenticated = true;
         state.error = null;
         // If student, set studentDetails
@@ -175,6 +179,7 @@ const authSlice = createSlice({
         state.loading = false;
         state.isAuthenticated = true;
         state.error = null;
+        state.token = action.payload.accessToken;
         // Decode the token to get user info
         const decoded = jwtDecode(action.payload.accessToken);
         state.user = { role: decoded.UserInfo.role, username: decoded.UserInfo.username || decoded.UserInfo.email, uuid: decoded.UserInfo.uuid };

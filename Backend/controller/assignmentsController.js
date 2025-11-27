@@ -315,11 +315,17 @@ const getAssignmentsByCourse = asyncHandler(async (req, res) => {
   const { courseId } = req.params;
   const userUuid = req.user.uuid;
 
-  // Verify course exists
+  // Verify course exists and is active
   const course = await Course.findCourseById(courseId);
   if (!course) {
     res.status(404);
     throw new Error('Course not found');
+  }
+
+  // Check if course is active (especially for students)
+  if (req.user.role === 'student' && course.courseStatus !== 'active') {
+    res.status(403);
+    throw new Error('This course is not active');
   }
 
   // For professors: check if they own the course
