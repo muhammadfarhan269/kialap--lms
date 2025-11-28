@@ -9,7 +9,7 @@ const EditLibraryAsset = () => {
   const navigate = useNavigate();
   const { id } = useParams();
   const dispatch = useDispatch();
-  const { currentAsset, loading, error } = useSelector(state => state.assets);
+  const { currentAsset, loading, error, success } = useSelector(state => state.assets);
 
   // Form state
   const [formData, setFormData] = useState({

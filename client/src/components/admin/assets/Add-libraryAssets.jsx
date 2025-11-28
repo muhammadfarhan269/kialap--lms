@@ -8,7 +8,7 @@ import '../../../css/dashboard.css';
 const AddLibraryAssets = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
-  const { loading, error } = useSelector(state => state.assets);
+  const { loading, error, success } = useSelector(state => state.assets);
 
   // Form state
   const [formData, setFormData] = useState({

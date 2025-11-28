@@ -104,22 +104,22 @@ const AllProfessor = () => {
             <div className="stats-card">
               <div className="stats-card-label">Total Professors</div>
               <div className="stats-card-value">{totalProfessors}</div>
-              <span className="stats-card-change positive">+12 this month</span>
+              {/* <span className="stats-card-change positive">+12 this month</span> */}
             </div>
             <div className="stats-card">
               <div className="stats-card-label">Full-Time</div>
               <div className="stats-card-value">{fullTime}</div>
-              <span className="stats-card-change positive">+5 this month</span>
+              {/* <span className="stats-card-change positive">+5 this month</span> */}
             </div>
             <div className="stats-card">
               <div className="stats-card-label">Part-Time</div>
               <div className="stats-card-value">{partTime}</div>
-              <span className="stats-card-change positive">+7 this month</span>
+              {/* <span className="stats-card-change positive">+7 this month</span> */}
             </div>
             <div className="stats-card">
               <div className="stats-card-label">Departments</div>
               <div className="stats-card-value">{departments}</div>
-              <span className="stats-card-change neutral">No change</span>
+              {/* <span className="stats-card-change neutral">No change</span> */}
             </div>
           </div>
         </div>
@@ -129,7 +129,7 @@ const AllProfessor = () => {
           <div className="dashboard-card">
             <div className="dashboard-card-header">
               <h5 className="dashboard-card-title mb-0">Featured Professors</h5>
-              <Link to="#" className="text-primary text-sm">View All</Link>
+              {/* <Link to="#" className="text-primary text-sm">View All</Link> */}
             </div>
             <div className="dashboard-card-body">
               <div className="dashboard-grid grid-cols-4 gap-4">

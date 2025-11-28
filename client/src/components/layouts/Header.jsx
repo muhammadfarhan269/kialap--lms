@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
+import { useSelector } from 'react-redux';
 
 const Header = ({ toggleSidebar }) => {
   const location = useLocation();
@@ -29,6 +30,8 @@ const Header = ({ toggleSidebar }) => {
   };
 
   const breadcrumb = generateBreadcrumb();
+  const { user } = useSelector((state) => state.auth);
+  const isAdmin = user?.role === 'administrator' || (!user && localStorage.getItem('role') === 'admin');
 
   return (
     <nav className="top-navbar">
@@ -95,7 +98,8 @@ const Header = ({ toggleSidebar }) => {
           </div>
 
           {/* Notifications */}
-          <div className="dropdown">
+
+          {/* <div className="dropdown">
             <button className="btn btn-light btn-icon position-relative" data-bs-toggle="dropdown" id="notificationsToggle">
               <i className="bi bi-bell"></i>
               <span className="position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger" style={{ fontSize: '0.6rem' }}>3</span>
@@ -155,21 +159,21 @@ const Header = ({ toggleSidebar }) => {
                 </a>
               </li>
             </ul>
-          </div>
+          </div> */}
 
-          {/* Quick Actions */}
-          <div className="dropdown">
-            <button className="btn btn-light btn-icon" data-bs-toggle="dropdown">
-              <i className="bi bi-plus-lg"></i>
-            </button>
-            <ul className="dropdown-menu dropdown-menu-end">
-              <li><a className="dropdown-item" href="add-student.html"><i className="bi bi-person-plus me-2"></i>Add Student</a></li>
-              <li><a className="dropdown-item" href="add-course.html"><i className="bi bi-book me-2"></i>Add Course</a></li>
-              <li><a className="dropdown-item" href="add-professor.html"><i className="bi bi-person-badge me-2"></i>Add Professor</a></li>
-              <li><hr className="dropdown-divider" /></li>
-              <li><a className="dropdown-item" href="#"><i className="bi bi-calendar-plus me-2"></i>Schedule Event</a></li>
-            </ul>
-          </div>
+          {/* Quick Actions (admin only) */}
+          {isAdmin && (
+            <div className="dropdown">
+              <button className="btn btn-light btn-icon" data-bs-toggle="dropdown">
+                <i className="bi bi-plus-lg"></i>
+              </button>
+              <ul className="dropdown-menu dropdown-menu-end">
+                <li><a className="dropdown-item" href="/add-student"><i className="bi bi-person-plus me-2"></i>Add Student</a></li>
+                <li><a className="dropdown-item" href="/add-course"><i className="bi bi-book me-2"></i>Add Course</a></li>
+                <li><a className="dropdown-item" href="/add-professor"><i className="bi bi-person-badge me-2"></i>Add Professor</a></li>
+              </ul>
+            </div>
+          )}
 
           {/* User Menu */}
           <div className="dropdown">
