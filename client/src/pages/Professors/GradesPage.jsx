@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import Layout from '../layouts/Layout';
 import { fetchProfessorCourses } from '../../redux/slices/coursesSlice';
-import { FaUsers, FaInfoCircle, FaChevronRight } from 'react-icons/fa';
+import { FaUsers, FaInfoCircle, FaChevronRight, FaBook } from 'react-icons/fa';
 
 // Small responsive styles for the cards (injected once)
 const injectGradesPageStyles = () => {
@@ -41,7 +41,7 @@ const GradesPage = () => {
   return (
     <Layout>
       <div className="container">
-        <h2 className="mb-4">Grade Management</h2>
+        <h2 className="mb-4"><FaBook className="me-2"/> Grade Management</h2>
 
         {coursesLoading ? (
           <p className="text-muted">Loading your courses...</p>
@@ -67,7 +67,7 @@ const GradesPage = () => {
                 >
                   <div className="card-body d-flex flex-column justify-content-between">
                     <div>
-                      <h5 className="card-title mb-1">{course.courseCode}</h5>
+                      <h5 className="card-title mb-1"><FaBook className="me-2"/> {course.courseCode}</h5>
                       <p className="card-text text-muted mb-2 text-truncate">{course.courseName}</p>
                     </div>
                     <div className="d-flex justify-content-between align-items-center mt-2">

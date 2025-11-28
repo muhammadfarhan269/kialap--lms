@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { FaFileAlt, FaDownload, FaUpload, FaTimes, FaClock } from 'react-icons/fa';
+import { FaFileAlt, FaDownload, FaUpload, FaTimes, FaClock, FaBook, FaInfoCircle, FaEllipsisH } from 'react-icons/fa';
 
 const Assignment = () => {
   const dispatch = useDispatch();
@@ -234,15 +234,15 @@ const Assignment = () => {
 
       {!loading && assignments.length > 0 && (
         <div className="table-responsive">
-          <table className="assignments-table table table-striped table-hover" style={{ minWidth: 900 }}>
+          <table className="assignments-table table table-striped table-hover table-bordered" style={{ minWidth: 900 }}>
             <thead>
               <tr>
-                <th>Title</th>
-                <th>Course</th>
-                <th>Due Date</th>
-                <th>Status</th>
-                <th>File</th>
-                <th>Actions</th>
+                <th><FaFileAlt className="me-1"/> Title</th>
+                <th><FaBook className="me-1"/> Course</th>
+                <th><FaClock className="me-1"/> Due Date</th>
+                <th><FaInfoCircle className="me-1"/> Status</th>
+                <th><FaDownload className="me-1"/> File</th>
+                <th><FaEllipsisH className="me-1"/> Actions</th>
               </tr>
             </thead>
             <tbody>

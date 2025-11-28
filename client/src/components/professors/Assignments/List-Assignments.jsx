@@ -4,7 +4,7 @@ import { fetchAssignmentsByProfessor, deleteAssignment } from '../../../redux/sl
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import '../../../css/dashboard.css';
-import { FaPlus, FaEye, FaEdit, FaTrash, FaDownload } from 'react-icons/fa';
+import { FaPlus, FaEye, FaEdit, FaTrash, FaDownload, FaFileAlt, FaBook, FaClock, FaInfoCircle, FaUsers, FaEllipsisH } from 'react-icons/fa';
 
 const ListAssignments = () => {
   const dispatch = useDispatch();
@@ -55,7 +55,7 @@ const ListAssignments = () => {
     <div className="list-assignments-container">
       <div className="list-header">
         <h2>Assignments</h2>
-        <button className="btn btn-primary" onClick={handleCreate}>Create Assignment</button>
+        <button className="btn btn-primary d-inline-flex align-items-center" onClick={handleCreate}><FaPlus className="me-2"/> Create Assignment</button>
       </div>
 
       {loading && <p>Loading assignments...</p>}
@@ -70,13 +70,13 @@ const ListAssignments = () => {
           <table className="assignments-table table table-striped table-hover" style={{ width: '120%' }}>
             <thead>
               <tr>
-                <th>Title</th>
-                <th>Course</th>
-                <th>Due Date</th>
-                <th>Status</th>
-                <th>File</th>
-                <th>Submissions</th>
-                <th>Actions</th>
+                <th><FaFileAlt className="me-1"/> Title</th>
+                <th><FaBook className="me-1"/> Course</th>
+                <th><FaClock className="me-1"/> Due Date</th>
+                <th><FaInfoCircle className="me-1"/> Status</th>
+                <th><FaDownload className="me-1"/> File</th>
+                <th><FaUsers className="me-1"/> Submissions</th>
+                <th><FaEllipsisH className="me-1"/> Actions</th>
               </tr>
             </thead>
             <tbody>

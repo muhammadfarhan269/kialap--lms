@@ -11,7 +11,7 @@ import {
   clearSuccess
 } from '../../../redux/slices/enrollmentSlice';
 import { toast } from 'react-toastify';
-import { FaBook, FaPlusCircle, FaMinusCircle, FaCheckCircle, FaExclamationTriangle } from 'react-icons/fa';
+import { FaBook, FaPlusCircle, FaMinusCircle, FaCheckCircle, FaExclamationTriangle, FaCode, FaBuilding, FaUser, FaStar, FaUsers, FaEllipsisH } from 'react-icons/fa';
 
 const EnrollCourse = () => {
   const dispatch = useDispatch();
@@ -182,16 +182,16 @@ const EnrollCourse = () => {
                 </div>
               ) : (
                 <div className="table-responsive">
-                  <table className="table table-hover" style={{ minWidth: 1000 }}>
+                  <table className="table table-hover table-bordered table-striped" style={{ minWidth: 1000 }}>
                     <thead className="table-light">
                       <tr>
-                        <th>Course Code</th>
-                        <th>Course Name</th>
-                        <th>Department</th>
-                        <th>Professor</th>
-                        <th>Credits</th>
-                        <th>Students</th>
-                        <th>Actions</th>
+                        <th><FaCode className="me-1"/> Course Code</th>
+                        <th><FaBook className="me-1"/> Course Name</th>
+                        <th><FaBuilding className="me-1"/> Department</th>
+                        <th><FaUser className="me-1"/> Professor</th>
+                        <th><FaStar className="me-1"/> Credits</th>
+                        <th><FaUsers className="me-1"/> Students</th>
+                        <th><FaEllipsisH className="me-1"/> Actions</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -260,16 +260,16 @@ const EnrollCourse = () => {
               </div>
               <div className="card-body">
                 <div className="table-responsive">
-                  <table className="table table-hover">
+                  <table className="table table-hover table-bordered table-striped">
                     <thead className="table-light">
                       <tr>
-                        <th>Course Code</th>
-                        <th>Course Name</th>
-                        <th>Department</th>
-                        <th>Professor</th>
-                        <th>Credits</th>
-                        <th>Students</th>
-                        <th>Actions</th>
+                        <th><FaCode className="me-1"/> Course Code</th>
+                        <th><FaBook className="me-1"/> Course Name</th>
+                        <th><FaBuilding className="me-1"/> Department</th>
+                        <th><FaUser className="me-1"/> Professor</th>
+                        <th><FaStar className="me-1"/> Credits</th>
+                        <th><FaUsers className="me-1"/> Students</th>
+                        <th><FaEllipsisH className="me-1"/> Actions</th>
                       </tr>
                     </thead>
                     <tbody>

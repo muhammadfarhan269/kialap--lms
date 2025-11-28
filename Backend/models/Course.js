@@ -222,6 +222,11 @@ const getAllCourses = async (limit = 10, offset = 0, filters = {}) => {
       c.course_name as "courseName",
       c.department,
       c.credits,
+      c.max_students as "maxStudents",
+      c.course_image as "courseImage",
+      c.classroom,
+      c.semester,
+      c.class_days as "classDays",
       COALESCE(c.course_status, 'active') as "courseStatus",
       CONCAT(COALESCE(p.title, ''), ' ', COALESCE(p.first_name, ''), ' ', COALESCE(p.last_name, '')) as "professorName",
       COALESCE(e.enrolled_count, 0) as "enrolledStudents"

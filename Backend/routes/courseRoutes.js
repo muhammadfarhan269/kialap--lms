@@ -20,7 +20,8 @@ router.use(verifyJWT);
 
 // Admin only routes
 router.post('/', upload, verifyAdmin, createCourse);
-router.put('/:id', verifyAdmin, updateCourse);
+// Allow file upload when updating a course (courseImage)
+router.put('/:id', upload, verifyAdmin, updateCourse);
 router.delete('/:id', verifyAdmin, deleteCourse);
 
 // All authenticated users can GET courses

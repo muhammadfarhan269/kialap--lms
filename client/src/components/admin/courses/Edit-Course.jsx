@@ -116,7 +116,13 @@ const EditCourse = () => {
       }));
 
       if (currentCourse.courseImage) {
-        setImagePreview(currentCourse.courseImage);
+        // If backend returns a filename, convert to fully-qualified URL
+        const ci = currentCourse.courseImage;
+        if (/^https?:\/\//i.test(ci) || ci.startsWith('/')) {
+          setImagePreview(ci);
+        } else {
+          setImagePreview(`http://localhost:5000/images/${ci}`);
+        }
       }
     }
   }, [currentCourse]);
@@ -180,32 +186,64 @@ const EditCourse = () => {
     setSubmitLoading(true);
 
     try {
-      const updatePayload = {
-        courseCode: formData.courseCode,
-        courseName: formData.courseName,
-        department: formData.department,
-        courseDescription: formData.courseDescription,
-        credits: formData.credits,
-        duration: formData.duration,
-        maxStudents: formData.maxStudents,
-        prerequisites: formData.prerequisites,
-        semester: formData.semester,
-        courseType: formData.courseType,
-        classDays: formData.classDays, // Will be stringified in the model
-        startTime: formData.startTime,
-        endTime: formData.endTime,
-        classroom: formData.classroom,
-        courseStatus: formData.courseStatus,
-        enrollmentType: formData.enrollmentType,
-        onlineAvailable: formData.onlineAvailable,
-        certificateOffered: formData.certificateOffered,
-        recordedLectures: formData.recordedLectures,
-        courseFee: formData.courseFee,
-        labFee: formData.labFee,
-        materialFee: formData.materialFee,
-      };
+      // If an image file is selected, send FormData so backend can process file upload
+      let payloadToSend;
+      if (imageFile) {
+        const fd = new FormData();
+        fd.append('courseImage', imageFile);
+        // append the rest as strings
+        fd.append('courseCode', formData.courseCode);
+        fd.append('courseName', formData.courseName);
+        fd.append('department', formData.department);
+        fd.append('courseDescription', formData.courseDescription || '');
+        fd.append('credits', String(formData.credits || 3));
+        fd.append('duration', String(formData.duration || 16));
+        fd.append('maxStudents', String(formData.maxStudents || 30));
+        fd.append('prerequisites', formData.prerequisites || '');
+        fd.append('semester', formData.semester || '');
+        fd.append('courseType', formData.courseType || '');
+        fd.append('classDays', Array.isArray(formData.classDays) ? JSON.stringify(formData.classDays) : JSON.stringify([]));
+        fd.append('startTime', formData.startTime || '');
+        fd.append('endTime', formData.endTime || '');
+        fd.append('classroom', formData.classroom || '');
+        fd.append('courseStatus', formData.courseStatus || 'active');
+        fd.append('enrollmentType', formData.enrollmentType || 'open');
+        fd.append('onlineAvailable', String(formData.onlineAvailable));
+        fd.append('certificateOffered', String(formData.certificateOffered));
+        fd.append('recordedLectures', String(formData.recordedLectures));
+        fd.append('courseFee', String(formData.courseFee || 0));
+        fd.append('labFee', String(formData.labFee || 0));
+        fd.append('materialFee', String(formData.materialFee || 0));
 
-      const result = await dispatch(updateCourse({ id, courseData: updatePayload }));
+        payloadToSend = fd;
+      } else {
+        payloadToSend = {
+          courseCode: formData.courseCode,
+          courseName: formData.courseName,
+          department: formData.department,
+          courseDescription: formData.courseDescription,
+          credits: formData.credits,
+          duration: formData.duration,
+          maxStudents: formData.maxStudents,
+          prerequisites: formData.prerequisites,
+          semester: formData.semester,
+          courseType: formData.courseType,
+          classDays: formData.classDays, // Will be stringified in the model
+          startTime: formData.startTime,
+          endTime: formData.endTime,
+          classroom: formData.classroom,
+          courseStatus: formData.courseStatus,
+          enrollmentType: formData.enrollmentType,
+          onlineAvailable: formData.onlineAvailable,
+          certificateOffered: formData.certificateOffered,
+          recordedLectures: formData.recordedLectures,
+          courseFee: formData.courseFee,
+          labFee: formData.labFee,
+          materialFee: formData.materialFee,
+        };
+      }
+
+      const result = await dispatch(updateCourse({ id, courseData: payloadToSend }));
       
       if (result.payload && result.payload.success) {
         // Success - show message and redirect

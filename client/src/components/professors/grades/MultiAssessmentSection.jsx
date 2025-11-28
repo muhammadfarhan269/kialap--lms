@@ -454,7 +454,7 @@ const MultiAssessmentSection = ({ assessmentType, students, courseId, initialGra
               {students && students.length > 0 ? students.map(student => (
                 <tr key={student.userUuid}>
                   <td className="sticky-name" style={{ position: 'sticky', background: '#fff', zIndex: 9 }}>
-                    <strong>{student.studentName || 'N/A'}</strong>
+                    <strong>{student.studentFirstName || student.studentName || 'Unknown'}</strong>
                   </td>
                   <td className="sticky-email" style={{ position: 'sticky', background: '#fff', zIndex: 9 }}>
                     <small>{student.studentEmail || 'N/A'}</small>

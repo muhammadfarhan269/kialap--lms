@@ -62,6 +62,10 @@ const upload = multer({
 // @route   POST /api/courses
 // @access  Private/Admin
 const createCourse = asyncHandler(async (req, res) => {
+  console.log('🔍 DEBUG: createCourse called');
+  console.log('📁 DEBUG: req.files:', req.files ? Object.keys(req.files) : 'no files');
+  console.log('📋 DEBUG: req.body:', Object.keys(req.body));
+  
   const {
     courseCode,
     courseName,
@@ -117,6 +121,9 @@ const createCourse = asyncHandler(async (req, res) => {
   let courseImage = null;
   if (req.files && req.files.courseImage && req.files.courseImage[0]) {
     courseImage = req.files.courseImage[0].filename;
+    console.log('✅ DEBUG: Course image found:', courseImage);
+  } else {
+    console.log('❌ DEBUG: No course image in req.files');
   }
 
   // Parse classDays from comma-separated string to array
@@ -250,6 +257,33 @@ const updateCourse = asyncHandler(async (req, res) => {
     if (existingCourse) {
       res.status(400);
       throw new Error('Course code already exists');
+    }
+  }
+
+  // If upload middleware was used, multer places files in req.files
+  // If a new course image was uploaded, set it on req.body so updateCourse will persist it
+  try {
+    if (req.files && req.files.courseImage && req.files.courseImage[0]) {
+      req.body.courseImage = req.files.courseImage[0].filename;
+      console.log('✅ DEBUG: updateCourse - new courseImage set on req.body:', req.body.courseImage);
+    }
+  } catch (e) {
+    // ignore
+  }
+
+  // Normalize classDays: if client sent a JSON string or comma-separated string, convert to array
+  if (req.body.classDays) {
+    if (typeof req.body.classDays === 'string') {
+      try {
+        const parsed = JSON.parse(req.body.classDays);
+        if (Array.isArray(parsed)) {
+          req.body.classDays = parsed;
+        } else {
+          req.body.classDays = String(req.body.classDays).split(',').map(s => s.trim()).filter(Boolean);
+        }
+      } catch (e) {
+        req.body.classDays = String(req.body.classDays).split(',').map(s => s.trim()).filter(Boolean);
+      }
     }
   }
 

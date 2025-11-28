@@ -1,6 +1,7 @@
 import React, { useEffect } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { fetchAllCoursesGrades, fetchStudentFinalGradesSummary } from '../../../redux/slices/allCoursesGradesSlice';
+import { FaTasks, FaQuestionCircle, FaFileAlt, FaGraduationCap } from 'react-icons/fa';
 
 // (Grade badge removed) UI simplified to hide grade and percentage
 const StudentGradesDashboard = () => {
@@ -54,10 +55,10 @@ const StudentGradesDashboard = () => {
                           <table className="table table-sm table-bordered mb-0">
                             <thead>
                               <tr>
-                                <th>{`Assignments${row.weights && row.weights.assignment_weight ? ` (${row.weights.assignment_weight}%)` : ''}`}</th>
-                                <th>{`Quizzes${row.weights && row.weights.quiz_weight ? ` (${row.weights.quiz_weight}%)` : ''}`}</th>
-                                <th>{`Midterms${row.weights && row.weights.midterm_weight ? ` (${row.weights.midterm_weight}%)` : ''}`}</th>
-                                <th>{`Finals${row.weights && row.weights.final_weight ? ` (${row.weights.final_weight}%)` : ''}`}</th>
+                                <th><FaTasks className="me-1"/>{`Assignments${row.weights && row.weights.assignment_weight ? ` (${row.weights.assignment_weight}%)` : ''}`}</th>
+                                <th><FaQuestionCircle className="me-1"/>{`Quizzes${row.weights && row.weights.quiz_weight ? ` (${row.weights.quiz_weight}%)` : ''}`}</th>
+                                <th><FaFileAlt className="me-1"/>{`Midterms${row.weights && row.weights.midterm_weight ? ` (${row.weights.midterm_weight}%)` : ''}`}</th>
+                                <th><FaGraduationCap className="me-1"/>{`Finals${row.weights && row.weights.final_weight ? ` (${row.weights.final_weight}%)` : ''}`}</th>
                               </tr>
                             </thead>
                             <tbody>

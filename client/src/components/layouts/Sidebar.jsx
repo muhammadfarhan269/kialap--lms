@@ -100,12 +100,6 @@ const Sidebar = ({ isOpen, collapsed = false }) => {
                   </NavLink>
                 </li>
                 <li className="nav-item">
-                  <NavLink className="nav-link" to="/research-history">
-                    <i className="bi bi-search"></i>
-                    <span>Research History</span>
-                  </NavLink>
-                </li>
-                <li className="nav-item">
                   <NavLink className="nav-link" to="/professor/assignments">
                     <i className="bi bi-pencil-square"></i>
                     <span>Assignments of Students</span>

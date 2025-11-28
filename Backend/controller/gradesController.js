@@ -64,6 +64,8 @@ const getEnrolledStudents = asyncHandler(async (req, res) => {
       e.user_uuid as "userUuid",
       e.course_id as "courseId",
       u.username as "studentName",
+      u.first_name as "studentFirstName",
+      u.last_name as "studentLastName",
       u.email as "studentEmail",
       s.student_id as "studentId",
       s.department as "studentDepartment"

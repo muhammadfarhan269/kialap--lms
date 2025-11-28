@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSelector } from 'react-redux';
-import { FaEye, FaImage, FaTimesCircle, FaCalendarAlt } from 'react-icons/fa';
+import { FaEye, FaImage, FaTimesCircle, FaCalendarAlt, FaBook, FaListOl, FaCode, FaBuilding, FaStar, FaTag, FaUsers, FaInfoCircle, FaFileAlt, FaClock, FaEllipsisH } from 'react-icons/fa';
 
 const AssignedCourses = () => {
   const [courses, setCourses] = useState([]);
@@ -19,10 +19,12 @@ const AssignedCourses = () => {
           },
 
         });
-        console.log(response.data);
         if (!response.ok) throw new Error('Network response was not ok');
         const data = await response.json();
-        setCourses(Array.isArray(data.data) ? data.data : []);
+        // API sometimes returns an array directly or an object like { data: [...] }
+        const coursesPayload = Array.isArray(data) ? data : (Array.isArray(data.data) ? data.data : []);
+        console.log('Fetched assigned courses:', { raw: data, normalizedCount: coursesPayload.length });
+        setCourses(coursesPayload);
       } catch (err) {
         setError('Failed to fetch assigned courses');
         console.error(err);
@@ -57,6 +59,25 @@ const AssignedCourses = () => {
       }
       /* Make modal wider on large screens */
       .modal-xl { max-width: 1100px; }
+
+      /* Assigned course modal custom styles */
+      .assigned-course-modal .modal-content { border-radius: 12px; overflow: hidden; box-shadow: 0 8px 30px rgba(0,0,0,0.18); }
+      .assigned-course-modal .modal-header { padding: 18px 20px; border-bottom: 1px solid #eef2f6; display:flex; align-items:center; gap:12px; }
+      .assigned-course-modal .modal-icon { width:48px; height:48px; border-radius:50%; display:inline-flex; align-items:center; justify-content:center; font-size:18px; }
+      .assigned-course-modal .modal-body { padding: 20px; }
+      .assigned-course-modal .modal-body .course-left { text-align:center; }
+      .assigned-course-modal .modal-body .course-left img { width:100%; height:auto; max-height:220px; object-fit:cover; border-radius:8px; }
+      .assigned-course-modal .meta-row { display:flex; gap:12px; flex-wrap:wrap; justify-content:center; }
+      .assigned-course-modal .meta-row .badge { margin:4px 4px; }
+      .assigned-course-modal .details-list p { margin:6px 0; }
+      .assigned-course-modal .detail-label { color:#556; font-weight:600; margin-right:6px; }
+      .assigned-course-modal .details-table th { width:36%; font-weight:700; color:#3b5568; vertical-align:top; padding-top:8px; }
+      .assigned-course-modal .details-table td { color:#2c3e50; }
+      .assigned-course-modal .modal-footer { padding: 14px 20px; border-top: 1px solid #eef2f6; display:flex; justify-content:flex-end; gap:8px; }
+      @media (max-width: 575px) {
+        .assigned-course-modal .modal-header { gap:8px; padding:12px; }
+        .assigned-course-modal .modal-icon { width:40px; height:40px; }
+      }
     `;
     document.head.appendChild(style);
   }, []);
@@ -78,7 +99,7 @@ const AssignedCourses = () => {
     <div className="container-fluid">
       <div className="card">
         <div className="card-header">
-          <h4 className="card-title">Assigned Courses (Table View)</h4>
+          <h4 className="card-title"><FaBook className="me-2" /> Assigned Courses</h4>
         </div>
 
         <div className="card-body">
@@ -87,21 +108,21 @@ const AssignedCourses = () => {
           ) : (
             <div className="table-responsive">
               <table className="table table-bordered table-striped table-hover assigned-courses-table">
-                <thead className="table-dark">
+                <thead>
                   <tr>
-                    <th style={{ minWidth: 40 }}>#</th>
-                    <th style={{ minWidth: 120 }}>Course Image</th>
-                    <th style={{ minWidth: 220 }}>Name</th>
-                    <th style={{ minWidth: 120 }}>Code</th>
-                    <th style={{ minWidth: 160 }}>Department</th>
-                    <th style={{ minWidth: 80 }}>Credits</th>
-                    <th style={{ minWidth: 100 }}>Semester</th>
-                    <th style={{ minWidth: 100 }}>Type</th>
-                    <th style={{ minWidth: 100 }}>Enrolled</th>
-                    <th style={{ minWidth: 100 }}>Status</th>
-                    <th style={{ minWidth: 220 }}>Description</th>
-                    <th style={{ minWidth: 140 }}>Created At</th>
-                    <th style={{ minWidth: 120, textAlign: 'center' }}>Action</th>
+                    <th style={{ minWidth: 40 }}><FaListOl className="me-1" /></th>
+                    <th style={{ minWidth: 120 }}><FaImage className="me-1" />Image</th>
+                    <th style={{ minWidth: 220 }}><FaBook className="me-1" />Name</th>
+                    <th style={{ minWidth: 120 }}><FaCode className="me-1" />Code</th>
+                    <th style={{ minWidth: 160 }}><FaBuilding className="me-1" />Department</th>
+                    <th style={{ minWidth: 80 }}><FaStar className="me-1" />Credits</th>
+                    <th style={{ minWidth: 100 }}><FaCalendarAlt className="me-1" />Semester</th>
+                    <th style={{ minWidth: 100 }}><FaTag className="me-1" />Type</th>
+                    <th style={{ minWidth: 100 }}><FaUsers className="me-1" />Enrolled</th>
+                    <th style={{ minWidth: 100 }}><FaInfoCircle className="me-1" />Status</th>
+                    <th style={{ minWidth: 220 }}><FaFileAlt className="me-1" />Description</th>
+                    <th style={{ minWidth: 140 }}><FaClock className="me-1" />Created At</th>
+                    <th style={{ minWidth: 120, textAlign: 'center' }}><FaEllipsisH className="me-1" />Action</th>
                   </tr>
                 </thead>
 
@@ -111,13 +132,25 @@ const AssignedCourses = () => {
                       <td data-label="#">{index + 1}</td>
                       <td data-label="Course Image">
                         {course.courseImage ? (
-                          <img
-                            src={`/images/${course.courseImage}`}
-                            alt={course.courseName}
-                            className="rounded"
-                          />
+                          (() => {
+
+                            const img = String(course.courseImage || '');
+                            const BACKEND_ORIGIN = 'http://localhost:5000';
+                            const imageSrc = img.startsWith('http://') || img.startsWith('https://')
+                              ? img
+                              : img.startsWith('/')
+                                ? `${BACKEND_ORIGIN}${img}`
+                                : `${BACKEND_ORIGIN}/images/${img}`;
+                            return (
+                              <img
+                                src={imageSrc}
+                                alt={course.courseName}
+                                className="rounded"
+                              />
+                            );
+                          })()
                         ) : (
-                          <div className="text-muted d-flex align-items-center"><FaImage className="me-2"/> No Image</div>
+                          <div className="text-muted d-flex align-items-center"><FaImage className="me-2" /> No Image</div>
                         )}
                       </td>
                       <td data-label="Name">{course.courseName}</td>
@@ -161,51 +194,91 @@ const AssignedCourses = () => {
 
       {/* ================= MODAL ====================== */}
       {selectedCourse && (
-        <div className="modal fade show" style={{ display: 'block', background: 'rgba(0,0,0,0.5)' }}>
+        <div className="modal fade show assigned-course-modal" style={{ display: 'block', background: 'rgba(0,0,0,0.5)' }}>
           <div className="modal-dialog modal-xl">
             <div className="modal-content">
 
-              <div className="modal-header d-flex align-items-center">
-                <h5 className="modal-title">{selectedCourse.courseName} – Details</h5>
+              <div className="modal-header">
+                <div className="d-flex align-items-center">
+                  <div className="modal-icon bg-primary text-white me-3"><FaBook /></div>
+                  <div>
+                    <h5 className="modal-title mb-0">{selectedCourse.courseName}</h5>
+                    <small className="text-muted">{selectedCourse.courseCode}</small>
+                  </div>
+                </div>
                 <button className="btn-close ms-auto" onClick={closeModal} aria-label="Close"></button>
               </div>
 
               <div className="modal-body">
                 <div className="row gy-3">
 
-                  <div className="col-12 col-md-4 text-center">
+                  <div className="col-12 col-md-4 course-left">
                     {selectedCourse.courseImage ? (
-                      <img
-                        src={`/images/${selectedCourse.courseImage}`}
-                        alt="Course"
-                        className="img-fluid rounded mb-2"
-                        style={{ maxHeight: 220, width: '100%', objectFit: 'cover' }}
-                      />
+                      (() => {
+                        const img = String(selectedCourse.courseImage || '');
+                        const BACKEND_ORIGIN = 'http://localhost:5000';
+                        const imageSrc = img.startsWith('http://') || img.startsWith('https://')
+                          ? img
+                          : img.startsWith('/')
+                            ? `${BACKEND_ORIGIN}${img}`
+                            : `${BACKEND_ORIGIN}/images/${img}`;
+                        return (
+                          <img
+                            src={imageSrc}
+                            alt="Course"
+                          />
+                        );
+                      })()
                     ) : (
                       <div className="text-muted d-flex align-items-center justify-content-center" style={{ height: 160 }}>
                         <FaImage className="me-2" /> No Image
                       </div>
                     )}
-                    <div className="mt-2 d-flex justify-content-center gap-2">
-                      <span className="badge bg-info text-dark"><FaCalendarAlt className="me-1"/> {selectedCourse.semester}</span>
+                    <div className="meta-row mt-3">
+                      <span className="badge bg-info text-dark"><FaCalendarAlt className="me-1" /> {selectedCourse.semester}</span>
                       <span className="badge bg-primary">{selectedCourse.credits} credits</span>
+                      <span className="badge bg-secondary">{selectedCourse.courseType}</span>
                     </div>
                   </div>
 
                   <div className="col-12 col-md-8">
-                    <div className="row">
-                      <div className="col-12 col-sm-6"><p><strong>Course Code:</strong> {selectedCourse.courseCode}</p></div>
-                      <div className="col-12 col-sm-6"><p><strong>Department:</strong> {selectedCourse.department}</p></div>
-                      <div className="col-12 col-sm-6"><p><strong>Credits:</strong> {selectedCourse.credits}</p></div>
-                      <div className="col-12 col-sm-6"><p><strong>Semester:</strong> {selectedCourse.semester}</p></div>
-                      <div className="col-12 col-sm-6"><p><strong>Course Type:</strong> {selectedCourse.courseType}</p></div>
-                      <div className="col-12 col-sm-6"><p><strong>Enrolled Students:</strong> {selectedCourse.enrolledStudents}</p></div>
-                      <div className="col-12 col-sm-6"><p><strong>Status:</strong> {selectedCourse.courseStatus}</p></div>
-                      <div className="col-12 col-sm-6"><p><strong>Class Days:</strong> {selectedCourse.classDays}</p></div>
-                      <div className="col-12 col-sm-6"><p><strong>Time:</strong> {selectedCourse.startTime} - {selectedCourse.endTime}</p></div>
-                      <div className="col-12 col-sm-6"><p><strong>Classroom:</strong> {selectedCourse.classroom}</p></div>
-                      <div className="col-12"><p><strong>Description:</strong><br /> {selectedCourse.courseDescription}</p></div>
-                      <div className="col-12 col-sm-6"><p><strong>Total Fee:</strong> {selectedCourse.totalFee}</p></div>
+                    <div className="details-list">
+                      <table className="table table-sm details-table mb-0">
+                        <tbody>
+                          <tr>
+                            <th>Course Code</th>
+                            <td>{selectedCourse.courseCode}</td>
+                          </tr>
+                          <tr>
+                            <th>Department</th>
+                            <td>{selectedCourse.department}</td>
+                          </tr>
+                          <tr>
+                            <th>Credits</th>
+                            <td>{selectedCourse.credits}</td>
+                          </tr>
+                          <tr>
+                            <th>Semester</th>
+                            <td>{selectedCourse.semester}</td>
+                          </tr>
+                          <tr>
+                            <th>Course Type</th>
+                            <td>{selectedCourse.courseType}</td>
+                          </tr>
+                          <tr>
+                            <th>Enrolled</th>
+                            <td>{selectedCourse.enrolledStudents}</td>
+                          </tr>
+                          <tr>
+                            <th>Status</th>
+                            <td><span className={`badge ${selectedCourse.courseStatus === 'active' ? 'bg-success' : 'bg-secondary'}`}>{selectedCourse.courseStatus}</span></td>
+                          </tr>
+                          <tr>
+                            <th>Description</th>
+                            <td>{selectedCourse.courseDescription || '—'}</td>
+                          </tr>
+                        </tbody>
+                      </table>
                     </div>
                   </div>
 
@@ -213,9 +286,10 @@ const AssignedCourses = () => {
               </div>
 
               <div className="modal-footer">
-                <button className="btn btn-secondary" onClick={closeModal}>
-                  Close
-                </button>
+                <div className="d-flex gap-2">
+
+                  <button className="btn btn-secondary" onClick={closeModal}>Close</button>
+                </div>
               </div>
 
             </div>

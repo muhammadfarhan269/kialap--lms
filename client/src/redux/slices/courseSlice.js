@@ -87,6 +87,27 @@ export const updateCourse = createAsyncThunk(
   'course/updateCourse',
   async ({ id, courseData }, { rejectWithValue }) => {
     try {
+      // If courseData is a FormData (contains a file), use fetch directly
+      if (courseData instanceof FormData) {
+        const token = localStorage.getItem('accessToken');
+        const response = await fetch(`http://localhost:5000/api/courses/${id}`, {
+          method: 'PUT',
+          body: courseData,
+          credentials: 'include',
+          headers: {
+            ...(token && { Authorization: `Bearer ${token}` }),
+            // Let browser set Content-Type with boundary
+          },
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json().catch(() => ({ message: 'Failed to update course' }));
+          throw new Error(errorData.message || 'Failed to update course');
+        }
+
+        return response.json();
+      }
+
       return await apiCall(`http://localhost:5000/api/courses/${id}`, {
         method: 'PUT',
         body: JSON.stringify(courseData),

@@ -6,11 +6,11 @@ import { toast } from 'react-toastify';
 import '../../../css/dashboard.css';
 
 const AllCourse = () => {
-		const navigate = useNavigate();
-		const dispatch = useDispatch();
+	const navigate = useNavigate();
+	const dispatch = useDispatch();
 	const { courses, loading, error, success, pagination } = useSelector(state => state.course);
-		const [currentPage, setCurrentPage] = useState(pagination?.page ?? 1);
-		const [limit, setLimit] = useState(pagination?.limit ?? 6);
+	const [currentPage, setCurrentPage] = useState(pagination?.page ?? 1);
+	const [limit, setLimit] = useState(pagination?.limit ?? 6);
 	const [searchTerm, setSearchTerm] = useState('');
 	const [debouncedSearchTerm, setDebouncedSearchTerm] = useState('');
 	const [filters, setFilters] = useState({
@@ -20,6 +20,8 @@ const AllCourse = () => {
 	});
 	const [selectedCourse, setSelectedCourse] = useState(null);
 	const [showModal, setShowModal] = useState(false);
+	const [showDeleteModal, setShowDeleteModal] = useState(false);
+	const [courseToDelete, setCourseToDelete] = useState(null);
 
 	// Debounce search term
 	useEffect(() => {
@@ -45,75 +47,52 @@ const AllCourse = () => {
 		}
 	}, [error, dispatch]);
 
-		// fetch courses when page, limit, or filters change
-		useEffect(() => {
-			const offset = (currentPage - 1) * limit;
-			// Build query params with filters
-			const params = {
-				limit,
-				offset,
-				...(filters.department && { department: filters.department }),
-				...(filters.semester && { semester: filters.semester }),
-				...(filters.status && { status: filters.status }),
-				...(debouncedSearchTerm && { search: debouncedSearchTerm }),
-			};
-			dispatch(fetchCourses(params));
-		}, [dispatch, currentPage, limit, filters, debouncedSearchTerm]);
+	// fetch courses when page, limit, or filters change
+	useEffect(() => {
+		const offset = (currentPage - 1) * limit;
+		// Build query params with filters
+		const params = {
+			limit,
+			offset,
+			...(filters.department && { department: filters.department }),
+			...(filters.semester && { semester: filters.semester }),
+			...(filters.status && { status: filters.status }),
+			...(debouncedSearchTerm && { search: debouncedSearchTerm }),
+		};
+		dispatch(fetchCourses(params));
+	}, [dispatch, currentPage, limit, filters, debouncedSearchTerm]);
 
-		// DOM effects for lazy loading images and checkbox behavior when courses change
-		useEffect(() => {
-			// Lazy load images that are not immediately visible
-			const images = document.querySelectorAll('img[src*="unsplash"], img[src*="ui-avatars"], img[src*="/images/"]');
-			images.forEach(img => {
-				if (!img.hasAttribute('loading')) {
-					img.setAttribute('loading', 'lazy');
-				}
-			});
-
-			// Select all checkbox functionality
-			const selectAll = document.getElementById('selectAll');
-			const checkboxes = document.querySelectorAll('tbody input[type="checkbox"]');
-
-			const onSelectAllChange = function () {
-				checkboxes.forEach(checkbox => {
-					checkbox.checked = this.checked;
-				});
-			};
-
-			const onCheckboxChange = function () {
-				const allChecked = Array.from(checkboxes).every(cb => cb.checked);
-				const someChecked = Array.from(checkboxes).some(cb => cb.checked);
-
-				if (selectAll) {
-					selectAll.checked = allChecked;
-					selectAll.indeterminate = !allChecked && someChecked;
-				}
-			};
-
-			if (selectAll) selectAll.addEventListener('change', onSelectAllChange);
-			checkboxes.forEach(cb => cb.addEventListener('change', onCheckboxChange));
-
-			// PerformanceObserver for LCP (non-critical)
-			let observer;
-			if ('PerformanceObserver' in window) {
-				try {
-					observer = new PerformanceObserver((list) => {
-						for (const entry of list.getEntries()) {
-							console.log('LCP:', entry.startTime, 'ms');
-						}
-					});
-					observer.observe({ type: 'largest-contentful-paint', buffered: true });
-				} catch (e) {
-					// ignore
-				}
+	// DOM effects for lazy loading images and checkbox behavior when courses change
+	useEffect(() => {
+		// Lazy load images that are not immediately visible
+		const images = document.querySelectorAll('img[src*="unsplash"], img[src*="ui-avatars"], img[src*="/images/"]');
+		images.forEach(img => {
+			if (!img.hasAttribute('loading')) {
+				img.setAttribute('loading', 'lazy');
 			}
+		});
 
-			return () => {
-				if (selectAll) selectAll.removeEventListener('change', onSelectAllChange);
-				checkboxes.forEach(cb => cb.removeEventListener('change', onCheckboxChange));
-				if (observer && observer.disconnect) observer.disconnect();
-			};
-		}, [courses]);
+
+
+		// PerformanceObserver for LCP (non-critical)
+		let observer;
+		if ('PerformanceObserver' in window) {
+			try {
+				observer = new PerformanceObserver((list) => {
+					for (const entry of list.getEntries()) {
+						console.log('LCP:', entry.startTime, 'ms');
+					}
+				});
+				observer.observe({ type: 'largest-contentful-paint', buffered: true });
+			} catch (e) {
+				// ignore
+			}
+		}
+
+		return () => {
+			if (observer && observer.disconnect) observer.disconnect();
+		};
+	}, [courses]);
 
 	// Handle filter changes
 	const handleFilterChange = (e) => {
@@ -144,11 +123,23 @@ const AllCourse = () => {
 		setCurrentPage(1);
 	};
 
-	// Handle delete course
-	const handleDelete = (id) => {
-		if (window.confirm('Are you sure you want to delete this course?')) {
-			dispatch(deleteCourse(id));
+	// Handle delete course (open confirmation modal)
+	const handleDelete = (course) => {
+		setCourseToDelete(course);
+		setShowDeleteModal(true);
+	};
+
+	const confirmDelete = () => {
+		if (courseToDelete) {
+			dispatch(deleteCourse(courseToDelete.id));
 		}
+		setShowDeleteModal(false);
+		setCourseToDelete(null);
+	};
+
+	const cancelDelete = () => {
+		setShowDeleteModal(false);
+		setCourseToDelete(null);
 	};
 
 	// Handle view course details
@@ -192,46 +183,35 @@ const AllCourse = () => {
 				</div>
 			</div>
 
-		{/* Stats Row (dynamic) */}
-		{(() => {
-			// Ensure courses is an array
-			const courseArray = Array.isArray(courses) ? courses : [];
-			const totalCourses = pagination?.total ?? courseArray.length;
-			const activeCourses = courseArray.filter(c => (c.courseStatus || '').toLowerCase() === 'active').length;
-			const totalCapacity = courseArray.reduce((sum, c) => sum + (Number(c.maxStudents) || 0), 0);
-			const avgCapacity = courseArray.length ? Math.round(totalCapacity / courseArray.length) : 0;
+			{/* Stats Row (dynamic) */}
+			{(() => {
+				// Ensure courses is an array
+				const courseArray = Array.isArray(courses) ? courses : [];
+				const totalCourses = pagination?.total ?? courseArray.length;
+				const activeCourses = courseArray.filter(c => (c.courseStatus || '').toLowerCase() === 'active').length;
 
-			return (
-				<div className="dashboard-grid grid-cols-4 mb-3">
-					<div className="stats-card">
-						<div className="stats-card-label">Total Courses</div>
-						<div className="stats-card-value">{totalCourses}</div>
-						<span className="stats-card-change positive">{totalCourses > 0 ? `·` : ''}</span>
+				return (
+					<div className="dashboard-grid grid-cols-2 mb-3">
+						<div className="stats-card">
+							<div className="stats-card-label">Total Courses</div>
+							<div className="stats-card-value">{totalCourses}</div>
+							
+						</div>
+						<div className="stats-card">
+							<div className="stats-card-label">Active Courses</div>
+							<div className="stats-card-value">{activeCourses}</div>
+							
+						</div>
+
 					</div>
-					<div className="stats-card">
-						<div className="stats-card-label">Active Courses</div>
-						<div className="stats-card-value">{activeCourses}</div>
-						<span className="stats-card-change positive">{activeCourses > 0 ? `·` : ''}</span>
-					</div>
-					<div className="stats-card">
-						<div className="stats-card-label">Total Capacity</div>
-						<div className="stats-card-value">{totalCapacity}</div>
-						<span className="stats-card-change positive">capacity</span>
-					</div>
-					<div className="stats-card">
-						<div className="stats-card-label">Avg. Capacity</div>
-						<div className="stats-card-value">{avgCapacity}</div>
-						<span className="stats-card-change negative">per course</span>
-					</div>
-				</div>
-			);
-		})()}			{/* Filters Row */}
+				);
+			})()}			{/* Filters Row */}
 			<div className="dashboard-card mb-3">
 				<div className="dashboard-grid grid-cols-4 mb-3">
 					<div>
 						<label htmlFor="departmentFilter" className="form-label small">Department</label>
-						<select 
-							className="form-select" 
+						<select
+							className="form-select"
 							id="departmentFilter"
 							value={filters.department}
 							onChange={handleFilterChange}
@@ -246,8 +226,8 @@ const AllCourse = () => {
 					</div>
 					<div>
 						<label htmlFor="semesterFilter" className="form-label small">Semester</label>
-						<select 
-							className="form-select" 
+						<select
+							className="form-select"
 							id="semesterFilter"
 							value={filters.semester}
 							onChange={handleFilterChange}
@@ -260,8 +240,8 @@ const AllCourse = () => {
 					</div>
 					<div>
 						<label htmlFor="statusFilter" className="form-label small">Status</label>
-						<select 
-							className="form-select" 
+						<select
+							className="form-select"
 							id="statusFilter"
 							value={filters.status}
 							onChange={handleFilterChange}
@@ -274,10 +254,10 @@ const AllCourse = () => {
 					</div>
 					<div>
 						<label htmlFor="searchFilter" className="form-label small">Search</label>
-						<input 
-							type="text" 
-							className="form-control" 
-							id="searchFilter" 
+						<input
+							type="text"
+							className="form-control"
+							id="searchFilter"
 							placeholder="Search courses..."
 							value={searchTerm}
 							onChange={handleSearch}
@@ -292,9 +272,6 @@ const AllCourse = () => {
 					<table className="table table-hover align-middle">
 						<thead>
 							<tr>
-								<th scope="col">
-									<input className="form-check-input" type="checkbox" id="selectAll" />
-								</th>
 								<th scope="col">Course Code</th>
 								<th scope="col">Course Name</th>
 								<th scope="col">Department</th>
@@ -309,7 +286,7 @@ const AllCourse = () => {
 							{/* Dynamic rows from Redux store */}
 							{loading ? (
 								<tr>
-									<td colSpan={9} className="text-center py-4">
+									<td colSpan={8} className="text-center py-4">
 										<div className="spinner-border text-primary" role="status">
 											<span className="visually-hidden">Loading...</span>
 										</div>
@@ -317,7 +294,7 @@ const AllCourse = () => {
 								</tr>
 							) : error ? (
 								<tr>
-									<td colSpan={9} className="text-center text-danger py-4">{error}</td>
+									<td colSpan={8} className="text-center text-danger py-4">{error}</td>
 								</tr>
 							) : (courses && courses.length > 0) ? (
 								courses.map(course => {
@@ -335,14 +312,15 @@ const AllCourse = () => {
 										imgSrc = `https://images.unsplash.com/photo-1522227802361-1a7a9d6f0f6b?w=50&h=50&fit=crop`;
 									}
 									const professorName = course.professorName || 'Unknown';
-									const studentsCount = course.maxStudents ?? 0;
-									const progressPct = studentsCount ? 0 : 0; // replace with actual enrolled/ max if available
+									const studentsCount = Number(course.enrolledStudents ?? course.enrolled_students ?? 0);
+									const capacity = Number(course.maxStudents ?? course.max_students ?? 0);
+									const progressPct = capacity > 0 ? Math.round((studentsCount / capacity) * 100) : 0;
 									const status = (course.courseStatus || '').toLowerCase();
 									const statusClass = status === 'active' ? 'bg-success' : status === 'full' ? 'bg-warning' : status === 'inactive' ? 'bg-secondary' : 'bg-secondary';
 
 									return (
 										<tr key={course.id}>
-											<td><input className="form-check-input" type="checkbox" /></td>
+
 											<td className="fw-semibold">{course.courseCode}</td>
 											<td>
 												<div className="d-flex align-items-center">
@@ -395,7 +373,7 @@ const AllCourse = () => {
 														<li><button className="dropdown-item" onClick={() => navigate(`/edit-course/${course.id}`)}><i className="bi bi-pencil me-2" /> Edit</button></li>
 														<li><a className="dropdown-item" href="#"><i className="bi bi-people me-2" /> Students</a></li>
 														<li><hr className="dropdown-divider" /></li>
-														<li><a className="dropdown-item text-danger" href="#" onClick={() => handleDelete(course.id)}><i className="bi bi-trash me-2" /> Delete</a></li>
+														<li><button className="dropdown-item text-danger" type="button" onClick={() => handleDelete(course)}><i className="bi bi-trash me-2" /> Delete</button></li>
 													</ul>
 												</div>
 											</td>
@@ -404,7 +382,7 @@ const AllCourse = () => {
 								})
 							) : (
 								<tr>
-									<td colSpan={9} className="text-center py-4">No courses found.</td>
+									<td colSpan={8} className="text-center py-4">No courses found.</td>
 								</tr>
 							)}
 						</tbody>
@@ -412,48 +390,48 @@ const AllCourse = () => {
 				</div>
 
 				{/* Pagination */}
-					<div className="d-flex justify-content-between align-items-center mt-3">
-						<div>
+				<div className="d-flex justify-content-between align-items-center mt-3">
+					<div>
+						{(() => {
+							const total = pagination?.total ?? (courses ? courses.length : 0);
+							const offset = (currentPage - 1) * limit;
+							const start = total === 0 ? 0 : offset + 1;
+							const end = Math.min(offset + (courses ? courses.length : 0), total);
+							return <p className="text-muted mb-0">Showing {start} to {end} of {total} entries</p>;
+						})()}
+					</div>
+					<nav aria-label="Page navigation">
+						<ul className="pagination mb-0">
 							{(() => {
 								const total = pagination?.total ?? (courses ? courses.length : 0);
-								const offset = (currentPage - 1) * limit;
-								const start = total === 0 ? 0 : offset + 1;
-								const end = Math.min(offset + (courses ? courses.length : 0), total);
-								return <p className="text-muted mb-0">Showing {start} to {end} of {total} entries</p>;
+								const totalPages = Math.max(1, Math.ceil(total / limit));
+								const pages = [];
+								for (let p = 1; p <= totalPages; p++) pages.push(p);
+
+								const goto = (p) => (e) => {
+									e.preventDefault();
+									if (p < 1 || p > totalPages) return;
+									setCurrentPage(p);
+								};
+
+								return (
+									<>
+										<li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+											<a className="page-link" href="#" onClick={goto(currentPage - 1)}>Previous</a>
+										</li>
+										{pages.map(p => (
+											<li key={p} className={`page-item ${p === currentPage ? 'active' : ''}`} aria-current={p === currentPage ? 'page' : undefined}>
+												<a className="page-link" href="#" onClick={goto(p)}>{p}</a>
+											</li>
+										))}
+										<li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+											<a className="page-link" href="#" onClick={goto(currentPage + 1)}>Next</a>
+										</li>
+									</>
+								);
 							})()}
-						</div>
-						<nav aria-label="Page navigation">
-							<ul className="pagination mb-0">
-								{(() => {
-									const total = pagination?.total ?? (courses ? courses.length : 0);
-									const totalPages = Math.max(1, Math.ceil(total / limit));
-									const pages = [];
-									for (let p = 1; p <= totalPages; p++) pages.push(p);
-
-									const goto = (p) => (e) => {
-										e.preventDefault();
-										if (p < 1 || p > totalPages) return;
-										setCurrentPage(p);
-									};
-
-									return (
-										<>
-											<li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-												<a className="page-link" href="#" onClick={goto(currentPage - 1)}>Previous</a>
-											</li>
-											{pages.map(p => (
-												<li key={p} className={`page-item ${p === currentPage ? 'active' : ''}`} aria-current={p === currentPage ? 'page' : undefined}>
-													<a className="page-link" href="#" onClick={goto(p)}>{p}</a>
-												</li>
-											))}
-											<li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-												<a className="page-link" href="#" onClick={goto(currentPage + 1)}>Next</a>
-											</li>
-										</>
-									);
-								})()}
-							</ul>
-						</nav>
+						</ul>
+					</nav>
 				</div>
 			</div>
 
@@ -472,10 +450,10 @@ const AllCourse = () => {
 										<img
 											src={selectedCourse.courseImage ? (
 												/^https?:\/\//i.test(selectedCourse.courseImage) || /^\/\//.test(selectedCourse.courseImage) ?
-												selectedCourse.courseImage :
-												selectedCourse.courseImage.startsWith('/') ?
-												selectedCourse.courseImage :
-												`http://localhost:5000/images/${selectedCourse.courseImage}`
+													selectedCourse.courseImage :
+													selectedCourse.courseImage.startsWith('/') ?
+														selectedCourse.courseImage :
+														`http://localhost:5000/images/${selectedCourse.courseImage}`
 											) : 'https://images.unsplash.com/photo-1522227802361-1a7a9d6f0f6b?w=200&h=200&fit=crop'}
 											alt="Course"
 											className="img-fluid rounded mb-3"
@@ -529,6 +507,52 @@ const AllCourse = () => {
 					</div>
 				</div>
 			)}
+
+			{/* Delete Confirmation Modal */}
+			{showDeleteModal && courseToDelete && (
+				<div className="modal fade show d-block" tabIndex="-1" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+					<div className="modal-dialog modal-md modal-dialog-centered">
+						<div className="modal-content">
+							<div className="modal-header">
+								<h5 className="modal-title text-danger">Confirm Delete</h5>
+								<button type="button" className="btn-close" onClick={cancelDelete}></button>
+							</div>
+							<div className="modal-body">
+								<p>Are you sure you want to delete the course <strong>{courseToDelete.courseName || courseToDelete.courseCode}</strong>?</p>
+								<p className="text-muted small mb-0">This action cannot be undone.</p>
+							</div>
+							<div className="modal-footer">
+								<button type="button" className="btn btn-secondary" onClick={cancelDelete}>Cancel</button>
+								<button type="button" className="btn btn-danger" onClick={confirmDelete}>Delete</button>
+							</div>
+						</div>
+					</div>
+				</div>
+			)}
+
+			<style>{`
+				/* Scoped table borders for All Courses table */
+				.dashboard-card .table {
+					width: 100%;
+					border-collapse: collapse;
+					min-width: 900px;
+					border: 1px solid #e6e6e6;
+				}
+
+				.dashboard-card .table th {
+					background: #f9f9f9;
+					padding: 12px;
+					text-align: left;
+					font-weight: 700;
+					border: 1px solid #e6e6e6;
+					color: #333;
+				}
+
+				.dashboard-card .table td {
+					padding: 12px;
+					border: 1px solid #e6e6e6;
+				}
+			`}</style>
 		</div>
 	);
 };

@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { toast } from 'react-toastify';
-import { FaDownload, FaArrowLeft, FaUser, FaEnvelope, FaFileAlt } from 'react-icons/fa';
+import { FaDownload, FaArrowLeft, FaUser, FaEnvelope, FaFileAlt, FaBook, FaClock, FaUsers, FaExclamationTriangle } from 'react-icons/fa';
 
 const ViewSubmittedAssignments = () => {
   const { assignmentId } = useParams();
@@ -86,31 +86,31 @@ const ViewSubmittedAssignments = () => {
         >
           <FaArrowLeft className="me-2" /> Back to Assignments
         </button>
-        <h2>Assignment Submissions</h2>
+        <h2><FaFileAlt className="me-2" /> Assignment Submissions</h2>
       </div>
 
       {assignment && (
         <div className="assignment-info">
           <div className="info-item">
-            <label>Title:</label>
-            <span>{assignment.title}</span>
-          </div>
-          <div className="info-item">
-            <label>Course:</label>
-            <span>{assignment.courseName || 'N/A'}</span>
-          </div>
-          <div className="info-item">
-            <label>Due Date:</label>
-            <span>{new Date(assignment.dueDate).toLocaleString()}</span>
-          </div>
-          <div className="info-item">
-            <label>Total Submissions:</label>
-            <span>{submissions.length}</span>
-          </div>
-          <div className="info-item">
-            <label>Late Submissions:</label>
-            <span className="late-count">{submissions.filter(s => s.status === 'Late').length}</span>
-          </div>
+              <label><FaFileAlt className="me-1"/> Title:</label>
+              <span>{assignment.title}</span>
+            </div>
+            <div className="info-item">
+              <label><FaBook className="me-1"/> Course:</label>
+              <span>{assignment.courseName || 'N/A'}</span>
+            </div>
+            <div className="info-item">
+              <label><FaClock className="me-1"/> Due Date:</label>
+              <span>{new Date(assignment.dueDate).toLocaleString()}</span>
+            </div>
+            <div className="info-item">
+              <label><FaUsers className="me-1"/> Total Submissions:</label>
+              <span>{submissions.length}</span>
+            </div>
+            <div className="info-item">
+              <label><FaExclamationTriangle className="me-1"/> Late Submissions:</label>
+              <span className="late-count">{submissions.filter(s => s.status === 'Late').length}</span>
+            </div>
         </div>
       )}
 
@@ -141,7 +141,13 @@ const ViewSubmittedAssignments = () => {
                   <td data-label="Student Name">
                     <div className="d-flex align-items-center gap-2">
                       <FaUser />
-                      <span>{submission.studentName || 'Unknown'}</span>
+                      <span>{(() => {
+                        // Prefer separate first + last name fields returned by API
+                        const first = submission.studentFirstName || '';
+                        const last = submission.studentLastName || '';
+                        const combined = `${first} ${last}`.trim();
+                        return combined || submission.studentName || 'Unknown';
+                      })()}</span>
                     </div>
                   </td>
                   <td data-label="Email">
@@ -154,9 +160,9 @@ const ViewSubmittedAssignments = () => {
                       <button
                         className="btn btn-sm btn-outline-primary d-flex align-items-center"
                         onClick={() => handleDownload(submission.filePath)}
-                        title="Download submission"
+                        title="View submission"
                       >
-                        <FaDownload /> <span className="ms-2 d-none d-sm-inline">Download</span>
+                        <FaDownload /> <span className="ms-2 d-none d-sm-inline">View</span>
                       </button>
                     ) : (
                       <span className="muted d-inline-flex align-items-center"><FaFileAlt className="me-2"/> —</span>
@@ -181,6 +187,7 @@ const ViewSubmittedAssignments = () => {
           align-items: center;
           gap: 20px;
           margin-bottom: 30px;
+          flex-wrap: wrap;
         }
 
         .submissions-header h2 {
@@ -256,6 +263,7 @@ const ViewSubmittedAssignments = () => {
           width: 100%;
           border-collapse: collapse;
           min-width: 900px;
+          border: 1px solid #e6e6e6;
         }
 
         .submissions-table th {
@@ -263,13 +271,13 @@ const ViewSubmittedAssignments = () => {
           padding: 12px;
           text-align: left;
           font-weight: 700;
-          border-bottom: 2px solid #e6e6e6;
+          border: 1px solid #e6e6e6;
           color: #333;
         }
 
         .submissions-table td {
           padding: 12px;
-          border-bottom: 1px solid #e6e6e6;
+          border: 1px solid #e6e6e6;
         }
 
         .submissions-table td .me-2 { margin-right: .5rem; }
@@ -332,6 +340,13 @@ const ViewSubmittedAssignments = () => {
 
         /* Mobile stacked table */
         @media (max-width: 575px) {
+          /* Stack header actions and title on small screens */
+          .submissions-header { flex-direction: column; align-items: flex-start; gap: 10px; }
+          .submissions-header h2 { font-size: 20px; }
+          .submissions-header .btn { width: auto; }
+
+          /* allow table to shrink under small screens */
+          .table-responsive { overflow-x: auto; }
           .submissions-table thead { display: none; }
           .submissions-table, .submissions-table tbody, .submissions-table tr, .submissions-table td { display: block; width: 100%; }
           .submissions-table tr { margin-bottom: 0.75rem; border: 1px solid #e9ecef; border-radius: .25rem; padding: .5rem; }
