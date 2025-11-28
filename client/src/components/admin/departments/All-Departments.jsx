@@ -85,6 +85,41 @@ const AllDepartments = () => {
     return colors[name] || 'primary';
   };
 
+  // Export currently visible departments (filtered) to CSV
+  const exportToCSV = (data = filteredDepartments, filename = 'departments.csv') => {
+    if (!data || data.length === 0) {
+      toast.info('No data available to export');
+      return;
+    }
+
+    const rows = data.map(d => ({
+      ID: d.id,
+      Department: d.departmentName || '',
+      Status: d.departmentStatus || '',
+      Head: d.headName || '',
+      Email: d.headEmail || '',
+      Phone: d.headPhone || '',
+      Students: d.currentStudents ?? 0,
+      Faculty: d.facultyCount ?? 0,
+      Established: d.establishedYear ?? ''
+    }));
+
+    const header = Object.keys(rows[0]);
+    const csv = [header.join(',')].concat(
+      rows.map(r => header.map(h => `"${String(r[h] ?? '').replace(/"/g, '""')}"`).join(','))
+    ).join('\n');
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.setAttribute('download', filename);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+  };
+
   if (loading) {
     return (
       <div className="dashboard-content">
@@ -112,7 +147,7 @@ const AllDepartments = () => {
               <p className="text-muted text-sm">Manage academic departments, staff, and student enrollment across your institution.</p>
             </div>
             <div className="d-flex gap-2">
-              <button className="btn btn-outline-secondary">
+              <button className="btn btn-outline-secondary" onClick={() => exportToCSV()}>
                 <i className="bi bi-download me-2"></i>Export Data
               </button>
               <a href="/add-department" className="btn btn-primary">
@@ -135,7 +170,7 @@ const AllDepartments = () => {
                 <div className="stat-value text-primary fw-bold mb-1" style={{ fontSize: '2rem' }}>{departments.length}</div>
                 <div className="stat-label text-muted mb-2">Total Departments</div>
                 <div className="stat-change text-success small fw-semibold">
-                  <i className="bi bi-arrow-up" style={{ fontSize: '12px' }}></i> +2 this year
+                  {/* <i className="bi bi-arrow-up" style={{ fontSize: '12px' }}></i> +2 this year */}
                 </div>
               </div>
             </div>
@@ -150,7 +185,7 @@ const AllDepartments = () => {
                 <div className="stat-value text-success fw-bold mb-1" style={{ fontSize: '2rem' }}>{departments.filter(d => d.departmentStatus === 'active').length}</div>
                 <div className="stat-label text-muted mb-2">Active Departments</div>
                 <div className="stat-change text-success small fw-semibold">
-                  <i className="bi bi-arrow-up" style={{ fontSize: '12px' }}></i> 100% operational
+                  {/* <i className="bi bi-arrow-up" style={{ fontSize: '12px' }}></i> 100% operational */}
                 </div>
               </div>
             </div>
@@ -165,7 +200,7 @@ const AllDepartments = () => {
                 <div className="stat-value text-info fw-bold mb-1" style={{ fontSize: '2rem' }}>{totalStudents}</div>
                 <div className="stat-label text-muted mb-2">Total Students</div>
                 <div className="stat-change text-success small fw-semibold">
-                  <i className="bi bi-arrow-up" style={{ fontSize: '12px' }}></i> +12.5% this semester
+                  {/* <i className="bi bi-arrow-up" style={{ fontSize: '12px' }}></i> +12.5% this semester */}
                 </div>
               </div>
             </div>
@@ -180,7 +215,7 @@ const AllDepartments = () => {
                 <div className="stat-value text-warning fw-bold mb-1" style={{ fontSize: '2rem' }}>{totalFaculty}</div>
                 <div className="stat-label text-muted mb-2">Faculty Members</div>
                 <div className="stat-change text-success small fw-semibold">
-                  <i className="bi bi-arrow-up" style={{ fontSize: '12px' }}></i> +8 new hires
+                  {/* <i className="bi bi-arrow-up" style={{ fontSize: '12px' }}></i> +8 new hires */}
                 </div>
               </div>
             </div>

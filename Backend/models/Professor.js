@@ -107,24 +107,27 @@ const findProfessorByUserUuid = async (userUuid) => {
 const getAllProfessors = async (limit = 10, offset = 0) => {
   const query = `
     SELECT
-      id,
-      user_uuid as "userUuid",
-      CONCAT(COALESCE(title, ''), ' ', first_name, ' ', last_name) as name,
-      title,
-      first_name as "firstName",
-      last_name as "lastName",
-      employee_id as "employeeId",
-      department,
-      position,
-      employment_type as "employmentType",
-      profile_image as "avatar",
-      email,
-      username,
-      account_status as "status",
-      role,
-      created_at as "createdAt"
-    FROM professors
-    ORDER BY created_at DESC
+      p.id,
+      p.user_uuid as "userUuid",
+      CONCAT(COALESCE(p.title, ''), ' ', p.first_name, ' ', p.last_name) as name,
+      p.title,
+      p.first_name as "firstName",
+      p.last_name as "lastName",
+      p.employee_id as "employeeId",
+      p.department,
+      p.position,
+      p.employment_type as "employmentType",
+      p.profile_image as "avatar",
+      p.email,
+      p.username,
+      p.account_status as "status",
+      p.role,
+      p.created_at as "createdAt",
+      COALESCE(COUNT(c.id), 0) as "courses"
+    FROM professors p
+    LEFT JOIN courses c ON p.user_uuid = c.professor_uuid AND c.course_status = 'active'
+    GROUP BY p.id, p.user_uuid, p.title, p.first_name, p.last_name, p.employee_id, p.department, p.position, p.employment_type, p.profile_image, p.email, p.username, p.account_status, p.role, p.created_at
+    ORDER BY p.created_at DESC
     LIMIT $1 OFFSET $2
   `;
   const result = await pool.query(query, [limit, offset]);

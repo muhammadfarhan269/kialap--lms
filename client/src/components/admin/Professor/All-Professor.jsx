@@ -144,12 +144,6 @@ const AllProfessor = () => {
                       <div className="mb-2">
                         <span className={`badge ${prof.employmentType === 'Full-Time' ? 'bg-success' : 'bg-warning'}`}>{prof.employmentType}</span>
                       </div>
-                      <div className="text-warning mb-2">
-                        {Array.from({ length: 5 }, (_, i) => (
-                          <i key={i} className={`bi ${i < Math.floor(prof.rating || 4.5) ? 'bi-star-fill' : i < (prof.rating || 4.5) ? 'bi-star-half' : 'bi-star'}`}></i>
-                        ))}
-                        <span className="text-muted text-sm">({prof.rating || 4.5})</span>
-                      </div>
                       <div className="d-flex gap-2 justify-content-center">
                         <Link to={`/professor-profile/${prof.id}`} className="btn btn-sm btn-outline-primary">View</Link>
                         <Link to={`/edit-professor/${prof.id}`} className="btn btn-sm btn-outline-secondary">Edit</Link>
@@ -194,20 +188,14 @@ const AllProfessor = () => {
             </div>
             <div className="dashboard-card-body p-0">
               <div className="table-responsive">
-                <table className="table table-hover mb-0">
+                <table className="table table-hover table-bordered mb-0">
                   <thead className="table-light">
                     <tr>
-                      <th scope="col" className="border-0">
-                        <div className="form-check">
-                          <input className="form-check-input" type="checkbox" id="selectAll" />
-                        </div>
-                      </th>
                       <th scope="col" className="border-0">Professor</th>
                       <th scope="col" className="border-0">Department</th>
                       <th scope="col" className="border-0">Position</th>
                       <th scope="col" className="border-0">Employment Type</th>
                       <th scope="col" className="border-0">Courses</th>
-                      <th scope="col" className="border-0">Rating</th>
                       <th scope="col" className="border-0">Status</th>
                       <th scope="col" className="border-0">Actions</th>
                     </tr>
@@ -215,11 +203,6 @@ const AllProfessor = () => {
                   <tbody>
                     {paginatedProfessors.map((prof) => (
                       <tr key={prof.id}>
-                        <td>
-                          <div className="form-check">
-                            <input className="form-check-input" type="checkbox" />
-                          </div>
-                        </td>
                         <td>
                           <div className="d-flex align-items-center">
                             <img src={prof.avatar ? `http://localhost:5000/images/${prof.avatar}` : `https://ui-avatars.com/api/?name=${encodeURIComponent(prof.name)}&background=0d6efd&color=fff`} alt={prof.name} className="rounded-circle me-3" style={{ width: '40px', height: '40px' }} />
@@ -232,17 +215,7 @@ const AllProfessor = () => {
                         <td>{prof.department}</td>
                         <td>{prof.position}</td>
                         <td><span className={`badge ${prof.employmentType === 'Full-Time' ? 'bg-success' : 'bg-warning'}`}>{prof.employmentType}</span></td>
-                        <td>{prof.courses || 0} courses</td>
-                        <td>
-                          <div className="d-flex align-items-center">
-                            <span className="me-1">{prof.rating || 4.5}</span>
-                            <div className="text-warning">
-                              {Array.from({ length: 5 }, (_, i) => (
-                                <i key={i} className={`bi ${i < Math.floor(prof.rating || 4.5) ? 'bi-star-fill' : i < (prof.rating || 4.5) ? 'bi-star-half' : 'bi-star'}`}></i>
-                              ))}
-                            </div>
-                          </div>
-                        </td>
+                        <td>{prof.courses}</td>
                         <td><span className={`badge ${prof.status === 'Active' ? 'bg-success' : 'bg-warning'}`}>{prof.status || 'Active'}</span></td>
                         <td>
                           <div className="dropdown">
