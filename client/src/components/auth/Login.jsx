@@ -3,6 +3,7 @@ import { Link, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { loginUser, clearError } from '../../redux/slices/authSlice';
 import { toast } from 'react-toastify';
+import './auth.css';
 
 const Login = () => {
   const dispatch = useDispatch();
