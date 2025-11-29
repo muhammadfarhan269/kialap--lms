@@ -154,6 +154,41 @@ const AllCourse = () => {
 		setSelectedCourse(null);
 	};
 
+	// Export courses to CSV
+	const exportToCSV = (data = courses, filename = 'courses.csv') => {
+		if (!data || data.length === 0) {
+			toast.info('No data available to export');
+			return;
+		}
+
+		const rows = data.map(c => ({
+			'Course Code': c.courseCode || '',
+			'Course Name': c.courseName || '',
+			'Department': c.department || '',
+			'Professor': c.professorName || '',
+			'Credits': c.credits ?? '',
+			'Students': c.enrolledStudents ?? c.enrolled_students ?? 0,
+			'Max Capacity': c.maxStudents ?? c.max_students ?? 0,
+			'Semester': c.semester || '',
+			'Status': c.courseStatus || '',
+		}));
+
+		const header = Object.keys(rows[0]);
+		const csv = [header.join(',')].concat(
+			rows.map(r => header.map(h => `"${String(r[h] ?? '').replace(/"/g, '""')}"`).join(','))
+		).join('\n');
+
+		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.setAttribute('download', filename);
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		URL.revokeObjectURL(url);
+	};
+
 	return (
 		<div className="container-fluid">
 			{/* Error Alert */}
@@ -176,9 +211,9 @@ const AllCourse = () => {
 						<button className="btn btn-primary" onClick={() => navigate('/add-course')}>
 							<i className="bi bi-plus-circle me-2" /> Add New Course
 						</button>
-						<button className="btn btn-outline-secondary ms-2">
-							<i className="bi bi-download me-2" /> Export
-						</button>
+					<button className="btn btn-outline-secondary ms-2" onClick={() => exportToCSV()}>
+						<i className="bi bi-download me-2" /> Export
+					</button>
 					</div>
 				</div>
 			</div>

@@ -55,20 +55,59 @@ const LibraryAssets = () => {
     }));
   };
 
-  // Handle delete asset
-  const handleDeleteAsset = async (id) => {
-    if (window.confirm('Are you sure you want to delete this asset?')) {
-      try {
-        await dispatch(deleteAsset(id)).unwrap();
-        // Refresh the assets list
-        dispatch(getAssets(filters));
-      } catch (error) {
-        console.error('Failed to delete asset:', error);
-      }
-    }
-  };
+	// Handle delete asset
+	const handleDeleteAsset = async (id) => {
+		if (window.confirm('Are you sure you want to delete this asset?')) {
+			try {
+				await dispatch(deleteAsset(id)).unwrap();
+				// Refresh the assets list
+				dispatch(getAssets(filters));
+			} catch (error) {
+				console.error('Failed to delete asset:', error);
+			}
+		}
+	};
 
-  // Get status badge class
+	// Export assets to CSV
+	const exportToCSV = (data = assets, filename = 'library-assets.csv') => {
+		if (!data || data.length === 0) {
+			toast.info('No data available to export');
+			return;
+		}
+
+		const rows = data.map(a => ({
+			'Title': a.title || '',
+			'Category': a.category || '',
+			'Authors': a.authors || '',
+			'Publisher': a.publisher || '',
+			'ISBN/ISSN': a.isbn_issn || '',
+			'Edition': a.edition || '',
+			'Publication Year': a.publication_year || '',
+			'Pages': a.pages || '',
+			'Copies': a.copies ?? 0,
+			'Price': a.price ?? 0,
+			'Location': (a.location || '').replace('-', ' ').toUpperCase(),
+			'Status': (a.status || '').replace('-', ' ').toUpperCase(),
+			'Barcode': a.barcode || '',
+			'Call Number': a.call_number || '',
+			'Acquisition Date': a.acquisition_date ? new Date(a.acquisition_date).toLocaleDateString() : ''
+		}));
+
+		const header = Object.keys(rows[0]);
+		const csv = [header.join(',')].concat(
+			rows.map(r => header.map(h => `"${String(r[h] ?? '').replace(/"/g, '""')}"`).join(','))
+		).join('\n');
+
+		const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+		const url = URL.createObjectURL(blob);
+		const link = document.createElement('a');
+		link.href = url;
+		link.setAttribute('download', filename);
+		document.body.appendChild(link);
+		link.click();
+		document.body.removeChild(link);
+		URL.revokeObjectURL(url);
+	};  // Get status badge class
   const getStatusBadgeClass = (status) => {
     switch (status) {
       case 'available': return 'bg-success-subtle text-success';
@@ -178,7 +217,7 @@ const LibraryAssets = () => {
               <p className="page-description">Manage and organize your library's digital and physical resources</p>
             </div>
             <div className="d-flex gap-2">
-              <button className="btn btn-outline-primary">
+              <button className="btn btn-outline-primary" onClick={() => exportToCSV()}>
                 <i className="bi bi-download me-1"></i>
                 Export
               </button>

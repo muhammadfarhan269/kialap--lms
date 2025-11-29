@@ -182,9 +182,6 @@ const AddDepartments = () => {
             <a href="/departments" className="btn btn-outline-secondary">
               <i className="bi bi-arrow-left me-2"></i>Back to Departments
             </a>
-            <button className="btn btn-outline-info" data-bs-toggle="modal" data-bs-target="#templateModal">
-              <i className="bi bi-file-earmark-text me-2"></i>Use Template
-            </button>
           </div>
         </div>
       </div>
